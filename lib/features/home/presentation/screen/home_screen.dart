@@ -13,41 +13,43 @@ import '../models/story_model.dart';
 class HomeScreen extends StatelessWidget {
   HomeScreen({Key? key}) : super(key: key);
 
-  final HomeController controller = Get.put(HomeController());
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.backgroudColor,
       body: SafeArea(
-        child: Column(
-          children: [
-            // Custom AppBar
-            _buildCustomAppBar(),
+        child: GetBuilder(
+          init: HomeController(),
+          initState: (state) => state.controller!.initial(context),
+          builder: (controller) => Column(
+            children: [
+              // Custom AppBar
+              _buildCustomAppBar(controller),
 
-            // Stories Section
-            _buildStoriesSection(),
+              // Stories Section
+              _buildStoriesSection(controller),
 
-            // Posts Section
-            Expanded(
-              child: Obx(() => ListView.builder(
-                controller: controller.scrollController,
-                itemCount: controller.posts.length,
-                itemBuilder: (context, index) {
-                  return PostCard(
-                    post: controller.posts[index],
-                    controller: controller,
-                  );
-                },
-              )),
-            ),
-          ],
+              // Posts Section
+              Expanded(
+                child: ListView.builder(
+                  controller: controller.scrollController,
+                  itemCount: controller.posts.length,
+                  itemBuilder: (context, index) {
+                    return PostCard(
+                      post: controller.posts[index],
+                      controller: controller,
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildCustomAppBar() {
+  Widget _buildCustomAppBar(HomeController controller) {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
       child: Row(
@@ -56,8 +58,8 @@ class HomeScreen extends StatelessWidget {
           Row(
             children: [
               GestureDetector(
-                onTap: ()=>Get.toNamed(AppRoutes.createPost),
-                  child: Icon(Icons.add, color: Colors.white, size: 26.sp)
+                onTap: () => Get.toNamed(AppRoutes.createPost),
+                child: Icon(Icons.add, color: Colors.white, size: 26.sp),
               ),
               SizedBox(width: 8.w),
               Text(
@@ -72,26 +74,41 @@ class HomeScreen extends StatelessWidget {
           ),
           Row(
             children: [
-              Obx(() => GestureDetector(
-                onTap: (){
+              GestureDetector(
+                onTap: () {
                   Get.toNamed(AppRoutes.cartScreen);
                 },
-                child: _buildIconWithBadge(Icons.shopping_cart_outlined, controller.cartCount.value, AppColors.primaryColor, AppColors.black),
-              )),
+                child: _buildIconWithBadge(
+                  Icons.shopping_cart_outlined,
+                  controller.cartCount.value,
+                  AppColors.primaryColor,
+                  AppColors.black,
+                ),
+              ),
               SizedBox(width: 20.w),
-              Obx(() => GestureDetector(
-                onTap: (){
+              GestureDetector(
+                onTap: () {
                   Get.toNamed(AppRoutes.notificationScreen);
                 },
-                child: _buildIconWithBadge(Icons.notifications_outlined, controller.notificationCount.value, Colors.red, AppColors.white),
-              )),
+                child: _buildIconWithBadge(
+                  Icons.notifications_outlined,
+                  controller.notificationCount.value,
+                  Colors.red,
+                  AppColors.white,
+                ),
+              ),
               SizedBox(width: 20.w),
-              Obx(() => GestureDetector(
-                onTap: (){
+              GestureDetector(
+                onTap: () {
                   Get.toNamed(AppRoutes.chatScreenImage);
                 },
-                child: _buildIconWithBadge(Icons.chat, controller.messageCount.value, AppColors.textColor, AppColors.white),
-              )),
+                child: _buildIconWithBadge(
+                  Icons.chat,
+                  controller.messageCount.value,
+                  AppColors.textColor,
+                  AppColors.white,
+                ),
+              ),
             ],
           ),
         ],
@@ -99,7 +116,12 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildIconWithBadge(IconData icon, int count, Color color, Color textColor) {
+  Widget _buildIconWithBadge(
+    IconData icon,
+    int count,
+    Color color,
+    Color textColor,
+  ) {
     return Stack(
       clipBehavior: Clip.none,
       children: [
@@ -110,14 +132,8 @@ class HomeScreen extends StatelessWidget {
             top: -6.h,
             child: Container(
               padding: EdgeInsets.all(4.r),
-              decoration: BoxDecoration(
-                color: color,
-                shape: BoxShape.circle,
-              ),
-              constraints: BoxConstraints(
-                minWidth: 18.w,
-                minHeight: 18.h,
-              ),
+              decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+              constraints: BoxConstraints(minWidth: 18.w, minHeight: 18.h),
               child: Center(
                 child: Text(
                   count.toString(),
@@ -134,31 +150,45 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildStoriesSection() {
+  Widget _buildStoriesSection(HomeController controller) {
     return Container(
       height: 110.h,
       padding: EdgeInsets.symmetric(vertical: 10.h),
-      child: Obx(() => ListView.builder(
-        scrollDirection: Axis.horizontal,
-        itemCount: controller.stories.length,
-        itemBuilder: (context, index) {
-          return StoryItem(story: controller.stories[index]);
-        },
-      )),
+      child: Row(
+        children: [
+          StoryItem(
+            story: controller.stories[0],
+            isOwn: true,
+          ), // need to change later
+          Expanded(
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: controller.stories.length,
+              itemBuilder: (context, index) {
+                return StoryItem(
+                  story: controller.stories[index],
+                  isOwn: false,
+                );
+              },
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
 
 class StoryItem extends StatelessWidget {
   final StoryModel story;
+  final bool isOwn;
 
-  const StoryItem({Key? key, required this.story}) : super(key: key);
+  const StoryItem({super.key, required this.story, required this.isOwn});
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        if (story.isOwn) {
+        if (isOwn) {
           // ✅ Navigate to CreateStoryScreen
           Get.to(() => CreateStoryScreen());
         } else {
@@ -177,7 +207,9 @@ class StoryItem extends StatelessWidget {
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     border: Border.all(
-                      color: story.hasStory ? AppColors.primaryColor : Colors.grey.shade800,
+                      color: !story.isWatched
+                          ? AppColors.primaryColor
+                          : Colors.grey.shade800,
                       width: 2.5.w,
                     ),
                   ),
@@ -188,7 +220,7 @@ class StoryItem extends StatelessWidget {
                     ),
                   ),
                 ),
-                if (story.isOwn)
+                if (isOwn)
                   Positioned(
                     bottom: 0,
                     right: 0,
@@ -208,10 +240,7 @@ class StoryItem extends StatelessWidget {
             SizedBox(height: 4.h),
             Text(
               story.name,
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 11.sp,
-              ),
+              style: TextStyle(color: Colors.white, fontSize: 11.sp),
               overflow: TextOverflow.ellipsis,
             ),
           ],
@@ -221,16 +250,12 @@ class StoryItem extends StatelessWidget {
   }
 }
 
-
 class PostCard extends StatelessWidget {
   final PostModel post;
   final HomeController controller;
 
-  const PostCard({
-    Key? key,
-    required this.post,
-    required this.controller,
-  }) : super(key: key);
+  const PostCard({Key? key, required this.post, required this.controller})
+    : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -254,7 +279,7 @@ class PostCard extends StatelessWidget {
           _buildPostCaption(),
 
           // Comments Section
-          _buildCommentsSection(),
+          // if (post.commentOfPost != 0) _buildCommentsSection(),
         ],
       ),
     );
@@ -267,7 +292,7 @@ class PostCard extends StatelessWidget {
         children: [
           CircleAvatar(
             radius: 20.r,
-            backgroundImage: NetworkImage(post.userImage),
+            backgroundImage: NetworkImage(post.creator.image),
           ),
           SizedBox(width: 12.w),
           Expanded(
@@ -275,7 +300,7 @@ class PostCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  post.userName,
+                  post.creator.name,
                   style: TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.w600,
@@ -283,7 +308,7 @@ class PostCard extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  post.time,
+                  post.createAt,
                   style: TextStyle(
                     color: Colors.grey.shade500,
                     fontSize: 12.sp,
@@ -293,7 +318,7 @@ class PostCard extends StatelessWidget {
             ),
           ),
           GestureDetector(
-            onTap: () => controller.onConnectTap(post.userName),
+            onTap: () => controller.onConnectTap(post.creator.name),
             child: Container(
               padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 6.h),
               decoration: BoxDecoration(
@@ -313,7 +338,11 @@ class PostCard extends StatelessWidget {
           SizedBox(width: 8.w),
           GestureDetector(
             onTap: () => controller.onMoreTap(post.id),
-            child: Icon(Icons.more_vert, color: Colors.grey.shade400, size: 24.sp),
+            child: Icon(
+              Icons.more_vert,
+              color: Colors.grey.shade400,
+              size: 24.sp,
+            ),
           ),
         ],
       ),
@@ -336,10 +365,10 @@ class PostCard extends StatelessWidget {
           child: PageView.builder(
             controller: pageController,
             onPageChanged: (page) => controller.onPageChanged(post.id, page),
-            itemCount: post.images.length,
+            itemCount: post.image.length,
             itemBuilder: (context, index) {
               return Image.network(
-                post.images[index],
+                post.image[index],
                 fit: BoxFit.cover,
                 errorBuilder: (context, error, stackTrace) {
                   return Container(
@@ -353,26 +382,28 @@ class PostCard extends StatelessWidget {
             },
           ),
         ),
-        if (post.images.length > 1)
+        if (post.image.length > 1)
           Positioned(
             bottom: 10.h,
-            child: Obx(() => Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: List.generate(
-                post.images.length,
-                    (index) => Container(
-                  margin: EdgeInsets.symmetric(horizontal: 3.w),
-                  width: 6.w,
-                  height: 6.h,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: currentPage.value == index
-                        ? Colors.white
-                        : Colors.white.withOpacity(0.4),
+            child: Obx(
+              () => Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: List.generate(
+                  post.image.length,
+                  (index) => Container(
+                    margin: EdgeInsets.symmetric(horizontal: 3.w),
+                    width: 6.w,
+                    height: 6.h,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: currentPage.value == index
+                          ? Colors.white
+                          : Colors.white.withOpacity(0.4),
+                    ),
                   ),
                 ),
               ),
-            )),
+            ),
           ),
       ],
     );
@@ -393,7 +424,7 @@ class PostCard extends StatelessWidget {
           ),
           SizedBox(width: 4.w),
           Text(
-            '${post.likes}',
+            '${post.likeOfPost}',
             style: TextStyle(color: AppColors.primaryColor, fontSize: 14.sp),
           ),
           SizedBox(width: 20.w),
@@ -407,7 +438,7 @@ class PostCard extends StatelessWidget {
           ),
           SizedBox(width: 4.w),
           Text(
-            '${post.comments.length}',
+            '${post.commentOfPost}',
             style: TextStyle(color: Colors.white, fontSize: 14.sp),
           ),
           const Spacer(),
@@ -435,7 +466,7 @@ class PostCard extends StatelessWidget {
               style: TextStyle(color: Colors.white, fontSize: 14.sp),
               children: [
                 TextSpan(
-                  text: '${post.userName} ',
+                  text: '${post.creator.name} ',
                   style: const TextStyle(fontWeight: FontWeight.w600),
                 ),
                 TextSpan(text: post.caption),
@@ -443,45 +474,41 @@ class PostCard extends StatelessWidget {
             ),
           ),
           SizedBox(height: 4.h),
-          Text(
-            '#${post.hashtag}',
-            style: TextStyle(
-              color: const Color(0xFF00a8ff),
-              fontSize: 14.sp,
-            ),
-          ),
+          // Text(
+          //   '#${post.hashtag}',
+          //   style: TextStyle(color: const Color(0xFF00a8ff), fontSize: 14.sp),
+          // ),
         ],
       ),
     );
   }
 
-  Widget _buildCommentsSection() {
-    if (post.comments.isEmpty) return const SizedBox.shrink();
+  // Widget _buildCommentsSection() {
 
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          RichText(
-            text: TextSpan(
-              style: TextStyle(color: Colors.white, fontSize: 13.sp),
-              children: [
-                TextSpan(
-                  text: '${post.comments[0].userName} ',
-                  style: const TextStyle(fontWeight: FontWeight.w600),
-                ),
-                TextSpan(
-                  text: post.comments[0].comment,
-                  style: TextStyle(color: Colors.grey.shade400),
-                ),
-              ],
-            ),
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ],
-      ),
-    );
-  }
+  //   return Padding(
+  //     padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+  //     child: Column(
+  //       crossAxisAlignment: CrossAxisAlignment.start,
+  //       children: [
+  //         RichText(
+  //           text: TextSpan(
+  //             style: TextStyle(color: Colors.white, fontSize: 13.sp),
+  //             children: [
+  //               TextSpan(
+  //                 text: '${post.comments[0].userName} ',
+  //                 style: const TextStyle(fontWeight: FontWeight.w600),
+  //               ),
+  //               TextSpan(
+  //                 text: post.comments[0].comment,
+  //                 style: TextStyle(color: Colors.grey.shade400),
+  //               ),
+  //             ],
+  //           ),
+  //           maxLines: 2,
+  //           overflow: TextOverflow.ellipsis,
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }
 }

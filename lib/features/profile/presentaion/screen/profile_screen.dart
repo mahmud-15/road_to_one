@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:road_project_flutter/component/text/common_text.dart';
 import 'package:road_project_flutter/config/route/app_routes.dart';
+import 'package:road_project_flutter/features/profile/data/user_activity_photo.dart';
 import 'package:road_project_flutter/utils/constants/app_colors.dart';
 import 'package:video_player/video_player.dart';
 
@@ -16,8 +17,8 @@ class ProfileScreen extends StatefulWidget {
   State<ProfileScreen> createState() => _ProfileScreenState();
 }
 
-class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProviderStateMixin {
-  final ProfileController controller = ProfileController();
+class _ProfileScreenState extends State<ProfileScreen>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
 
   @override
@@ -46,138 +47,158 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
         ),
         centerTitle: true,
         leading: IconButton(
-          icon: const Icon(Icons.add,size: 30,color: AppColors.white200,),
+          icon: const Icon(Icons.add, size: 30, color: AppColors.white200),
           onPressed: () {
             Get.toNamed(AppRoutes.createPost);
           },
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.settings,size: 30,color: AppColors.white200,),
+            icon: const Icon(
+              Icons.settings,
+              size: 30,
+              color: AppColors.white200,
+            ),
             onPressed: () {
               Get.toNamed(AppRoutes.settingScreen);
             },
           ),
         ],
       ),
-      body: Column(
-        children: [
-          // Profile Header
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              children: [
-                // Profile Picture and Stats
-                Row(
-                  children: [
-                    // Profile Picture
-                    CircleAvatar(
-                      radius: 40,
-                      backgroundImage: NetworkImage(controller.profileImage),
-                      backgroundColor: Colors.grey[800],
-                    ),
-                    SizedBox(width: 30.h),
-                    // Stats
-                    Expanded(
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          _buildStatColumn(controller.postsCount.toString(), 'Posts'),
-                          GestureDetector( onTap: (){
-                            Get.toNamed(AppRoutes.networkScreen);
-                          },
-                              child:
-                          _buildStatColumn(controller.networkCount.toString(), 'Network')
-                          ),
-                        ],
+      body: GetBuilder(
+        init: ProfileController(),
+        initState: (state) => state.controller!.initial(context),
+        builder: (controller) => Column(
+          children: [
+            // Profile Header
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                children: [
+                  // Profile Picture and Stats
+                  Row(
+                    children: [
+                      // Profile Picture
+                      CircleAvatar(
+                        radius: 40,
+                        backgroundImage: NetworkImage(
+                          controller.user.value?.image ??
+                              controller.profileImage,
+                        ),
+                        backgroundColor: Colors.grey[800],
                       ),
-                    ),
-                  ],
-                ),
-                SizedBox(height: 12.h),
-                // Name
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: CommonText(
-                    text: controller.username,
-                    fontSize: 20.sp,
-                    fontWeight: FontWeight.w500,
-                    color: AppColors.white50,
+                      SizedBox(width: 30.h),
+                      // Stats
+                      Expanded(
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            _buildStatColumn(
+                              controller.user.value!.totalPost.toString(),
+                              'Posts',
+                            ),
+                            GestureDetector(
+                              onTap: () {
+                                Get.toNamed(AppRoutes.networkScreen);
+                              },
+                              child: _buildStatColumn(
+                                controller.user.value!.totalNetwork.toString(),
+                                'Network',
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-                SizedBox(height: 14.h),
-                // Edit Profile Button
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: GestureDetector(
-                    onTap: (){
-                      Get.toNamed(AppRoutes.editProfileScreen);
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-                      decoration: BoxDecoration(
-                        color: Colors.grey[800],
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: CommonText(
-                        text: "Edit Profile",
-                        fontSize: 12.sp,
-                        fontWeight: FontWeight.w400,
-                        color: AppColors.white50,
-                      ),
+                  SizedBox(height: 12.h),
+                  // Name
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: CommonText(
+                      text: controller.user.value!.name,
+                      fontSize: 20.sp,
+                      fontWeight: FontWeight.w500,
+                      color: AppColors.white50,
                     ),
                   ),
-                ),
-                SizedBox(height: 12.h),
-                // Bio
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: CommonText(
-                    text: controller.bio,
-                    fontSize: 16.sp,
-                    maxLines: 6,
-                    textAlign: TextAlign.left,
-                    fontWeight: FontWeight.w400,
-                    color: AppColors.white50,
+                  SizedBox(height: 14.h),
+                  // Edit Profile Button
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: GestureDetector(
+                      onTap: () {
+                        Get.toNamed(AppRoutes.editProfileScreen);
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 6,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.grey[800],
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: CommonText(
+                          text: "Edit Profile",
+                          fontSize: 12.sp,
+                          fontWeight: FontWeight.w400,
+                          color: AppColors.white50,
+                        ),
+                      ),
+                    ),
                   ),
-                ),
-              ],
-            ),
-          ),
-
-          // Tab Bar
-          Container(
-            decoration: BoxDecoration(
-              border: Border(
-                bottom: BorderSide(color: Colors.grey[800]!, width: 0.5),
+                  SizedBox(height: 12.h),
+                  // Bio
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: CommonText(
+                      text: controller.bio, // need to set later
+                      fontSize: 16.sp,
+                      maxLines: 6,
+                      textAlign: TextAlign.left,
+                      fontWeight: FontWeight.w400,
+                      color: AppColors.white50,
+                    ),
+                  ),
+                ],
               ),
             ),
-            child: TabBar(
-              controller: _tabController,
-              indicatorColor: Colors.white,
-              indicatorWeight: 1,
-              tabs: const [
-                Tab(icon: Icon(Icons.grid_on, size: 24)),
-                Tab(icon: Icon(Icons.video_library, size: 24)),
-                Tab(icon: Icon(Icons.favorite_border, size: 24)),
-                Tab(icon: Icon(Icons.bookmark_border, size: 24)),
-              ],
-            ),
-          ),
 
-          // Tab Bar View
-          Expanded(
-            child: TabBarView(
-              controller: _tabController,
-              children: [
-                _buildGridView(controller.posts),
-                _buildGridView(controller.stories),
-                _buildGridView(controller.favorites),
-                _buildGridView(controller.saved),
-              ],
+            // Tab Bar
+            Container(
+              decoration: BoxDecoration(
+                border: Border(
+                  bottom: BorderSide(color: Colors.grey[800]!, width: 0.5),
+                ),
+              ),
+              child: TabBar(
+                controller: _tabController,
+                indicatorColor: Colors.white,
+                indicatorWeight: 1,
+                tabs: const [
+                  Tab(icon: Icon(Icons.grid_on, size: 24)),
+                  Tab(icon: Icon(Icons.video_library, size: 24)),
+                  Tab(icon: Icon(Icons.favorite_border, size: 24)),
+                  Tab(icon: Icon(Icons.bookmark_border, size: 24)),
+                ],
+              ),
             ),
-          ),
-        ],
+
+            // Tab Bar View
+            Expanded(
+              child: TabBarView(
+                controller: _tabController,
+                children: [
+                  _buildGridView(controller.userImage),
+                  _buildGridView(controller.userImage),
+                  _buildGridView(controller.userImage),
+                  _buildGridView(controller.userImage),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -202,7 +223,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
     );
   }
 
-  Widget _buildGridView(List<MediaItem> items) {
+  Widget _buildGridView(List<UserActivityPhoto> items) {
     return GridView.builder(
       padding: const EdgeInsets.all(1),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -223,9 +244,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
             children: [
               // Thumbnail
               Image.network(
-                item.type == MediaType.video
-                    ? (item.thumbnail ?? item.url)
-                    : item.url,
+                item.type == MediaType.video ? (item.media[0]) : item.image,
                 fit: BoxFit.cover,
                 loadingBuilder: (context, child, loadingProgress) {
                   if (loadingProgress == null) return child;
@@ -235,7 +254,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                       child: CircularProgressIndicator(
                         value: loadingProgress.expectedTotalBytes != null
                             ? loadingProgress.cumulativeBytesLoaded /
-                            loadingProgress.expectedTotalBytes!
+                                  loadingProgress.expectedTotalBytes!
                             : null,
                       ),
                     ),
@@ -245,7 +264,9 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                   return Container(
                     color: Colors.grey[900],
                     child: Icon(
-                      item.type == MediaType.video ? Icons.videocam : Icons.image,
+                      item.type == MediaType.video
+                          ? Icons.videocam
+                          : Icons.image,
                       size: 50,
                       color: Colors.grey[700],
                     ),
@@ -275,13 +296,16 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                   bottom: 8,
                   right: 8,
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 6,
+                      vertical: 2,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.black.withOpacity(0.7),
                       borderRadius: BorderRadius.circular(4),
                     ),
                     child: Text(
-                      item.duration!,
+                      item.duration.toString(),
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 11,
@@ -297,11 +321,16 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
     );
   }
 
-  void _showMediaViewer(BuildContext context, List<MediaItem> items, int initialIndex) {
+  void _showMediaViewer(
+    BuildContext context,
+    List<UserActivityPhoto> items,
+    int initialIndex,
+  ) {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => MediaViewerScreen(items: items, initialIndex: initialIndex),
+        builder: (context) =>
+            MediaViewerScreen(items: items, initialIndex: initialIndex),
       ),
     );
   }
@@ -309,7 +338,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
 
 // Full screen media viewer
 class MediaViewerScreen extends StatefulWidget {
-  final List<MediaItem> items;
+  final List<UserActivityPhoto> items;
   final int initialIndex;
 
   const MediaViewerScreen({
@@ -349,7 +378,8 @@ class _MediaViewerScreenState extends State<MediaViewerScreen> {
       ),
       body: PageView.builder(
         controller: _pageController,
-        scrollDirection: Axis.vertical, // THIS IS THE KEY CHANGE - Makes it scroll vertically
+        scrollDirection: Axis
+            .vertical, // THIS IS THE KEY CHANGE - Makes it scroll vertically
         itemCount: widget.items.length,
         onPageChanged: (index) {
           setState(() {
@@ -360,7 +390,7 @@ class _MediaViewerScreenState extends State<MediaViewerScreen> {
           final item = widget.items[index];
           return Center(
             child: item.type == MediaType.video
-                ? VideoPlayerWidget(videoUrl: item.url)
+                ? VideoPlayerWidget(videoUrl: item.media[0])
                 : _buildImageViewer(item),
           );
         },
@@ -368,10 +398,10 @@ class _MediaViewerScreenState extends State<MediaViewerScreen> {
     );
   }
 
-  Widget _buildImageViewer(MediaItem item) {
+  Widget _buildImageViewer(UserActivityPhoto item) {
     return InteractiveViewer(
       child: Image.network(
-        item.url,
+        item.image,
         fit: BoxFit.contain,
         loadingBuilder: (context, child, loadingProgress) {
           if (loadingProgress == null) return child;
@@ -379,7 +409,7 @@ class _MediaViewerScreenState extends State<MediaViewerScreen> {
             child: CircularProgressIndicator(
               value: loadingProgress.expectedTotalBytes != null
                   ? loadingProgress.cumulativeBytesLoaded /
-                  loadingProgress.expectedTotalBytes!
+                        loadingProgress.expectedTotalBytes!
                   : null,
             ),
           );
@@ -493,7 +523,9 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
   void _skipBackward() {
     final currentPosition = _controller.value.position;
     final newPosition = currentPosition - const Duration(seconds: 10);
-    _controller.seekTo(newPosition > Duration.zero ? newPosition : Duration.zero);
+    _controller.seekTo(
+      newPosition > Duration.zero ? newPosition : Duration.zero,
+    );
   }
 
   void _skipForward() {
@@ -527,9 +559,7 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
     }
 
     if (!_isInitialized) {
-      return const Center(
-        child: CircularProgressIndicator(),
-      );
+      return const Center(child: CircularProgressIndicator());
     }
 
     return GestureDetector(
@@ -648,7 +678,10 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
 
                     // Bottom Controls - Progress Bar
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 12,
+                      ),
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
                           begin: Alignment.bottomCenter,
@@ -705,27 +738,45 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
                                 itemBuilder: (context) => [
                                   const PopupMenuItem(
                                     value: 0.5,
-                                    child: Text('0.5x', style: TextStyle(color: Colors.white)),
+                                    child: Text(
+                                      '0.5x',
+                                      style: TextStyle(color: Colors.white),
+                                    ),
                                   ),
                                   const PopupMenuItem(
                                     value: 0.75,
-                                    child: Text('0.75x', style: TextStyle(color: Colors.white)),
+                                    child: Text(
+                                      '0.75x',
+                                      style: TextStyle(color: Colors.white),
+                                    ),
                                   ),
                                   const PopupMenuItem(
                                     value: 1.0,
-                                    child: Text('Normal', style: TextStyle(color: Colors.white)),
+                                    child: Text(
+                                      'Normal',
+                                      style: TextStyle(color: Colors.white),
+                                    ),
                                   ),
                                   const PopupMenuItem(
                                     value: 1.25,
-                                    child: Text('1.25x', style: TextStyle(color: Colors.white)),
+                                    child: Text(
+                                      '1.25x',
+                                      style: TextStyle(color: Colors.white),
+                                    ),
                                   ),
                                   const PopupMenuItem(
                                     value: 1.5,
-                                    child: Text('1.5x', style: TextStyle(color: Colors.white)),
+                                    child: Text(
+                                      '1.5x',
+                                      style: TextStyle(color: Colors.white),
+                                    ),
                                   ),
                                   const PopupMenuItem(
                                     value: 2.0,
-                                    child: Text('2x', style: TextStyle(color: Colors.white)),
+                                    child: Text(
+                                      '2x',
+                                      style: TextStyle(color: Colors.white),
+                                    ),
                                   ),
                                 ],
                               ),

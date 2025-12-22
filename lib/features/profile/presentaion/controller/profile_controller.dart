@@ -1,142 +1,286 @@
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:road_project_flutter/config/api/api_end_point.dart';
+import 'package:road_project_flutter/features/profile/data/profile_model.dart';
+import 'package:road_project_flutter/features/profile/data/user_activity_like.dart';
+import 'package:road_project_flutter/features/profile/data/user_activity_photo.dart';
+import 'package:road_project_flutter/features/profile/data/user_activity_story.dart';
+import 'package:road_project_flutter/services/api/api_service.dart';
+import 'package:road_project_flutter/services/storage/storage_services.dart';
+import 'package:road_project_flutter/utils/constants/app_string.dart';
+
 import '../../data/media_item.dart';
 
-class ProfileController {
-  final String username = "Alex Peterson";
-  final String bio = "Job: UI/UX Designer\nDream Job: UI/UX Designer\nInterested in Socializing, Adventure, Travelling";
-  final int postsCount = 33;
-  final int networkCount = 483;
-  final String profileImage = "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop";
+class ProfileController extends GetxController {
+  final isLoading = false.obs;
+  final user = Rxn<ProfileModel>();
+  final userImage = RxList<UserActivityPhoto>();
+  final userStory = RxList<UserActivityStory>();
+  final userLike = RxList<UserActivityLike>();
+  // final String username = "Alex Peterson";
+  final String bio =
+      "Job: UI/UX Designer\nDream Job: UI/UX Designer\nInterested in Socializing, Adventure, Travelling";
+  // final int postsCount = 33;
+  // final int networkCount = 483;
+  final String profileImage =
+      "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop";
 
   // Real photos from Unsplash and videos from sample sources
   final List<MediaItem> posts = [
     MediaItem(
-      url: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&h=400&fit=crop",
+      url:
+          "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&h=400&fit=crop",
       type: MediaType.image,
     ),
     MediaItem(
-      url: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
+      url:
+          "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
       type: MediaType.video,
       duration: "0:15",
-      thumbnail: "https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?w=400&h=400&fit=crop",
+      thumbnail:
+          "https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?w=400&h=400&fit=crop",
     ),
     MediaItem(
-      url: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=400&h=400&fit=crop",
+      url:
+          "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=400&h=400&fit=crop",
       type: MediaType.image,
     ),
     MediaItem(
-      url: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
+      url:
+          "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
       type: MediaType.video,
       duration: "1:23",
-      thumbnail: "https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?w=400&h=400&fit=crop",
+      thumbnail:
+          "https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?w=400&h=400&fit=crop",
     ),
     MediaItem(
-      url: "https://images.unsplash.com/photo-1583468982228-19f19164aee2?w=400&h=400&fit=crop",
+      url:
+          "https://images.unsplash.com/photo-1583468982228-19f19164aee2?w=400&h=400&fit=crop",
       type: MediaType.image,
     ),
     MediaItem(
-      url: "https://images.unsplash.com/photo-1590086782792-42dd2350140d?w=400&h=400&fit=crop",
+      url:
+          "https://images.unsplash.com/photo-1590086782792-42dd2350140d?w=400&h=400&fit=crop",
       type: MediaType.image,
     ),
     MediaItem(
-      url: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",
+      url:
+          "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",
       type: MediaType.video,
       duration: "2:15",
-      thumbnail: "https://images.unsplash.com/photo-1599566150163-29194dcaad36?w=400&h=400&fit=crop",
+      thumbnail:
+          "https://images.unsplash.com/photo-1599566150163-29194dcaad36?w=400&h=400&fit=crop",
     ),
     MediaItem(
-      url: "https://images.unsplash.com/photo-1552374196-c4e7ffc6e126?w=400&h=400&fit=crop",
+      url:
+          "https://images.unsplash.com/photo-1552374196-c4e7ffc6e126?w=400&h=400&fit=crop",
       type: MediaType.image,
     ),
     MediaItem(
-      url: "https://images.unsplash.com/photo-1605296867304-46d5465a13f1?w=400&h=400&fit=crop",
+      url:
+          "https://images.unsplash.com/photo-1605296867304-46d5465a13f1?w=400&h=400&fit=crop",
       type: MediaType.image,
     ),
   ];
 
   final List<MediaItem> stories = [
     MediaItem(
-      url: "https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?w=400&h=400&fit=crop",
+      url:
+          "https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?w=400&h=400&fit=crop",
       type: MediaType.image,
     ),
     MediaItem(
-      url: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4",
+      url:
+          "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4",
       type: MediaType.video,
       duration: "0:15",
-      thumbnail: "https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?w=400&h=400&fit=crop",
+      thumbnail:
+          "https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?w=400&h=400&fit=crop",
     ),
     MediaItem(
-      url: "https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?w=400&h=400&fit=crop",
+      url:
+          "https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?w=400&h=400&fit=crop",
       type: MediaType.image,
     ),
     MediaItem(
-      url: "https://images.unsplash.com/photo-1583468982228-19f19164aee2?w=400&h=400&fit=crop",
+      url:
+          "https://images.unsplash.com/photo-1583468982228-19f19164aee2?w=400&h=400&fit=crop",
       type: MediaType.image,
     ),
     MediaItem(
-      url: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4",
+      url:
+          "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4",
       type: MediaType.video,
       duration: "0:30",
-      thumbnail: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&h=400&fit=crop",
+      thumbnail:
+          "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&h=400&fit=crop",
     ),
     MediaItem(
-      url: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=400&h=400&fit=crop",
+      url:
+          "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=400&h=400&fit=crop",
       type: MediaType.image,
     ),
   ];
 
   final List<MediaItem> favorites = [
     MediaItem(
-      url: "https://images.unsplash.com/photo-1552374196-c4e7ffc6e126?w=400&h=400&fit=crop",
+      url:
+          "https://images.unsplash.com/photo-1552374196-c4e7ffc6e126?w=400&h=400&fit=crop",
       type: MediaType.image,
     ),
     MediaItem(
-      url: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4",
+      url:
+          "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4",
       type: MediaType.video,
       duration: "1:05",
-      thumbnail: "https://images.unsplash.com/photo-1605296867304-46d5465a13f1?w=400&h=400&fit=crop",
+      thumbnail:
+          "https://images.unsplash.com/photo-1605296867304-46d5465a13f1?w=400&h=400&fit=crop",
     ),
     MediaItem(
-      url: "https://images.unsplash.com/photo-1590086782792-42dd2350140d?w=400&h=400&fit=crop",
+      url:
+          "https://images.unsplash.com/photo-1590086782792-42dd2350140d?w=400&h=400&fit=crop",
       type: MediaType.image,
     ),
     MediaItem(
-      url: "https://images.unsplash.com/photo-1599566150163-29194dcaad36?w=400&h=400&fit=crop",
+      url:
+          "https://images.unsplash.com/photo-1599566150163-29194dcaad36?w=400&h=400&fit=crop",
       type: MediaType.image,
     ),
   ];
 
   final List<MediaItem> saved = [
     MediaItem(
-      url: "https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?w=400&h=400&fit=crop",
+      url:
+          "https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?w=400&h=400&fit=crop",
       type: MediaType.image,
     ),
     MediaItem(
-      url: "https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?w=400&h=400&fit=crop",
+      url:
+          "https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?w=400&h=400&fit=crop",
       type: MediaType.image,
     ),
     MediaItem(
-      url: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4",
+      url:
+          "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4",
       type: MediaType.video,
       duration: "3:20",
-      thumbnail: "https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?w=400&h=400&fit=crop",
+      thumbnail:
+          "https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?w=400&h=400&fit=crop",
     ),
     MediaItem(
-      url: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&h=400&fit=crop",
+      url:
+          "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&h=400&fit=crop",
       type: MediaType.image,
     ),
     MediaItem(
-      url: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4",
+      url:
+          "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4",
       type: MediaType.video,
       duration: "0:58",
-      thumbnail: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=400&h=400&fit=crop",
+      thumbnail:
+          "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=400&h=400&fit=crop",
     ),
     MediaItem(
-      url: "https://images.unsplash.com/photo-1583468982228-19f19164aee2?w=400&h=400&fit=crop",
+      url:
+          "https://images.unsplash.com/photo-1583468982228-19f19164aee2?w=400&h=400&fit=crop",
       type: MediaType.image,
     ),
     MediaItem(
-      url: "https://images.unsplash.com/photo-1552374196-c4e7ffc6e126?w=400&h=400&fit=crop",
+      url:
+          "https://images.unsplash.com/photo-1552374196-c4e7ffc6e126?w=400&h=400&fit=crop",
       type: MediaType.image,
     ),
   ];
+
+  void initial(BuildContext context) {
+    fetchProfile(context);
+    fetchAllImage(context);
+  }
+
+  void fetchProfile(BuildContext context) async {
+    isLoading.value = true;
+    update();
+    final response = await ApiService2.get(ApiEndPoint.user);
+    isLoading.value = false;
+    update();
+    if (response == null) {
+      ScaffoldMessenger.of(context)
+        ..clearSnackBars()
+        ..showSnackBar(SnackBar(content: Text(AppString.someThingWrong)));
+    } else {
+      final data = response.data;
+      if (response.statusCode != 200) {
+        ScaffoldMessenger.of(context)
+          ..clearSnackBars()
+          ..showSnackBar(SnackBar(content: Text(AppString.someThingWrong)));
+      } else {
+        final profileData = ProfileModel.fromJson(data['data']);
+        user.value = profileData;
+        update();
+      }
+    }
+  }
+
+  void fetchAllImage(BuildContext context) async {
+    final url = "${ApiEndPoint.userActivity}/${LocalStorage.userId}?type=photo";
+    final response = await ApiService2.get(url);
+    if (response == null) {
+      ScaffoldMessenger.of(context)
+        ..clearSnackBars()
+        ..showSnackBar(SnackBar(content: Text(AppString.someThingWrong)));
+    } else {
+      final data = response.data;
+      if (response.statusCode != 200) {
+        ScaffoldMessenger.of(context)
+          ..clearSnackBars()
+          ..showSnackBar(SnackBar(content: Text(data['message'])));
+      } else {
+        final userData = UserActivityAllPhoto.fromJson(data['data']);
+        userImage.value = userData.userActivityPhoto;
+        update();
+      }
+    }
+  }
+
+  void fetchStory(BuildContext context) async {
+    final url = "${ApiEndPoint.userActivity}/${LocalStorage.userId}?type=story";
+    final response = await ApiService2.get(url);
+    if (response == null) {
+      ScaffoldMessenger.of(context)
+        ..clearSnackBars()
+        ..showSnackBar(SnackBar(content: Text(AppString.someThingWrong)));
+    } else {
+      final data = response.data;
+      if (response.statusCode != 200) {
+        ScaffoldMessenger.of(context)
+          ..clearSnackBars()
+          ..showSnackBar(SnackBar(content: Text(data['message'])));
+      } else {
+        final userData = UserActivityAllStory.fromJson(data['data']);
+        userStory.value = userData.userActivity;
+        update();
+      }
+    }
+  }
+
+  void fetchPost(BuildContext context) async {
+    final url = "${ApiEndPoint.userActivity}/${LocalStorage.userId}?type=like";
+    final response = await ApiService2.get(url);
+    if (response == null) {
+      ScaffoldMessenger.of(context)
+        ..clearSnackBars()
+        ..showSnackBar(SnackBar(content: Text(AppString.someThingWrong)));
+    } else {
+      final data = response.data;
+      if (response.statusCode != 200) {
+        ScaffoldMessenger.of(context)
+          ..clearSnackBars()
+          ..showSnackBar(SnackBar(content: Text(data['message'])));
+      } else {
+        final userData = UserActivityAllLike.fromJson(data['data']);
+        userLike.value = userData.userActivityLike;
+        update();
+      }
+    }
+  }
 }

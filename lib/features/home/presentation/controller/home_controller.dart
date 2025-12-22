@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:road_project_flutter/config/api/api_end_point.dart';
+import 'package:road_project_flutter/services/api/api_service.dart';
+import 'package:road_project_flutter/utils/constants/app_string.dart';
 import 'dart:async';
 
 import '../models/comment_model.dart';
@@ -13,6 +16,7 @@ class HomeController extends GetxController {
   // Observable lists
   var stories = <StoryModel>[].obs;
   var posts = <PostModel>[].obs;
+  var comments = <List<CommentModel>>[].obs;
 
   // Notification counts
   var cartCount = 3.obs;
@@ -24,16 +28,12 @@ class HomeController extends GetxController {
   final Map<String, RxInt> currentPages = {};
   final Map<String, Timer?> autoScrollTimers = {};
 
-  @override
-  void onInit() {
-    super.onInit();
-    loadStories();
-    loadPosts();
+  void onRefresh() {}
+
+  void initial(BuildContext context) {
+    loadStories(context);
+    loadPosts(context);
     initializePostControllers();
-  }
-
-  void onRefresh(){
-
   }
 
   @override
@@ -49,53 +49,68 @@ class HomeController extends GetxController {
     super.onClose();
   }
 
-  void loadStories() {
-    stories.value = [
-      StoryModel(name: 'Your Story', image: 'https://i.pravatar.cc/150?img=1', isOwn: true, hasStory: false),
-      StoryModel(name: 'Peterson', image: 'https://i.pravatar.cc/150?img=2', isOwn: false, hasStory: true),
-      StoryModel(name: 'Johnson', image: 'https://i.pravatar.cc/150?img=3', isOwn: false, hasStory: true),
-      StoryModel(name: 'Peterson', image: 'https://i.pravatar.cc/150?img=4', isOwn: false, hasStory: true),
-      StoryModel(name: 'Peterson', image: 'https://i.pravatar.cc/150?img=5', isOwn: false, hasStory: true),
-    ];
+  void loadStories(BuildContext context) async {
+    final response = await ApiService2.get(ApiEndPoint.story);
+    if (response == null) {
+      ScaffoldMessenger.of(context)
+        ..clearSnackBars()
+        ..showSnackBar(SnackBar(content: Text(AppString.someThingWrong)));
+    } else {
+      final data = response.data;
+      if (response.statusCode != 200) {
+        ScaffoldMessenger.of(context)
+          ..clearSnackBars()
+          ..showSnackBar(SnackBar(content: Text(data['message'])));
+      } else {
+        final userData = StoryModelAll.fromJson(data['data']);
+        stories.value = userData.stories;
+        update();
+      }
+    }
   }
 
-  void loadPosts() {
-    posts.value = [
-      PostModel(
-        id: 'post1',
-        userName: 'J.K Peterson',
-        userImage: 'https://i.pravatar.cc/150?img=2',
-        time: '2 hours ago',
-        caption: 'What are you looking for others???',
-        hashtag: 'Feshion-Co',
-        images: [
-          'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=500',
-          'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=500',
-          'https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?w=500',
-        ],
-        likes: '1.3k',
-        isLiked: false,
-        comments: [
-          CommentModel(userName: 'Feshion-Co', comment: 'looking so healthy :)')
-        ],
-      ),
-      PostModel(
-        id: 'post2',
-        userName: 'Hank Jhonson',
-        userImage: 'https://i.pravatar.cc/150?img=3',
-        time: '3 hours ago',
-        caption: 'What are you doing for others???',
-        hashtag: 'Feshion-Co',
-        images: [
-          'https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?w=500',
-        ],
-        likes: '1.3k',
-        isLiked: false,
-        comments: [
-          CommentModel(userName: 'Asad Ux', comment: 'What are you doing for others???')
-        ],
-      ),
-    ];
+  void loadPosts(BuildContext context) async {
+    final response = await ApiService2.get(ApiEndPoint.allPost);
+    if (response == null) {
+      ScaffoldMessenger.of(context)
+        ..clearSnackBars()
+        ..showSnackBar(SnackBar(content: Text(AppString.someThingWrong)));
+    } else {
+      final data = response.data;
+      if (response.statusCode != 200) {
+        ScaffoldMessenger.of(context)
+          ..clearSnackBars()
+          ..showSnackBar(SnackBar(content: Text(data['message'])));
+      } else {
+        final userData = PostAllModel.fromJson(data['data']);
+        posts.value = userData.postModel;
+        update();
+        for (var c in posts) {
+          loadComments(context, c.id);
+        }
+      }
+    }
+  }
+
+  void loadComments(BuildContext context, String id) async {
+    final url = "${ApiEndPoint.allComment}/$id";
+    final response = await ApiService2.get(url);
+    if (response == null) {
+      ScaffoldMessenger.of(context)
+        ..clearSnackBars()
+        ..showSnackBar(SnackBar(content: Text(AppString.someThingWrong)));
+    } else {
+      final data = response.data;
+      if (response.statusCode != 200) {
+        ScaffoldMessenger.of(context)
+          ..clearSnackBars()
+          ..showSnackBar(SnackBar(content: Text(data['message'])));
+      } else {
+        final userData = CommentModelAll.fromJson(data['data']);
+        comments.add(userData.comments);
+        update();
+      }
+    }
   }
 
   void initializePostControllers() {
@@ -105,15 +120,17 @@ class HomeController extends GetxController {
         currentPages[post.id] = 0.obs;
 
         // Start auto scroll for posts with multiple images
-        if (post.images.length > 1) {
-          startAutoScroll(post.id, post.images.length);
+        if (post.image.length > 1) {
+          startAutoScroll(post.id, post.image.length);
         }
       }
     }
   }
 
   void startAutoScroll(String postId, int imageCount) {
-    autoScrollTimers[postId] = Timer.periodic(const Duration(seconds: 3), (timer) {
+    autoScrollTimers[postId] = Timer.periodic(const Duration(seconds: 3), (
+      timer,
+    ) {
       if (currentPages[postId] != null && pageControllers[postId] != null) {
         int nextPage = (currentPages[postId]!.value + 1) % imageCount;
         currentPages[postId]!.value = nextPage;

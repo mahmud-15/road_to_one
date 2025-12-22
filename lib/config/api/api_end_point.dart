@@ -21,7 +21,7 @@ class ApiEndPoint {
   static const resetPassword = "$baseUrl/auth/reset-password";
   static const myProvider = "provider/my-provider";
   static const changePassword = "auth/change-password";
-  static const user = "user/profile";
+  static const user = "$baseUrl/user/profile";
   static const completeOrder = "booking/complete-booking/";
   static const reset_otp = "auth/resend-otp";
   static const notifications = "notifications";
@@ -29,4 +29,8 @@ class ApiEndPoint {
   static const review = "review/my-ratings";
   static const messages = "messages";
   static const sendMessage = "messages/create";
+  static const userActivity = "$baseUrl/user/profile/activity";
+  static const allPost = "$baseUrl/post";
+  static const allComment = "$baseUrl/post/comment";
+  static const story = "$baseUrl/story";
 }

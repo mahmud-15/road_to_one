@@ -16,7 +16,6 @@ class SplashScreen extends StatefulWidget {
 
 class _SplashScreenState extends State<SplashScreen>
     with SingleTickerProviderStateMixin {
-
   late AnimationController _controller;
   late Animation<double> _fade;
 
@@ -39,9 +38,10 @@ class _SplashScreenState extends State<SplashScreen>
       vsync: this,
     );
 
-    _fade = Tween<double>(begin: 0, end: 1).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeIn),
-    );
+    _fade = Tween<double>(
+      begin: 0,
+      end: 1,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeIn));
 
     _controller.forward();
 
@@ -51,18 +51,16 @@ class _SplashScreenState extends State<SplashScreen>
 
       Get.offAllNamed(AppRoutes.onBoardingFirst);
 
-      /*
-      if (isLoggedIn) {
-        bool isValidSession = await SignInController().checkProfile();
-        if (isValidSession) {
-          Get.offAllNamed(AppRoutes.homeNav);
-        } else {
-          Get.offAllNamed(AppRoutes.onboarding);
-        }
-      } else {
-        Get.offAllNamed(AppRoutes.onboarding);
-      }
-      */
+      // if (isLoggedIn) {
+      //   bool isValidSession = await SignInController().checkProfile();
+      //   if (isValidSession) {
+      //     Get.offAllNamed(AppRoutes.homeNav);
+      //   } else {
+      //     Get.offAllNamed(AppRoutes.onBoardingFirst);
+      //   }
+      // } else {
+      //   Get.offAllNamed(AppRoutes.onBoardingFirst);
+      // }
     });
   }
 
@@ -76,10 +74,7 @@ class _SplashScreenState extends State<SplashScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.backgroudColor,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-      ),
+      appBar: AppBar(backgroundColor: Colors.transparent, elevation: 0),
       body: FadeTransition(
         opacity: _fade,
         child: Center(

@@ -1,92 +1,132 @@
-import 'comment_model.dart';
+import 'dart:convert';
 
-class PostModel {
-  final String id;
-  final String userName;
-  final String userImage;
-  final String time;
-  final String caption;
-  final String hashtag;
-  final List<String> images;
-  final String likes;
-  bool isLiked;
-  final List<CommentModel> comments;
+// ignore_for_file: public_member_api_docs, sort_constructors_first
+class PostAllModel {
+  List<PostModel> postModel;
+  PostAllModel({required this.postModel});
 
-  PostModel({
-    required this.id,
-    required this.userName,
-    required this.userImage,
-    required this.time,
-    required this.caption,
-    required this.hashtag,
-    required this.images,
-    required this.likes,
-    required this.isLiked,
-    required this.comments,
-  });
-
-  // From JSON
-  factory PostModel.fromJson(Map<String, dynamic> json) {
-    return PostModel(
-      id: json['id'] ?? '',
-      userName: json['userName'] ?? '',
-      userImage: json['userImage'] ?? '',
-      time: json['time'] ?? '',
-      caption: json['caption'] ?? '',
-      hashtag: json['hashtag'] ?? '',
-      images: json['images'] != null
-          ? List<String>.from(json['images'])
-          : [],
-      likes: json['likes'] ?? '0',
-      isLiked: json['isLiked'] ?? false,
-      comments: json['comments'] != null
-          ? (json['comments'] as List)
-          .map((comment) => CommentModel.fromJson(comment))
-          .toList()
-          : [],
-    );
-  }
-
-  // To JSON
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'userName': userName,
-      'userImage': userImage,
-      'time': time,
-      'caption': caption,
-      'hashtag': hashtag,
-      'images': images,
-      'likes': likes,
-      'isLiked': isLiked,
-      'comments': comments.map((comment) => comment.toJson()).toList(),
+  Map<String, dynamic> toMap() {
+    return <String, dynamic>{
+      'postModel': postModel.map((x) => x.toMap()).toList(),
     };
   }
 
-  // Copy with
-  PostModel copyWith({
-    String? id,
-    String? userName,
-    String? userImage,
-    String? time,
-    String? caption,
-    String? hashtag,
-    List<String>? images,
-    String? likes,
-    bool? isLiked,
-    List<CommentModel>? comments,
-  }) {
-    return PostModel(
-      id: id ?? this.id,
-      userName: userName ?? this.userName,
-      userImage: userImage ?? this.userImage,
-      time: time ?? this.time,
-      caption: caption ?? this.caption,
-      hashtag: hashtag ?? this.hashtag,
-      images: images ?? this.images,
-      likes: likes ?? this.likes,
-      isLiked: isLiked ?? this.isLiked,
-      comments: comments ?? this.comments,
+  factory PostAllModel.fromMap(Map<String, dynamic> map) {
+    return PostAllModel(
+      postModel: List<PostModel>.from(
+        (map['postModel'] as List<int>).map<PostModel>(
+          (x) => PostModel.fromMap(x as Map<String, dynamic>),
+        ),
+      ),
     );
   }
+
+  String toJson() => json.encode(toMap());
+
+  factory PostAllModel.fromJson(String source) =>
+      PostAllModel.fromMap(json.decode(source) as Map<String, dynamic>);
+}
+
+class PostModel {
+  final String id;
+  final Creator creator;
+  final String caption;
+  final String type;
+  final String createAt;
+  final int commentOfPost;
+  final int likeOfPost;
+  final bool isOwner;
+  final bool hasSave;
+  bool isLiked;
+  final String connectionStatus;
+  final List<String> image;
+  PostModel({
+    required this.id,
+    required this.creator,
+    required this.caption,
+    required this.type,
+    required this.createAt,
+    required this.commentOfPost,
+    required this.likeOfPost,
+    required this.isOwner,
+    required this.hasSave,
+    required this.isLiked,
+    required this.connectionStatus,
+    required this.image,
+  });
+
+  Map<String, dynamic> toMap() {
+    return <String, dynamic>{
+      '_id': id,
+      'creator': creator.toMap(),
+      'caption': caption,
+      'type': type,
+      'createAt': createAt,
+      'commentOfPost': commentOfPost,
+      'likeOfPost': likeOfPost,
+      'isLiked': isLiked,
+      'isOwner': isOwner,
+      'hasSave': hasSave,
+      'connectionStatus': connectionStatus,
+      'image': image,
+    };
+  }
+
+  factory PostModel.fromMap(Map<String, dynamic> map) {
+    return PostModel(
+      id: map['_id'] as String,
+      creator: Creator.fromMap(map['creator'] as Map<String, dynamic>),
+      caption: map['caption'] as String,
+      type: map['type'] as String,
+      createAt: map['createAt'] as String,
+      commentOfPost: map['commentOfPost'] as int,
+      likeOfPost: map['likeOfPost'] as int,
+      isLiked: map['isLiked'] ?? false,
+      isOwner: map['isOwner'] as bool,
+      hasSave: map['hasSave'] as bool,
+      connectionStatus: map['connectionStatus'] as String,
+      image: List<String>.from((map['image'] as List<String>)),
+    );
+  }
+
+  String toJson() => json.encode(toMap());
+
+  factory PostModel.fromJson(String source) =>
+      PostModel.fromMap(json.decode(source) as Map<String, dynamic>);
+}
+
+class Creator {
+  final String id;
+  final String name;
+  final String image;
+  final String profileMode;
+  Creator({
+    required this.id,
+    required this.name,
+    required this.image,
+    required this.profileMode,
+  });
+
+  Map<String, dynamic> toMap() {
+    return <String, dynamic>{
+      '_id': id,
+      'name': name,
+      'image': image,
+      'profileMode': profileMode,
+    };
+  }
+
+  factory Creator.fromMap(Map<String, dynamic> map) {
+    return Creator(
+      id: map['_id'] as String,
+      name: map['name'] as String,
+      image: map['image'] as String,
+      profileMode: map['profileMode'] as String,
+    );
+  }
+
+  String toJson() => json.encode(toMap());
+
+  factory Creator.fromJson(String source) =>
+      Creator.fromMap(json.decode(source) as Map<String, dynamic>);
 }

@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:mime/mime.dart';
-import 'package:road_project_flutter/utils/app_utils.dart';
 import 'package:road_project_flutter/utils/log/app_log.dart';
 import '../../config/api/api_end_point.dart';
 import '../../utils/constants/app_string.dart';
@@ -11,29 +10,23 @@ import '../storage/storage_services.dart';
 import 'api_response_model.dart';
 
 class ApiService2 {
-  static Future<dynamic>? get(
+  static Future<Response<dynamic>?> get(
     String url, {
     Map<String, dynamic>? header,
   }) async {
     final dio = Dio();
+    final mainHeader = {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer ${LocalStorage.token}",
+    };
+    appLog("Url: $url\nHeader: ${header ?? mainHeader}");
     try {
       final response = await dio.get(
         url,
-        options: Options(
-          headers:
-              header ??
-              {
-                "Content-Type": "application/json",
-                "Authorization": LocalStorage.token,
-              },
-        ),
+        options: Options(headers: header ?? mainHeader),
       );
       appLog(response);
-      if (response.statusCode != 200) {
-        return null;
-      } else {
-        return response.data;
-      }
+      return response;
     } on DioException catch (e) {
       // 👇 THIS IS WHERE 400 LIVES
       appLog("Dio Error!");
@@ -57,7 +50,7 @@ class ApiService2 {
       "Authorization": "Bearer ${LocalStorage.token}",
     };
 
-    appLog("Url: $url\nHeader: $header\nBody: $body");
+    appLog("Url: $url\nHeader: ${header ?? mainHeader}\nBody: $body");
 
     try {
       final response = await dio.post(

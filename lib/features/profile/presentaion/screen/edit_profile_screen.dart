@@ -9,7 +9,7 @@ import '../../../../component/text/common_text.dart';
 import '../controller/edit_profile_controller.dart';
 
 class EditProfileScreen extends StatefulWidget {
-  const EditProfileScreen({Key? key}) : super(key: key);
+  const EditProfileScreen({super.key});
 
   @override
   State<EditProfileScreen> createState() => _EditProfileScreenState();
@@ -58,10 +58,15 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             const SizedBox(height: 20),
             ListTile(
               leading: const Icon(Icons.photo_camera, color: Colors.white),
-              title: const Text('Camera', style: TextStyle(color: Colors.white)),
+              title: const Text(
+                'Camera',
+                style: TextStyle(color: Colors.white),
+              ),
               onTap: () async {
                 Navigator.pop(context);
-                final XFile? image = await _imagePicker.pickImage(source: ImageSource.camera);
+                final XFile? image = await _imagePicker.pickImage(
+                  source: ImageSource.camera,
+                );
                 if (image != null) {
                   setState(() {
                     controller.updateProfileImage(File(image.path));
@@ -71,10 +76,15 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             ),
             ListTile(
               leading: const Icon(Icons.photo_library, color: Colors.white),
-              title: const Text('Gallery', style: TextStyle(color: Colors.white)),
+              title: const Text(
+                'Gallery',
+                style: TextStyle(color: Colors.white),
+              ),
               onTap: () async {
                 Navigator.pop(context);
-                final XFile? image = await _imagePicker.pickImage(source: ImageSource.gallery);
+                final XFile? image = await _imagePicker.pickImage(
+                  source: ImageSource.gallery,
+                );
                 if (image != null) {
                   setState(() {
                     controller.updateProfileImage(File(image.path));
@@ -85,7 +95,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             if (controller.selectedProfileImage != null)
               ListTile(
                 leading: const Icon(Icons.delete, color: Colors.red),
-                title: const Text('Remove Photo', style: TextStyle(color: Colors.red)),
+                title: const Text(
+                  'Remove Photo',
+                  style: TextStyle(color: Colors.red),
+                ),
                 onTap: () {
                   setState(() {
                     controller.removeProfileImage();
@@ -136,24 +149,24 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                         child: ClipOval(
                           child: controller.selectedProfileImage != null
                               ? Image.file(
-                            controller.selectedProfileImage!,
-                            fit: BoxFit.cover,
-                            width: 120,
-                            height: 120,
-                          )
+                                  controller.selectedProfileImage!,
+                                  fit: BoxFit.cover,
+                                  width: 120,
+                                  height: 120,
+                                )
                               : Image.network(
-                            controller.profileImageUrl,
-                            fit: BoxFit.cover,
-                            width: 120,
-                            height: 120,
-                            errorBuilder: (context, error, stackTrace) {
-                              return Icon(
-                                Icons.person,
-                                size: 60,
-                                color: Colors.grey[600],
-                              );
-                            },
-                          ),
+                                  controller.profileImageUrl,
+                                  fit: BoxFit.cover,
+                                  width: 120,
+                                  height: 120,
+                                  errorBuilder: (context, error, stackTrace) {
+                                    return Icon(
+                                      Icons.person,
+                                      size: 60,
+                                      color: Colors.grey[600],
+                                    );
+                                  },
+                                ),
                         ),
                       ),
                       Positioned(
@@ -164,7 +177,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                           decoration: BoxDecoration(
                             color: Colors.white,
                             shape: BoxShape.circle,
-                            border: Border.all(color: AppColors.upcolor, width: 3),
+                            border: Border.all(
+                              color: AppColors.upcolor,
+                              width: 3,
+                            ),
                           ),
                           child: const Icon(
                             Icons.camera_alt,
@@ -218,23 +234,54 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             // Details Section
             _buildSectionHeader('Details', () => _showDetailsDialog()),
             SizedBox(height: 14.h),
-            _buildDetailItem('User Name', controller.userName, controller.userNameController),
+            _buildDetailItem(
+              'User Name',
+              controller.userName,
+              controller.userNameController,
+            ),
             SizedBox(height: 8.h),
-            _buildDetailItem('E-mail', controller.email, controller.emailController),
+            _buildDetailItem(
+              'E-mail',
+              controller.email,
+              controller.emailController,
+            ),
             SizedBox(height: 8.h),
-            _buildDetailItem('Contact no', controller.contactNo, controller.contactNoController),
+            _buildDetailItem(
+              'Contact no',
+              controller.contactNo,
+              controller.contactNoController,
+            ),
             SizedBox(height: 8.h),
-            _buildDetailItem('Location', controller.location, controller.locationController),
+            _buildDetailItem(
+              'Location',
+              controller.location,
+              controller.locationController,
+            ),
             SizedBox(height: 8.h),
-            _buildDetailItem('Occupations', controller.occupation, controller.occupationController),
+            _buildDetailItem(
+              'Occupations',
+              controller.occupation,
+              controller.occupationController,
+            ),
             SizedBox(height: 8.h),
-            _buildDetailItem('Dream Job', controller.dreamJob, controller.dreamJobController),
+            _buildDetailItem(
+              'Dream Job',
+              controller.dreamJob,
+              controller.dreamJobController,
+            ),
             SizedBox(height: 8.h),
-            _buildDetailItem('Education', controller.education, controller.educationController),
+            _buildDetailItem(
+              'Education',
+              controller.education,
+              controller.educationController,
+            ),
             SizedBox(height: 24.h),
 
             // Interested In Section
-            _buildSectionHeader('Interested in', () => _showInterestedInDialog()),
+            _buildSectionHeader(
+              'Interested in',
+              () => _showInterestedInDialog(),
+            ),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
               child: CommonText(
@@ -265,7 +312,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           ),
           TextButton.icon(
             onPressed: onEdit,
-            icon: const Icon(Icons.edit_calendar_rounded, size: 16, color: Colors.grey),
+            icon: const Icon(
+              Icons.edit_calendar_rounded,
+              size: 16,
+              color: Colors.grey,
+            ),
             label: CommonText(
               text: "Edit",
               fontSize: 12.sp,
@@ -278,7 +329,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     );
   }
 
-  Widget _buildDetailItem(String label, String value, TextEditingController controller) {
+  Widget _buildDetailItem(
+    String label,
+    String value,
+    TextEditingController controller,
+  ) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Row(
@@ -426,15 +481,24 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               const SizedBox(height: 12),
               _buildDetailTextField('email', controller.emailController),
               const SizedBox(height: 12),
-              _buildDetailTextField('Contact no', controller.contactNoController),
+              _buildDetailTextField(
+                'Contact no',
+                controller.contactNoController,
+              ),
               const SizedBox(height: 12),
               _buildDetailTextField('Location', controller.locationController),
               const SizedBox(height: 12),
-              _buildDetailTextField('Occupations', controller.occupationController),
+              _buildDetailTextField(
+                'Occupations',
+                controller.occupationController,
+              ),
               const SizedBox(height: 12),
               _buildDetailTextField('dream job', controller.dreamJobController),
               const SizedBox(height: 12),
-              _buildDetailTextField('Education', controller.educationController),
+              _buildDetailTextField(
+                'Education',
+                controller.educationController,
+              ),
               const SizedBox(height: 20),
               SizedBox(
                 width: double.infinity,
@@ -444,11 +508,14 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     setState(() {
                       controller.userName = controller.userNameController.text;
                       controller.email = controller.emailController.text;
-                      controller.contactNo = controller.contactNoController.text;
+                      controller.contactNo =
+                          controller.contactNoController.text;
                       controller.location = controller.locationController.text;
-                      controller.occupation = controller.occupationController.text;
+                      controller.occupation =
+                          controller.occupationController.text;
                       controller.dreamJob = controller.dreamJobController.text;
-                      controller.education = controller.educationController.text;
+                      controller.education =
+                          controller.educationController.text;
                     });
                     Navigator.pop(context);
                   },
@@ -502,7 +569,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       builder: (context) => StatefulBuilder(
         builder: (context, setDialogState) => Dialog(
           backgroundColor: const Color(0xFF2d2d2d),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
           child: Padding(
             padding: const EdgeInsets.all(20),
             child: Column(
@@ -535,7 +604,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   children: interests.map((interest) {
                     return Chip(
                       label: Text(interest),
-                      deleteIcon: const Icon(Icons.close, size: 16, color: Colors.white),
+                      deleteIcon: const Icon(
+                        Icons.close,
+                        size: 16,
+                        color: Colors.white,
+                      ),
                       onDeleted: () {
                         setDialogState(() {
                           interests.remove(interest);
@@ -562,10 +635,16 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       Expanded(
                         child: TextField(
                           controller: newInterestController,
-                          style: const TextStyle(color: Colors.white70, fontSize: 14),
+                          style: const TextStyle(
+                            color: Colors.white70,
+                            fontSize: 14,
+                          ),
                           decoration: const InputDecoration(
                             hintText: 'Socializing',
-                            hintStyle: TextStyle(color: Colors.white38, fontSize: 14),
+                            hintStyle: TextStyle(
+                              color: Colors.white38,
+                              fontSize: 14,
+                            ),
                             border: InputBorder.none,
                           ),
                         ),
