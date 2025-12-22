@@ -11,7 +11,7 @@ import '../models/post_model.dart';
 import '../models/story_model.dart';
 
 class HomeScreen extends StatelessWidget {
-  HomeScreen({Key? key}) : super(key: key);
+  const HomeScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -20,28 +20,42 @@ class HomeScreen extends StatelessWidget {
       body: SafeArea(
         child: GetBuilder(
           init: HomeController(),
-          initState: (state) => state.controller!.initial(context),
           builder: (controller) => Column(
             children: [
               // Custom AppBar
-              _buildCustomAppBar(controller),
+              _buildCustomAppBar(
+                cartCount: controller.cartCount.value,
+                messageCount: controller.messageCount.value,
+                notificationCount: controller.notificationCount.value,
+              ),
 
               // Stories Section
-              _buildStoriesSection(controller),
+              controller.storyLoading.value
+                  ? Center(child: CircularProgressIndicator())
+                  : _buildStoriesSection(controller.stories),
 
               // Posts Section
-              Expanded(
-                child: ListView.builder(
-                  controller: controller.scrollController,
-                  itemCount: controller.posts.length,
-                  itemBuilder: (context, index) {
-                    return PostCard(
-                      post: controller.posts[index],
-                      controller: controller,
-                    );
-                  },
-                ),
-              ),
+              controller.postLoading.value
+                  ? Center(child: CircularProgressIndicator())
+                  : controller.posts.isEmpty
+                  ? Center(
+                      child: Text(
+                        "No Post Found",
+                        style: TextStyle(color: AppColors.white),
+                      ),
+                    )
+                  : Expanded(
+                      child: ListView.builder(
+                        controller: controller.scrollController,
+                        itemCount: controller.posts.length,
+                        itemBuilder: (context, index) {
+                          return PostCard(
+                            post: controller.posts[index],
+                            controller: controller,
+                          );
+                        },
+                      ),
+                    ),
             ],
           ),
         ),
@@ -49,7 +63,11 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildCustomAppBar(HomeController controller) {
+  Widget _buildCustomAppBar({
+    required int cartCount,
+    required int notificationCount,
+    required int messageCount,
+  }) {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
       child: Row(
@@ -80,7 +98,7 @@ class HomeScreen extends StatelessWidget {
                 },
                 child: _buildIconWithBadge(
                   Icons.shopping_cart_outlined,
-                  controller.cartCount.value,
+                  cartCount,
                   AppColors.primaryColor,
                   AppColors.black,
                 ),
@@ -92,7 +110,7 @@ class HomeScreen extends StatelessWidget {
                 },
                 child: _buildIconWithBadge(
                   Icons.notifications_outlined,
-                  controller.notificationCount.value,
+                  notificationCount,
                   Colors.red,
                   AppColors.white,
                 ),
@@ -104,7 +122,7 @@ class HomeScreen extends StatelessWidget {
                 },
                 child: _buildIconWithBadge(
                   Icons.chat,
-                  controller.messageCount.value,
+                  messageCount,
                   AppColors.textColor,
                   AppColors.white,
                 ),
@@ -150,25 +168,19 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildStoriesSection(HomeController controller) {
+  Widget _buildStoriesSection(List<StoryModel> stories) {
     return Container(
       height: 110.h,
       padding: EdgeInsets.symmetric(vertical: 10.h),
       child: Row(
         children: [
-          StoryItem(
-            story: controller.stories[0],
-            isOwn: true,
-          ), // need to change later
+          StoryItem(story: stories[0], isOwn: true), // need to change later
           Expanded(
             child: ListView.builder(
               scrollDirection: Axis.horizontal,
-              itemCount: controller.stories.length,
+              itemCount: stories.length,
               itemBuilder: (context, index) {
-                return StoryItem(
-                  story: controller.stories[index],
-                  isOwn: false,
-                );
+                return StoryItem(story: stories[index], isOwn: false);
               },
             ),
           ),

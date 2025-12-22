@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:road_project_flutter/config/api/api_end_point.dart';
+import 'package:road_project_flutter/config/route/app_routes.dart';
 import 'package:road_project_flutter/services/api/api_service.dart';
 import 'package:road_project_flutter/utils/constants/app_string.dart';
+import 'package:road_project_flutter/utils/log/app_log.dart';
+import 'package:road_project_flutter/utils/log/error_log.dart';
 import 'dart:async';
 
 import '../models/comment_model.dart';
@@ -18,6 +21,10 @@ class HomeController extends GetxController {
   var posts = <PostModel>[].obs;
   var comments = <List<CommentModel>>[].obs;
 
+  final storyLoading = false.obs;
+  final postLoading = false.obs;
+  final commentLoading = false.obs;
+
   // Notification counts
   var cartCount = 3.obs;
   var notificationCount = 1.obs;
@@ -29,6 +36,13 @@ class HomeController extends GetxController {
   final Map<String, Timer?> autoScrollTimers = {};
 
   void onRefresh() {}
+
+  @override
+  void onInit() {
+    // TODO: implement onInit
+    super.onInit();
+    initial(Get.context!);
+  }
 
   void initial(BuildContext context) {
     loadStories(context);
@@ -50,66 +64,105 @@ class HomeController extends GetxController {
   }
 
   void loadStories(BuildContext context) async {
-    final response = await ApiService2.get(ApiEndPoint.story);
-    if (response == null) {
-      ScaffoldMessenger.of(context)
-        ..clearSnackBars()
-        ..showSnackBar(SnackBar(content: Text(AppString.someThingWrong)));
-    } else {
-      final data = response.data;
-      if (response.statusCode != 200) {
+    storyLoading.value = true;
+    update();
+    try {
+      final response = await ApiService2.get(ApiEndPoint.story);
+
+      if (response == null) {
         ScaffoldMessenger.of(context)
           ..clearSnackBars()
-          ..showSnackBar(SnackBar(content: Text(data['message'])));
+          ..showSnackBar(SnackBar(content: Text(AppString.someThingWrong)));
       } else {
-        final userData = StoryModelAll.fromJson(data['data']);
-        stories.value = userData.stories;
-        update();
+        final data = response.data;
+        if (response.statusCode != 200) {
+          ScaffoldMessenger.of(context)
+            ..clearSnackBars()
+            ..showSnackBar(SnackBar(content: Text(data['message'])));
+        } else {
+          final userData = (data['data'] as List)
+              .map((e) => StoryModel.fromJson(e))
+              .toList();
+          stories.value = userData;
+          update();
+        }
       }
+    } catch (e) {
+      errorLog("Load story failed: $e");
+      Get.offAllNamed(AppRoutes.signIn);
+    } finally {
+      storyLoading.value = false;
+      update();
     }
   }
 
   void loadPosts(BuildContext context) async {
-    final response = await ApiService2.get(ApiEndPoint.allPost);
-    if (response == null) {
-      ScaffoldMessenger.of(context)
-        ..clearSnackBars()
-        ..showSnackBar(SnackBar(content: Text(AppString.someThingWrong)));
-    } else {
-      final data = response.data;
-      if (response.statusCode != 200) {
+    postLoading.value = true;
+    update();
+    try {
+      final response = await ApiService2.get(ApiEndPoint.allPost);
+      if (response == null) {
         ScaffoldMessenger.of(context)
           ..clearSnackBars()
-          ..showSnackBar(SnackBar(content: Text(data['message'])));
+          ..showSnackBar(SnackBar(content: Text(AppString.someThingWrong)));
       } else {
-        final userData = PostAllModel.fromJson(data['data']);
-        posts.value = userData.postModel;
-        update();
-        for (var c in posts) {
-          loadComments(context, c.id);
+        final data = response.data;
+        if (response.statusCode != 200) {
+          ScaffoldMessenger.of(context)
+            ..clearSnackBars()
+            ..showSnackBar(SnackBar(content: Text(data['message'])));
+        } else {
+          final userData = (data['data'] as List)
+              .map((e) => PostModel.fromJson(e))
+              .toList();
+          posts.value = userData;
+          update();
+          for (var c in posts) {
+            loadComments(context, c.id);
+          }
         }
       }
+    } catch (e) {
+      errorLog("Load posts failed: $e");
+      Get.offAllNamed(AppRoutes.signIn);
+    } finally {
+      postLoading.value = false;
+      update();
     }
   }
 
   void loadComments(BuildContext context, String id) async {
-    final url = "${ApiEndPoint.allComment}/$id";
-    final response = await ApiService2.get(url);
-    if (response == null) {
-      ScaffoldMessenger.of(context)
-        ..clearSnackBars()
-        ..showSnackBar(SnackBar(content: Text(AppString.someThingWrong)));
-    } else {
-      final data = response.data;
-      if (response.statusCode != 200) {
+    commentLoading.value = true;
+    update();
+
+    try {
+      final url = "${ApiEndPoint.allComment}/$id";
+
+      final response = await ApiService2.get(url);
+      if (response == null) {
         ScaffoldMessenger.of(context)
           ..clearSnackBars()
-          ..showSnackBar(SnackBar(content: Text(data['message'])));
+          ..showSnackBar(SnackBar(content: Text(AppString.someThingWrong)));
       } else {
-        final userData = CommentModelAll.fromJson(data['data']);
-        comments.add(userData.comments);
-        update();
+        final data = response.data;
+        if (response.statusCode != 200) {
+          ScaffoldMessenger.of(context)
+            ..clearSnackBars()
+            ..showSnackBar(SnackBar(content: Text(data['message'])));
+        } else {
+          final userData = (data['data'] as List)
+              .map((e) => CommentModel.fromJson(e))
+              .toList();
+          comments.add(userData);
+          update();
+        }
       }
+    } catch (e) {
+      errorLog("Load comments failed: $e");
+      Get.offAllNamed(AppRoutes.signIn);
+    } finally {
+      commentLoading.value = false;
+      update();
     }
   }
 

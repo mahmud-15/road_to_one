@@ -57,6 +57,13 @@ class _CommonButtonState extends State<CommonButton>
   }
 
   @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+    _animationController.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return SizedBox(
       height: widget.buttonHeight,

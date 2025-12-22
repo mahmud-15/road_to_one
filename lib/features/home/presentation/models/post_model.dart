@@ -1,32 +1,3 @@
-import 'dart:convert';
-
-// ignore_for_file: public_member_api_docs, sort_constructors_first
-class PostAllModel {
-  List<PostModel> postModel;
-  PostAllModel({required this.postModel});
-
-  Map<String, dynamic> toMap() {
-    return <String, dynamic>{
-      'postModel': postModel.map((x) => x.toMap()).toList(),
-    };
-  }
-
-  factory PostAllModel.fromMap(Map<String, dynamic> map) {
-    return PostAllModel(
-      postModel: List<PostModel>.from(
-        (map['postModel'] as List<int>).map<PostModel>(
-          (x) => PostModel.fromMap(x as Map<String, dynamic>),
-        ),
-      ),
-    );
-  }
-
-  String toJson() => json.encode(toMap());
-
-  factory PostAllModel.fromJson(String source) =>
-      PostAllModel.fromMap(json.decode(source) as Map<String, dynamic>);
-}
-
 class PostModel {
   final String id;
   final Creator creator;
@@ -55,44 +26,20 @@ class PostModel {
     required this.image,
   });
 
-  Map<String, dynamic> toMap() {
-    return <String, dynamic>{
-      '_id': id,
-      'creator': creator.toMap(),
-      'caption': caption,
-      'type': type,
-      'createAt': createAt,
-      'commentOfPost': commentOfPost,
-      'likeOfPost': likeOfPost,
-      'isLiked': isLiked,
-      'isOwner': isOwner,
-      'hasSave': hasSave,
-      'connectionStatus': connectionStatus,
-      'image': image,
-    };
-  }
-
-  factory PostModel.fromMap(Map<String, dynamic> map) {
-    return PostModel(
-      id: map['_id'] as String,
-      creator: Creator.fromMap(map['creator'] as Map<String, dynamic>),
-      caption: map['caption'] as String,
-      type: map['type'] as String,
-      createAt: map['createAt'] as String,
-      commentOfPost: map['commentOfPost'] as int,
-      likeOfPost: map['likeOfPost'] as int,
-      isLiked: map['isLiked'] ?? false,
-      isOwner: map['isOwner'] as bool,
-      hasSave: map['hasSave'] as bool,
-      connectionStatus: map['connectionStatus'] as String,
-      image: List<String>.from((map['image'] as List<String>)),
-    );
-  }
-
-  String toJson() => json.encode(toMap());
-
-  factory PostModel.fromJson(String source) =>
-      PostModel.fromMap(json.decode(source) as Map<String, dynamic>);
+  factory PostModel.fromJson(Map<String, dynamic> json) => PostModel(
+    id: json['_id'] ?? "",
+    creator: Creator.fromJson(json['creator']),
+    caption: json['caption'],
+    type: json['type'],
+    createAt: json['createAt'],
+    commentOfPost: json['commentOfPost'] ?? 0,
+    likeOfPost: json['likeOfPost'] ?? 0,
+    isOwner: json['isOwner'] ?? false,
+    hasSave: json['hasSave'] ?? false,
+    isLiked: json['isLiked'] ?? false,
+    connectionStatus: json['connectionStatus'] ?? "",
+    image: json['image'] ?? [],
+  );
 }
 
 class Creator {
@@ -107,26 +54,10 @@ class Creator {
     required this.profileMode,
   });
 
-  Map<String, dynamic> toMap() {
-    return <String, dynamic>{
-      '_id': id,
-      'name': name,
-      'image': image,
-      'profileMode': profileMode,
-    };
-  }
-
-  factory Creator.fromMap(Map<String, dynamic> map) {
-    return Creator(
-      id: map['_id'] as String,
-      name: map['name'] as String,
-      image: map['image'] as String,
-      profileMode: map['profileMode'] as String,
-    );
-  }
-
-  String toJson() => json.encode(toMap());
-
-  factory Creator.fromJson(String source) =>
-      Creator.fromMap(json.decode(source) as Map<String, dynamic>);
+  factory Creator.fromJson(Map<String, dynamic> json) => Creator(
+    id: json['id'] ?? "",
+    name: json['name'] ?? "",
+    image: json['image'] ?? "",
+    profileMode: json['profileMode'] ?? "",
+  );
 }
