@@ -1,7 +1,5 @@
-import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../../config/route/app_routes.dart';
 import '../../utils/log/app_log.dart';
 import 'storage_keys.dart';
 
@@ -14,6 +12,7 @@ class LocalStorage {
   static String myName = "";
   static String myEmail = "";
   static String myRole = "";
+  static String profileImage = "";
 
   // Create Local Storage Instance
   static SharedPreferences? preferences;
@@ -36,6 +35,7 @@ class LocalStorage {
     myName = localStorage.getString(LocalStorageKeys.myName) ?? "";
     myEmail = localStorage.getString(LocalStorageKeys.myEmail) ?? "";
     myRole = localStorage.getString(LocalStorageKeys.myRole) ?? "";
+    profileImage = localStorage.getString(LocalStorageKeys.profileImage) ?? "";
 
     appLog(userId, source: "Local Storage");
   }
@@ -60,6 +60,7 @@ class LocalStorage {
     localStorage.setString(LocalStorageKeys.myEmail, "");
     localStorage.setBool(LocalStorageKeys.isLogIn, false);
     localStorage.setString(LocalStorageKeys.myRole, "");
+    localStorage.setString(LocalStorageKeys.profileImage, "");
   }
 
   // Save Data To SharedPreferences

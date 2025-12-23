@@ -12,7 +12,7 @@ import 'package:road_project_flutter/utils/constants/app_colors.dart';
 import '../controller/store_show_controller.dart';
 
 class ProductDetailScreen extends StatelessWidget {
-  ProductDetailScreen({Key? key}) : super(key: key);
+  ProductDetailScreen({super.key});
 
   final ProductDetailController controller = Get.put(ProductDetailController());
 
@@ -41,43 +41,51 @@ class ProductDetailScreen extends StatelessWidget {
                             borderRadius: BorderRadius.circular(20.r),
                             image: controller.product['image'] != null
                                 ? DecorationImage(
-                              image: NetworkImage(controller.product['image']),
-                              fit: BoxFit.cover,
-                            )
+                                    image: NetworkImage(
+                                      controller.product['image'],
+                                    ),
+                                    fit: BoxFit.cover,
+                                  )
                                 : null,
                           ),
                           child: controller.product['image'] == null
                               ? Center(
-                            child: Icon(
-                              Icons.image,
-                              color: Colors.grey[400],
-                              size: 80.sp,
-                            ),
-                          )
+                                  child: Icon(
+                                    Icons.image,
+                                    color: Colors.grey[400],
+                                    size: 80.sp,
+                                  ),
+                                )
                               : null,
                         ),
                         Positioned(
                           top: 28.h,
                           right: 28.w,
-                          child: Obx(() => GestureDetector(
-                            onTap: controller.toggleFavorite,
-                            child: Container(
-                              padding: EdgeInsets.all(8.w),
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                shape: BoxShape.circle,
-                              ),
-                              child: Icon(
-                                controller.isFavorite.value ? Icons.favorite : Icons.favorite_border,
-                                color: controller.isFavorite.value ? Colors.red : Colors.grey[700],
-                                size: 24.sp,
+                          child: Obx(
+                            () => GestureDetector(
+                              onTap: controller.toggleFavorite,
+                              child: Container(
+                                padding: EdgeInsets.all(8.w),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  shape: BoxShape.circle,
+                                ),
+                                child: Icon(
+                                  controller.isFavorite.value
+                                      ? Icons.favorite
+                                      : Icons.favorite_border,
+                                  color: controller.isFavorite.value
+                                      ? Colors.red
+                                      : Colors.grey[700],
+                                  size: 24.sp,
+                                ),
                               ),
                             ),
-                          )),
+                          ),
                         ),
                       ],
                     ),
-        
+
                     // Product Info
                     Padding(
                       padding: EdgeInsets.symmetric(horizontal: 16.w),
@@ -114,21 +122,23 @@ class ProductDetailScreen extends StatelessWidget {
                               fontSize: 14.sp,
                             ),
                           ),
-        
+
                           SizedBox(height: 24.h),
-        
+
                           // Size and Quantity
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Obx(() => Text(
-                                'Size: ${controller.selectedSize.value}',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 16.sp,
-                                  fontWeight: FontWeight.w500,
+                              Obx(
+                                () => Text(
+                                  'Size: ${controller.selectedSize.value}',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 16.sp,
+                                    fontWeight: FontWeight.w500,
+                                  ),
                                 ),
-                              )),
+                              ),
                               Text(
                                 'Quantity',
                                 style: TextStyle(
@@ -139,9 +149,9 @@ class ProductDetailScreen extends StatelessWidget {
                               ),
                             ],
                           ),
-        
+
                           SizedBox(height: 12.h),
-        
+
                           // Size Selection and Quantity Counter
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -150,24 +160,36 @@ class ProductDetailScreen extends StatelessWidget {
                               Row(
                                 children: controller.sizes.map((size) {
                                   return Obx(() {
-                                    final isSelected = controller.selectedSize.value == size;
+                                    final isSelected =
+                                        controller.selectedSize.value == size;
                                     return GestureDetector(
                                       onTap: () => controller.selectSize(size),
                                       child: Container(
                                         margin: EdgeInsets.only(right: 8.w),
-                                        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+                                        padding: EdgeInsets.symmetric(
+                                          horizontal: 16.w,
+                                          vertical: 8.h,
+                                        ),
                                         decoration: BoxDecoration(
-                                          color: isSelected ? Colors.white : Color(0xFF2A2A2A),
-                                          borderRadius: BorderRadius.circular(8.r),
+                                          color: isSelected
+                                              ? Colors.white
+                                              : Color(0xFF2A2A2A),
+                                          borderRadius: BorderRadius.circular(
+                                            8.r,
+                                          ),
                                           border: Border.all(
-                                            color: isSelected ? Colors.white : Colors.grey[700]!,
+                                            color: isSelected
+                                                ? Colors.white
+                                                : Colors.grey[700]!,
                                             width: 1,
                                           ),
                                         ),
                                         child: Text(
                                           size,
                                           style: TextStyle(
-                                            color: isSelected ? Colors.black : Colors.white,
+                                            color: isSelected
+                                                ? Colors.black
+                                                : Colors.white,
                                             fontSize: 14.sp,
                                             fontWeight: FontWeight.w500,
                                           ),
@@ -177,7 +199,7 @@ class ProductDetailScreen extends StatelessWidget {
                                   });
                                 }).toList(),
                               ),
-        
+
                               // Quantity Counter
                               Container(
                                 decoration: BoxDecoration(
@@ -187,24 +209,36 @@ class ProductDetailScreen extends StatelessWidget {
                                 child: Row(
                                   children: [
                                     IconButton(
-                                      icon: Icon(Icons.remove, color: Colors.white, size: 20.sp),
+                                      icon: Icon(
+                                        Icons.remove,
+                                        color: Colors.white,
+                                        size: 20.sp,
+                                      ),
                                       onPressed: controller.decrementQuantity,
                                       padding: EdgeInsets.all(8.w),
                                       constraints: BoxConstraints(),
                                     ),
-                                    Obx(() => Container(
-                                      padding: EdgeInsets.symmetric(horizontal: 12.w),
-                                      child: Text(
-                                        '${controller.quantity.value}',
-                                        style: TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 16.sp,
-                                          fontWeight: FontWeight.w500,
+                                    Obx(
+                                      () => Container(
+                                        padding: EdgeInsets.symmetric(
+                                          horizontal: 12.w,
+                                        ),
+                                        child: Text(
+                                          '${controller.quantity.value}',
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 16.sp,
+                                            fontWeight: FontWeight.w500,
+                                          ),
                                         ),
                                       ),
-                                    )),
+                                    ),
                                     IconButton(
-                                      icon: Icon(Icons.add, color: Colors.white, size: 20.sp),
+                                      icon: Icon(
+                                        Icons.add,
+                                        color: Colors.white,
+                                        size: 20.sp,
+                                      ),
                                       onPressed: controller.incrementQuantity,
                                       padding: EdgeInsets.all(8.w),
                                       constraints: BoxConstraints(),
@@ -214,9 +248,9 @@ class ProductDetailScreen extends StatelessWidget {
                               ),
                             ],
                           ),
-        
+
                           SizedBox(height: 24.h),
-        
+
                           // Color Selection
                           Text(
                             'Color: ${controller.selectedColor.value}',
@@ -226,15 +260,18 @@ class ProductDetailScreen extends StatelessWidget {
                               fontWeight: FontWeight.w500,
                             ),
                           ),
-        
+
                           SizedBox(height: 12.h),
-        
+
                           Row(
                             children: controller.colors.map((colorItem) {
                               return Obx(() {
-                                final isSelected = controller.selectedColor.value == colorItem['name'];
+                                final isSelected =
+                                    controller.selectedColor.value ==
+                                    colorItem['name'];
                                 return GestureDetector(
-                                  onTap: () => controller.selectColor(colorItem['name']),
+                                  onTap: () =>
+                                      controller.selectColor(colorItem['name']),
                                   child: Container(
                                     margin: EdgeInsets.only(right: 12.w),
                                     width: 36.w,
@@ -243,17 +280,21 @@ class ProductDetailScreen extends StatelessWidget {
                                       color: colorItem['color'],
                                       shape: BoxShape.circle,
                                       border: Border.all(
-                                        color: isSelected ? Colors.white : Colors.transparent,
+                                        color: isSelected
+                                            ? Colors.white
+                                            : Colors.transparent,
                                         width: 2,
                                       ),
                                       boxShadow: isSelected
                                           ? [
-                                        BoxShadow(
-                                          color: Colors.white.withOpacity(0.3),
-                                          blurRadius: 8,
-                                          spreadRadius: 1,
-                                        ),
-                                      ]
+                                              BoxShadow(
+                                                color: Colors.white.withOpacity(
+                                                  0.3,
+                                                ),
+                                                blurRadius: 8,
+                                                spreadRadius: 1,
+                                              ),
+                                            ]
                                           : null,
                                     ),
                                   ),
@@ -261,21 +302,24 @@ class ProductDetailScreen extends StatelessWidget {
                               });
                             }).toList(),
                           ),
-        
+
                           SizedBox(height: 24.h),
-        
+
                           // Product Description
                           CommonText(
-                              text: "Product Description",
+                            text: "Product Description",
                             fontSize: 20.sp,
                             fontWeight: FontWeight.w600,
                             color: AppColors.white,
                           ),
-        
+
                           SizedBox(height: 12.h),
-        
+
                           Container(
-                            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 16.w,
+                              vertical: 12.h,
+                            ),
                             decoration: BoxDecoration(
                               color: Colors.transparent,
                               borderRadius: BorderRadius.circular(8.r),
@@ -294,7 +338,7 @@ class ProductDetailScreen extends StatelessWidget {
                               ),
                             ),
                           ),
-        
+
                           SizedBox(height: 24.h),
                           Padding(
                             padding: const EdgeInsets.all(18),
@@ -305,14 +349,14 @@ class ProductDetailScreen extends StatelessWidget {
                                   buttonColor: AppColors.transparent,
                                   titleColor: AppColors.white,
                                   borderColor: AppColors.white,
-                                  onTap: (){
+                                  onTap: () {
                                     Get.toNamed(AppRoutes.cartScreen);
                                   },
                                 ),
                                 SizedBox(height: 18.h),
                                 CommonButton(
                                   titleText: "Buy with Shop",
-                                  onTap: (){
+                                  onTap: () {
                                     Get.toNamed(AppRoutes.homeNav);
                                   },
                                 ),

@@ -9,7 +9,7 @@ import 'package:road_project_flutter/utils/constants/app_colors.dart';
 import '../controller/store_controller.dart';
 
 class StoreScreen extends StatelessWidget {
-  StoreScreen({Key? key}) : super(key: key);
+  StoreScreen({super.key});
 
   final StoreController controller = Get.put(StoreController());
 
@@ -33,37 +33,43 @@ class StoreScreen extends StatelessWidget {
           Stack(
             children: [
               IconButton(
-                icon: Icon(Icons.shopping_cart_outlined, color: Colors.white, size: 30.h),
+                icon: Icon(
+                  Icons.shopping_cart_outlined,
+                  color: Colors.white,
+                  size: 30.h,
+                ),
                 onPressed: () {
                   Get.toNamed(AppRoutes.cartScreen);
                 },
               ),
-              Obx(() => controller.cartItems.length > 0
-                  ? Positioned(
-                right: 8.w,
-                top: 4.h,
-                child: Container(
-                  padding: EdgeInsets.all(4.w),
-                  decoration: BoxDecoration(
-                    color: AppColors.primaryColor,
-                    shape: BoxShape.circle,
-                  ),
-                  constraints: BoxConstraints(
-                    minWidth: 18.w,
-                    minHeight: 18.h,
-                  ),
-                  child: Text(
-                    '${controller.cartItems.length}',
-                    style: TextStyle(
-                      color: Colors.black,
-                      fontSize: 10.sp,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-              )
-                  : SizedBox()),
+              Obx(
+                () => controller.cartItems.isNotEmpty
+                    ? Positioned(
+                        right: 8.w,
+                        top: 4.h,
+                        child: Container(
+                          padding: EdgeInsets.all(4.w),
+                          decoration: BoxDecoration(
+                            color: AppColors.primaryColor,
+                            shape: BoxShape.circle,
+                          ),
+                          constraints: BoxConstraints(
+                            minWidth: 18.w,
+                            minHeight: 18.h,
+                          ),
+                          child: Text(
+                            '${controller.cartItems.length}',
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontSize: 10.sp,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      )
+                    : SizedBox(),
+              ),
             ],
           ),
           SizedBox(width: 8.w),
@@ -81,12 +87,16 @@ class StoreScreen extends StatelessWidget {
               itemBuilder: (context, index) {
                 final category = controller.categories[index];
                 return Obx(() {
-                  final isSelected = controller.selectedCategory.value == category;
+                  final isSelected =
+                      controller.selectedCategory.value == category;
                   return GestureDetector(
                     onTap: () => controller.selectCategory(category),
                     child: Container(
                       margin: EdgeInsets.only(right: 12.w),
-                      padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 8.h),
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 20.w,
+                        vertical: 8.h,
+                      ),
                       decoration: BoxDecoration(
                         color: isSelected ? Colors.white : Colors.transparent,
                         borderRadius: BorderRadius.circular(20.r),
@@ -114,20 +124,22 @@ class StoreScreen extends StatelessWidget {
 
           // Product Grid
           Expanded(
-            child: Obx(() => GridView.builder(
-              padding: EdgeInsets.all(16.w),
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                childAspectRatio: 0.65,
-                crossAxisSpacing: 12.w,
-                mainAxisSpacing: 16.h,
+            child: Obx(
+              () => GridView.builder(
+                padding: EdgeInsets.all(16.w),
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  childAspectRatio: 0.65,
+                  crossAxisSpacing: 12.w,
+                  mainAxisSpacing: 16.h,
+                ),
+                itemCount: controller.products.length,
+                itemBuilder: (context, index) {
+                  final product = controller.products[index];
+                  return _buildProductCard(product);
+                },
               ),
-              itemCount: controller.products.length,
-              itemBuilder: (context, index) {
-                final product = controller.products[index];
-                return _buildProductCard(product);
-              },
-            )),
+            ),
           ),
         ],
       ),
@@ -157,22 +169,24 @@ class StoreScreen extends StatelessWidget {
                     height: 180.h,
                     decoration: BoxDecoration(
                       color: Colors.grey[800],
-                      borderRadius: BorderRadius.vertical(top: Radius.circular(12.r)),
+                      borderRadius: BorderRadius.vertical(
+                        top: Radius.circular(12.r),
+                      ),
                       image: product['image'] != null
                           ? DecorationImage(
-                        image: NetworkImage(product['image']),
-                        fit: BoxFit.cover,
-                      )
+                              image: NetworkImage(product['image']),
+                              fit: BoxFit.cover,
+                            )
                           : null,
                     ),
                     child: product['image'] == null
                         ? Center(
-                      child: Icon(
-                        Icons.image,
-                        color: Colors.grey[600],
-                        size: 50.sp,
-                      ),
-                    )
+                            child: Icon(
+                              Icons.image,
+                              color: Colors.grey[600],
+                              size: 50.sp,
+                            ),
+                          )
                         : null,
                   ),
                   // Favorite Button

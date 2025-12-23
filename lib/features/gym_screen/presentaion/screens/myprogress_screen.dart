@@ -5,11 +5,11 @@ import 'package:road_project_flutter/component/image/app_bar.dart';
 import 'package:road_project_flutter/utils/constants/app_colors.dart';
 import 'dart:io';
 import '../controller/my_progress_controller.dart';
-import '../../data/model/progress_model.dart';
 
 class MyProgressScreen extends GetView<MyProgressController> {
-  MyProgressScreen({Key? key}) : super(key: key);
+  MyProgressScreen({super.key});
 
+  @override
   MyProgressController controller = Get.put(MyProgressController());
 
   @override
@@ -65,14 +65,16 @@ class MyProgressScreen extends GetView<MyProgressController> {
             size: 20.sp,
           ),
           SizedBox(width: 8.w),
-          Obx(() => Text(
-            '${controller.workoutCount} workout${controller.workoutCount != 1 ? 's' : ''}',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 16.sp,
-              fontWeight: FontWeight.w600,
+          Obx(
+            () => Text(
+              '${controller.workoutCount} workout${controller.workoutCount != 1 ? 's' : ''}',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 16.sp,
+                fontWeight: FontWeight.w600,
+              ),
             ),
-          )),
+          ),
         ],
       ),
     );
@@ -177,30 +179,30 @@ class MyProgressScreen extends GetView<MyProgressController> {
         ),
         child: pictureItem.caption.isNotEmpty
             ? Align(
-          alignment: Alignment.bottomCenter,
-          child: Container(
-            width: double.infinity,
-            padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 4.h),
-            decoration: BoxDecoration(
-              color: Colors.black.withOpacity(0.7),
-              borderRadius: BorderRadius.only(
-                bottomLeft: Radius.circular(12.r),
-                bottomRight: Radius.circular(12.r),
-              ),
-            ),
-            child: Text(
-              pictureItem.caption,
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 10.sp,
-                fontWeight: FontWeight.w500,
-              ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              textAlign: TextAlign.center,
-            ),
-          ),
-        )
+                alignment: Alignment.bottomCenter,
+                child: Container(
+                  width: double.infinity,
+                  padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 4.h),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withOpacity(0.7),
+                    borderRadius: BorderRadius.only(
+                      bottomLeft: Radius.circular(12.r),
+                      bottomRight: Radius.circular(12.r),
+                    ),
+                  ),
+                  child: Text(
+                    pictureItem.caption,
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 10.sp,
+                      fontWeight: FontWeight.w500,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              )
             : null,
       ),
     );
@@ -245,7 +247,10 @@ class MyProgressScreen extends GetView<MyProgressController> {
             SizedBox(height: 24.h),
             ListTile(
               leading: const Icon(Icons.edit, color: Color(0xFFb4ff39)),
-              title: const Text('Edit Caption', style: TextStyle(color: Colors.white)),
+              title: const Text(
+                'Edit Caption',
+                style: TextStyle(color: Colors.white),
+              ),
               onTap: () {
                 Get.back();
                 controller.editCaption(index);
@@ -253,7 +258,10 @@ class MyProgressScreen extends GetView<MyProgressController> {
             ),
             ListTile(
               leading: const Icon(Icons.delete_outline, color: Colors.red),
-              title: const Text('Delete Picture', style: TextStyle(color: Colors.white)),
+              title: const Text(
+                'Delete Picture',
+                style: TextStyle(color: Colors.white),
+              ),
               onTap: () {
                 Get.back();
                 _showDeleteDialog(index);
@@ -281,20 +289,14 @@ class MyProgressScreen extends GetView<MyProgressController> {
         actions: [
           TextButton(
             onPressed: () => Get.back(),
-            child: Text(
-              'Cancel',
-              style: TextStyle(color: Colors.grey[400]),
-            ),
+            child: Text('Cancel', style: TextStyle(color: Colors.grey[400])),
           ),
           TextButton(
             onPressed: () {
               controller.deletePicture(index);
               Get.back();
             },
-            child: const Text(
-              'Delete',
-              style: TextStyle(color: Colors.red),
-            ),
+            child: const Text('Delete', style: TextStyle(color: Colors.red)),
           ),
         ],
       ),
@@ -310,12 +312,12 @@ class ImageViewerScreen extends StatefulWidget {
   final Function(int)? onEdit;
 
   const ImageViewerScreen({
-    Key? key,
+    super.key,
     required this.pictures,
     required this.initialIndex,
     this.onDelete,
     this.onEdit,
-  }) : super(key: key);
+  });
 
   @override
   State<ImageViewerScreen> createState() => _ImageViewerScreenState();
@@ -397,57 +399,63 @@ class _ImageViewerScreenState extends State<ImageViewerScreen> {
             maxScale: 4.0,
             child: pictureItem.imageUrl.startsWith('http')
                 ? Image.network(
-              pictureItem.imageUrl,
-              fit: BoxFit.contain,
-              loadingBuilder: (context, child, loadingProgress) {
-                if (loadingProgress == null) return child;
-                return Center(
-                  child: CircularProgressIndicator(
-                    value: loadingProgress.expectedTotalBytes != null
-                        ? loadingProgress.cumulativeBytesLoaded /
-                        loadingProgress.expectedTotalBytes!
-                        : null,
-                    color: const Color(0xFFb4ff39),
-                  ),
-                );
-              },
-              errorBuilder: (context, error, stackTrace) {
-                return Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.error_outline,
-                          size: 100, color: Colors.grey[700]),
-                      const SizedBox(height: 16),
-                      Text(
-                        'Failed to load image',
-                        style: TextStyle(color: Colors.grey[400]),
-                      ),
-                    ],
-                  ),
-                );
-              },
-            )
+                    pictureItem.imageUrl,
+                    fit: BoxFit.contain,
+                    loadingBuilder: (context, child, loadingProgress) {
+                      if (loadingProgress == null) return child;
+                      return Center(
+                        child: CircularProgressIndicator(
+                          value: loadingProgress.expectedTotalBytes != null
+                              ? loadingProgress.cumulativeBytesLoaded /
+                                    loadingProgress.expectedTotalBytes!
+                              : null,
+                          color: const Color(0xFFb4ff39),
+                        ),
+                      );
+                    },
+                    errorBuilder: (context, error, stackTrace) {
+                      return Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.error_outline,
+                              size: 100,
+                              color: Colors.grey[700],
+                            ),
+                            const SizedBox(height: 16),
+                            Text(
+                              'Failed to load image',
+                              style: TextStyle(color: Colors.grey[400]),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  )
                 : Image.file(
-              File(pictureItem.imageUrl),
-              fit: BoxFit.contain,
-              errorBuilder: (context, error, stackTrace) {
-                return Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.error_outline,
-                          size: 100, color: Colors.grey[700]),
-                      const SizedBox(height: 16),
-                      Text(
-                        'Failed to load image',
-                        style: TextStyle(color: Colors.grey[400]),
-                      ),
-                    ],
+                    File(pictureItem.imageUrl),
+                    fit: BoxFit.contain,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.error_outline,
+                              size: 100,
+                              color: Colors.grey[700],
+                            ),
+                            const SizedBox(height: 16),
+                            Text(
+                              'Failed to load image',
+                              style: TextStyle(color: Colors.grey[400]),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
                   ),
-                );
-              },
-            ),
           ),
         ),
         if (pictureItem.caption.isNotEmpty)

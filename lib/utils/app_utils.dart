@@ -34,6 +34,23 @@ class Utils {
     return null;
   }
 
+  static String timeAgo(DateTime givenTime) {
+    final now = DateTime.now();
+    final difference = now.difference(givenTime);
+
+    if (difference.inSeconds < 60) {
+      return "just now";
+    } else if (difference.inMinutes < 60) {
+      return "${difference.inMinutes} min ago";
+    } else if (difference.inHours < 24) {
+      return "${difference.inHours} hr ago";
+    } else if (difference.inDays < 7) {
+      return "${difference.inDays} day ago";
+    } else {
+      return "${(difference.inDays / 7).floor()} week ago";
+    }
+  }
+
   static successSnackBar(String title, String message) {
     Get.snackbar(
       title,

@@ -10,9 +10,8 @@ import '../../data/chat_model.dart';
 import '../../data/story_model.dart';
 import '../controller/chat_controller.dart';
 
-
 class ChatScreen extends StatelessWidget {
-  ChatScreen({Key? key}) : super(key: key);
+  ChatScreen({super.key});
 
   final ChatController controller = Get.put(ChatController());
 
@@ -33,14 +32,21 @@ class ChatScreen extends StatelessWidget {
               decoration: InputDecoration(
                 hintText: 'Search',
                 hintStyle: TextStyle(color: Colors.grey[600], fontSize: 14.sp),
-                prefixIcon: Icon(Icons.search, color: Colors.grey[600], size: 20.sp),
+                prefixIcon: Icon(
+                  Icons.search,
+                  color: Colors.grey[600],
+                  size: 20.sp,
+                ),
                 filled: true,
                 fillColor: Color(0xFF2A2A2A),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(25.r),
                   borderSide: BorderSide.none,
                 ),
-                contentPadding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 12.h),
+                contentPadding: EdgeInsets.symmetric(
+                  horizontal: 20.w,
+                  vertical: 12.h,
+                ),
               ),
             ),
           ),
@@ -49,27 +55,31 @@ class ChatScreen extends StatelessWidget {
           Container(
             height: 100.h,
             padding: EdgeInsets.only(left: 16.w),
-            child: Obx(() => ListView.builder(
-              scrollDirection: Axis.horizontal,
-              itemCount: controller.stories.length,
-              itemBuilder: (context, index) {
-                final story = controller.stories[index];
-                return _buildStoryItem(story);
-              },
-            )),
+            child: Obx(
+              () => ListView.builder(
+                scrollDirection: Axis.horizontal,
+                itemCount: controller.stories.length,
+                itemBuilder: (context, index) {
+                  final story = controller.stories[index];
+                  return _buildStoryItem(story);
+                },
+              ),
+            ),
           ),
 
           SizedBox(height: 8.h),
 
           // Chat List
           Expanded(
-            child: Obx(() => ListView.builder(
-              itemCount: controller.filteredChats.length,
-              itemBuilder: (context, index) {
-                final chat = controller.filteredChats[index];
-                return _buildChatItem(chat);
-              },
-            )),
+            child: Obx(
+              () => ListView.builder(
+                itemCount: controller.filteredChats.length,
+                itemBuilder: (context, index) {
+                  final chat = controller.filteredChats[index];
+                  return _buildChatItem(chat);
+                },
+              ),
+            ),
           ),
         ],
       ),
@@ -102,14 +112,11 @@ class ChatScreen extends StatelessWidget {
                 ),
               ),
               child: Stack(
-                children:
-                [
+                children: [
                   Container(
                     width: 65.w,
                     height: 65.h,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                    ),
+                    decoration: BoxDecoration(shape: BoxShape.circle),
                     child: Padding(
                       padding: EdgeInsets.all(3.r),
                       child: CircleAvatar(
@@ -129,10 +136,14 @@ class ChatScreen extends StatelessWidget {
                           shape: BoxShape.circle,
                           border: Border.all(color: Colors.black, width: 2.w),
                         ),
-                        child: Icon(Icons.add, color: Colors.black, size: 12.sp),
+                        child: Icon(
+                          Icons.add,
+                          color: Colors.black,
+                          size: 12.sp,
+                        ),
                       ),
                     ),
-                ]
+                ],
               ),
             ),
             SizedBox(height: 6.h),
@@ -143,10 +154,7 @@ class ChatScreen extends StatelessWidget {
                 textAlign: TextAlign.center,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 11.sp,
-                ),
+                style: TextStyle(color: Colors.white, fontSize: 11.sp),
               ),
             ),
           ],
@@ -180,10 +188,7 @@ class ChatScreen extends StatelessWidget {
                       decoration: BoxDecoration(
                         color: AppColors.primaryColor,
                         shape: BoxShape.circle,
-                        border: Border.all(
-                          color: AppColors.upcolor,
-                          width: 2,
-                        ),
+                        border: Border.all(color: AppColors.upcolor, width: 2),
                       ),
                     ),
                   ),
@@ -209,10 +214,7 @@ class ChatScreen extends StatelessWidget {
                   SizedBox(height: 4.h),
                   Text(
                     chat.message,
-                    style: TextStyle(
-                      color: Colors.grey[400],
-                      fontSize: 13.sp,
-                    ),
+                    style: TextStyle(color: Colors.grey[400], fontSize: 13.sp),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -226,10 +228,7 @@ class ChatScreen extends StatelessWidget {
               children: [
                 Text(
                   chat.time,
-                  style: TextStyle(
-                    color: Colors.grey[600],
-                    fontSize: 11.sp,
-                  ),
+                  style: TextStyle(color: Colors.grey[600], fontSize: 11.sp),
                 ),
                 SizedBox(height: 4.h),
                 if (chat.isOnline)

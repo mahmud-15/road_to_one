@@ -3,14 +3,14 @@ class PostModel {
   final Creator creator;
   final String caption;
   final String type;
-  final String createAt;
+  final DateTime createAt;
   final int commentOfPost;
-  final int likeOfPost;
+  int likeOfPost;
   final bool isOwner;
-  final bool hasSave;
+  bool hasSave;
   bool isLiked;
   final String connectionStatus;
-  final List<String> image;
+  final List<dynamic> image;
   PostModel({
     required this.id,
     required this.creator,
@@ -29,9 +29,9 @@ class PostModel {
   factory PostModel.fromJson(Map<String, dynamic> json) => PostModel(
     id: json['_id'] ?? "",
     creator: Creator.fromJson(json['creator']),
-    caption: json['caption'],
-    type: json['type'],
-    createAt: json['createAt'],
+    caption: json['caption'] ?? "",
+    type: json['type'] ?? "",
+    createAt: DateTime.parse(json['createdAt']),
     commentOfPost: json['commentOfPost'] ?? 0,
     likeOfPost: json['likeOfPost'] ?? 0,
     isOwner: json['isOwner'] ?? false,

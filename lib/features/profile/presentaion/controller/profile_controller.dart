@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:road_project_flutter/component/app_storage/storage_key.dart';
 import 'package:road_project_flutter/config/api/api_end_point.dart';
 import 'package:road_project_flutter/features/profile/data/profile_model.dart';
 import 'package:road_project_flutter/features/profile/data/user_activity_like.dart';
@@ -8,11 +9,15 @@ import 'package:road_project_flutter/features/profile/data/user_activity_story.d
 import 'package:road_project_flutter/services/api/api_service.dart';
 import 'package:road_project_flutter/services/storage/storage_services.dart';
 import 'package:road_project_flutter/utils/constants/app_string.dart';
+import 'package:road_project_flutter/utils/log/error_log.dart';
 
 import '../../data/media_item.dart';
 
 class ProfileController extends GetxController {
   final isLoading = false.obs;
+  final imageLoading = false.obs;
+  final likeLoading = false.obs;
+  final storyLoading = false.obs;
   final user = Rxn<ProfileModel>();
   final userImage = RxList<UserActivityPhoto>();
   final userStory = RxList<UserActivityStory>();
@@ -192,6 +197,13 @@ class ProfileController extends GetxController {
     ),
   ];
 
+  @override
+  void onInit() {
+    // TODO: implement onInit
+    super.onInit();
+    initial(Get.context!);
+  }
+
   void initial(BuildContext context) {
     fetchProfile(context);
     fetchAllImage(context);
@@ -200,87 +212,129 @@ class ProfileController extends GetxController {
   void fetchProfile(BuildContext context) async {
     isLoading.value = true;
     update();
-    final response = await ApiService2.get(ApiEndPoint.user);
-    isLoading.value = false;
-    update();
-    if (response == null) {
-      ScaffoldMessenger.of(context)
-        ..clearSnackBars()
-        ..showSnackBar(SnackBar(content: Text(AppString.someThingWrong)));
-    } else {
-      final data = response.data;
-      if (response.statusCode != 200) {
+    try {
+      final response = await ApiService2.get(ApiEndPoint.user);
+
+      if (response == null) {
         ScaffoldMessenger.of(context)
           ..clearSnackBars()
           ..showSnackBar(SnackBar(content: Text(AppString.someThingWrong)));
       } else {
-        final profileData = ProfileModel.fromJson(data['data']);
-        user.value = profileData;
-        update();
+        final data = response.data;
+        if (response.statusCode != 200) {
+          ScaffoldMessenger.of(context)
+            ..clearSnackBars()
+            ..showSnackBar(SnackBar(content: Text(AppString.someThingWrong)));
+        } else {
+          final profileData = ProfileModel.fromJson(data['data']);
+          user.value = profileData;
+          update();
+        }
       }
+    } catch (e) {
+      errorLog("error in profile: $e");
+    } finally {
+      isLoading.value = false;
+      update();
     }
   }
 
   void fetchAllImage(BuildContext context) async {
-    final url = "${ApiEndPoint.userActivity}/${LocalStorage.userId}?type=photo";
-    final response = await ApiService2.get(url);
-    if (response == null) {
-      ScaffoldMessenger.of(context)
-        ..clearSnackBars()
-        ..showSnackBar(SnackBar(content: Text(AppString.someThingWrong)));
-    } else {
-      final data = response.data;
-      if (response.statusCode != 200) {
+    imageLoading.value = true;
+    update();
+    try {
+      final url =
+          "${ApiEndPoint.userActivity}/${LocalStorage.userId}?type=photo";
+      final response = await ApiService2.get(url);
+      if (response == null) {
         ScaffoldMessenger.of(context)
           ..clearSnackBars()
-          ..showSnackBar(SnackBar(content: Text(data['message'])));
+          ..showSnackBar(SnackBar(content: Text(AppString.someThingWrong)));
       } else {
-        final userData = UserActivityAllPhoto.fromJson(data['data']);
-        userImage.value = userData.userActivityPhoto;
-        update();
+        final data = response.data;
+        if (response.statusCode != 200) {
+          ScaffoldMessenger.of(context)
+            ..clearSnackBars()
+            ..showSnackBar(SnackBar(content: Text(data['message'])));
+        } else {
+          final userData = (data['data'] as List)
+              .map((e) => UserActivityPhoto.fromJson(e))
+              .toList();
+          userImage.value = userData;
+          update();
+        }
       }
+    } catch (e) {
+      errorLog("error in image: $e");
+    } finally {
+      imageLoading.value = false;
+      update();
     }
   }
 
   void fetchStory(BuildContext context) async {
-    final url = "${ApiEndPoint.userActivity}/${LocalStorage.userId}?type=story";
-    final response = await ApiService2.get(url);
-    if (response == null) {
-      ScaffoldMessenger.of(context)
-        ..clearSnackBars()
-        ..showSnackBar(SnackBar(content: Text(AppString.someThingWrong)));
-    } else {
-      final data = response.data;
-      if (response.statusCode != 200) {
+    storyLoading.value = true;
+    update();
+    try {
+      final url =
+          "${ApiEndPoint.userActivity}/${LocalStorage.userId}?type=story";
+      final response = await ApiService2.get(url);
+      if (response == null) {
         ScaffoldMessenger.of(context)
           ..clearSnackBars()
-          ..showSnackBar(SnackBar(content: Text(data['message'])));
+          ..showSnackBar(SnackBar(content: Text(AppString.someThingWrong)));
       } else {
-        final userData = UserActivityAllStory.fromJson(data['data']);
-        userStory.value = userData.userActivity;
-        update();
+        final data = response.data;
+        if (response.statusCode != 200) {
+          ScaffoldMessenger.of(context)
+            ..clearSnackBars()
+            ..showSnackBar(SnackBar(content: Text(data['message'])));
+        } else {
+          final userData = (data['data'] as List)
+              .map((e) => UserActivityStory.fromJson(e))
+              .toList();
+          userStory.value = userData;
+          update();
+        }
       }
+    } catch (e) {
+      errorLog("error in story: $e");
+    } finally {
+      storyLoading.value = false;
+      update();
     }
   }
 
   void fetchPost(BuildContext context) async {
-    final url = "${ApiEndPoint.userActivity}/${LocalStorage.userId}?type=like";
-    final response = await ApiService2.get(url);
-    if (response == null) {
-      ScaffoldMessenger.of(context)
-        ..clearSnackBars()
-        ..showSnackBar(SnackBar(content: Text(AppString.someThingWrong)));
-    } else {
-      final data = response.data;
-      if (response.statusCode != 200) {
+    likeLoading.value = true;
+    update();
+    try {
+      final url =
+          "${ApiEndPoint.userActivity}/${LocalStorage.userId}?type=like";
+      final response = await ApiService2.get(url);
+      if (response == null) {
         ScaffoldMessenger.of(context)
           ..clearSnackBars()
-          ..showSnackBar(SnackBar(content: Text(data['message'])));
+          ..showSnackBar(SnackBar(content: Text(AppString.someThingWrong)));
       } else {
-        final userData = UserActivityAllLike.fromJson(data['data']);
-        userLike.value = userData.userActivityLike;
-        update();
+        final data = response.data;
+        if (response.statusCode != 200) {
+          ScaffoldMessenger.of(context)
+            ..clearSnackBars()
+            ..showSnackBar(SnackBar(content: Text(data['message'])));
+        } else {
+          final userData = (data['data'] as List)
+              .map((e) => UserActivityLike.fromJson(e))
+              .toList();
+          userLike.value = userData;
+          update();
+        }
       }
+    } catch (e) {
+      errorLog("error in post: $e");
+    } finally {
+      likeLoading.value = false;
+      update();
     }
   }
 }

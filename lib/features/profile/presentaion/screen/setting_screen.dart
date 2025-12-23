@@ -9,9 +9,8 @@ import 'package:road_project_flutter/utils/constants/app_colors.dart';
 
 import '../controller/setting_controller.dart';
 
-
 class SettingsScreen extends StatelessWidget {
-  SettingsScreen({Key? key}) : super(key: key);
+  SettingsScreen({super.key});
 
   final SettingsController controller = Get.put(SettingsController());
 
@@ -29,7 +28,9 @@ class SettingsScreen extends StatelessWidget {
             _buildSettingItem(
               icon: Icons.receipt_long_outlined,
               title: 'Order History',
-              onTap: (){Get.toNamed(AppRoutes.orderHistoryScreen);},
+              onTap: () {
+                Get.toNamed(AppRoutes.orderHistoryScreen);
+              },
             ),
 
             _buildDivider(),
@@ -38,7 +39,8 @@ class SettingsScreen extends StatelessWidget {
             _buildSettingItem(
               icon: Icons.local_shipping_outlined,
               title: 'Shipping Information',
-              onTap: ()=>Get.toNamed(AppRoutes.shippingInformationUpdateScreen),
+              onTap: () =>
+                  Get.toNamed(AppRoutes.shippingInformationUpdateScreen),
             ),
 
             _buildDivider(),
@@ -47,7 +49,7 @@ class SettingsScreen extends StatelessWidget {
             _buildSettingItem(
               icon: Icons.lock_outline,
               title: 'Change Password',
-              onTap: ()=>Get.toNamed(AppRoutes.changePassword),
+              onTap: () => Get.toNamed(AppRoutes.changePassword),
             ),
 
             _buildDivider(),
@@ -56,7 +58,7 @@ class SettingsScreen extends StatelessWidget {
             _buildSettingItem(
               icon: Icons.info_outline,
               title: 'About us',
-              onTap: ()=>Get.toNamed(AppRoutes.aboutUsScreen),
+              onTap: () => Get.toNamed(AppRoutes.aboutUsScreen),
             ),
 
             _buildDivider(),
@@ -74,11 +76,12 @@ class SettingsScreen extends StatelessWidget {
             _buildSettingItem(
               icon: Icons.logout,
               title: 'Logout',
-              onTap: (){
+              onTap: () {
                 LogoutDialog.show(
-                    onConfirm: (){
-                  Get.offAllNamed(AppRoutes.signIn);
-                });
+                  onConfirm: () {
+                    Get.offAllNamed(AppRoutes.signIn);
+                  },
+                );
               },
             ),
 
@@ -98,29 +101,24 @@ class SettingsScreen extends StatelessWidget {
       onTap: onTap,
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 30.h),
-        decoration: BoxDecoration(
-          color: AppColors.upcolor
-        ),
+        decoration: BoxDecoration(color: AppColors.upcolor),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Row(
               children: [
-                Icon(
-                  icon,
-                  color: Colors.grey,
-                  size: 30.sp,
+                Icon(icon, color: Colors.grey, size: 30.sp),
+                SizedBox(width: 8.w),
+                CommonText(
+                  text: title,
+                  fontSize: 16.sp,
+                  fontWeight: FontWeight.w400,
+                  color: AppColors.white50,
                 ),
-                SizedBox(width: 8.w,),
-                CommonText(text: title,fontSize: 16.sp,fontWeight: FontWeight.w400,color: AppColors.white50,)
               ],
             ),
             SizedBox(width: 16.w),
-            Icon(
-              Icons.chevron_right,
-              color: Colors.white70,
-              size: 24.sp,
-            ),
+            Icon(Icons.chevron_right, color: Colors.white70, size: 24.sp),
           ],
         ),
       ),

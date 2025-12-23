@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:road_project_flutter/component/image/app_bar.dart';
-import 'package:road_project_flutter/utils/constants/app_colors.dart';
 
 class MealDetailScreen extends StatelessWidget {
-  const MealDetailScreen({Key? key}) : super(key: key);
+  const MealDetailScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -50,28 +48,32 @@ class MealDetailScreen extends StatelessWidget {
             // Step 1
             _buildStep(
               number: '1',
-              text: 'Add oats, water or milk, and salt to a pot over medium-high heat. You can also add cinnamon for extra flavor.',
+              text:
+                  'Add oats, water or milk, and salt to a pot over medium-high heat. You can also add cinnamon for extra flavor.',
             ),
             SizedBox(height: 16),
 
             // Step 2
             _buildStep(
               number: '2',
-              text: 'Bring the mixture to a low boil, then reduce the heat to a simmer.',
+              text:
+                  'Bring the mixture to a low boil, then reduce the heat to a simmer.',
             ),
             SizedBox(height: 16),
 
             // Step 3
             _buildStep(
               number: '3',
-              text: 'Cook for 5–7 minutes, stirring occasionally, until the liquid is mostly absorbed and the oats are creamy.',
+              text:
+                  'Cook for 5–7 minutes, stirring occasionally, until the liquid is mostly absorbed and the oats are creamy.',
             ),
             SizedBox(height: 16),
 
             // Step 4
             _buildStep(
               number: '4',
-              text: 'Remove from heat, stir in the maple syrup and brown sugar, and serve with your favorite toppings.',
+              text:
+                  'Remove from heat, stir in the maple syrup and brown sugar, and serve with your favorite toppings.',
             ),
           ],
         ),

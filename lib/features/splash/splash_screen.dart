@@ -49,8 +49,11 @@ class _SplashScreenState extends State<SplashScreen>
     Future.delayed(const Duration(seconds: 3), () async {
       final isLoggedIn = LocalStorage.isLogIn;
 
-      Get.offAllNamed(AppRoutes.onBoardingFirst);
-
+      if (isLoggedIn) {
+        Get.offAllNamed(AppRoutes.homeNav);
+      } else {
+        Get.offAllNamed(AppRoutes.onBoardingFirst);
+      }
       // if (isLoggedIn) {
       //   bool isValidSession = await SignInController().checkProfile();
       //   if (isValidSession) {

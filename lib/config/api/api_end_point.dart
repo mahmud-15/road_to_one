@@ -24,7 +24,7 @@ class ApiEndPoint {
   static const user = "$baseUrl/user/profile";
   static const completeOrder = "booking/complete-booking/";
   static const reset_otp = "auth/resend-otp";
-  static const notifications = "notifications";
+  static const notifications = "$baseUrl/notification";
   static const chats = "chats/my-chats";
   static const review = "review/my-ratings";
   static const messages = "messages";
@@ -33,4 +33,8 @@ class ApiEndPoint {
   static const allPost = "$baseUrl/post";
   static const allComment = "$baseUrl/post/comment";
   static const story = "$baseUrl/story";
+  static const storyUser = "$baseUrl/story/user";
+  static const toggleLike = "$baseUrl/post/like/toggle";
+  static const toggleSave = "$baseUrl/post/save/toggle";
+  static const sendRequest = "$baseUrl/network-connection";
 }

@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:road_project_flutter/config/route/app_routes.dart';
@@ -11,41 +9,47 @@ class BreakfastController extends GetxController {
     MealItem(
       id: '1',
       name: 'Oats',
-      imageUrl: 'https://images.unsplash.com/photo-1517673132405-a56a62b18caf?w=400',
+      imageUrl:
+          'https://images.unsplash.com/photo-1517673132405-a56a62b18caf?w=400',
       isLocked: false,
     ),
     MealItem(
       id: '2',
       name: 'Pancakes',
-      imageUrl: 'https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=400',
+      imageUrl:
+          'https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=400',
       isLocked: true,
     ),
     MealItem(
       id: '3',
       name: 'Eggs',
-      imageUrl: 'https://images.unsplash.com/photo-1608039829572-78524f79c4c7?w=400',
+      imageUrl:
+          'https://images.unsplash.com/photo-1608039829572-78524f79c4c7?w=400',
       isLocked: true,
     ),
     MealItem(
       id: '4',
       name: 'Smoothie',
-      imageUrl: 'https://images.unsplash.com/photo-1505252585461-04db1eb84625?w=400',
+      imageUrl:
+          'https://images.unsplash.com/photo-1505252585461-04db1eb84625?w=400',
       isLocked: true,
     ),
     MealItem(
       id: '5',
       name: 'Toast',
-      imageUrl: 'https://images.unsplash.com/photo-1525351484163-7529414344d8?w=400',
+      imageUrl:
+          'https://images.unsplash.com/photo-1525351484163-7529414344d8?w=400',
       isLocked: true,
     ),
     MealItem(
       id: '6',
       name: 'Yogurt',
-      imageUrl: 'https://images.unsplash.com/photo-1488477181946-6428a0291777?w=400',
+      imageUrl:
+          'https://images.unsplash.com/photo-1488477181946-6428a0291777?w=400',
       isLocked: true,
     ),
   ].obs;
-  String mealType="";
+  String mealType = "";
 
   @override
   void onInit() {

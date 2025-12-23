@@ -1,7 +1,6 @@
 // Path: lib/screens/store/controller/store_controller.dart
 
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
 class StoreController extends GetxController {
@@ -49,84 +48,96 @@ class StoreController extends GetxController {
         'id': '1',
         'name': 'Vintage Tee',
         'price': '45.00',
-        'image': 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400',
+        'image':
+            'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400',
         'category': 'T-shirts',
       },
       {
         'id': '2',
         'name': 'Vintage Tee',
         'price': '45.00',
-        'image': 'https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?w=400',
+        'image':
+            'https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?w=400',
         'category': 'T-shirts',
       },
       {
         'id': '3',
         'name': 'Vintage Tee',
         'price': '45.00',
-        'image': 'https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?w=400',
+        'image':
+            'https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?w=400',
         'category': 'T-shirts',
       },
       {
         'id': '4',
         'name': 'Vintage Tee',
         'price': '45.00',
-        'image': 'https://images.unsplash.com/photo-1529374255404-311a2a4f1fd9?w=400',
+        'image':
+            'https://images.unsplash.com/photo-1529374255404-311a2a4f1fd9?w=400',
         'category': 'T-shirts',
       },
       {
         'id': '5',
         'name': 'Vintage Tee',
         'price': '45.00',
-        'image': 'https://images.unsplash.com/photo-1576566588028-4147f3842f27?w=400',
+        'image':
+            'https://images.unsplash.com/photo-1576566588028-4147f3842f27?w=400',
         'category': 'T-shirts',
       },
       {
         'id': '6',
         'name': 'Vintage Tee',
         'price': '45.00',
-        'image': 'https://images.unsplash.com/photo-1622445275576-721325763afe?w=400',
+        'image':
+            'https://images.unsplash.com/photo-1622445275576-721325763afe?w=400',
         'category': 'T-shirts',
       },
       {
         'id': '7',
         'name': 'Classic Hoodie',
         'price': '65.00',
-        'image': 'https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=400',
+        'image':
+            'https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=400',
         'category': 'Hoodies',
       },
       {
         'id': '8',
         'name': 'Pullover Hoodie',
         'price': '70.00',
-        'image': 'https://images.unsplash.com/photo-1620799140188-3b2a7c2e0e27?w=400',
+        'image':
+            'https://images.unsplash.com/photo-1620799140188-3b2a7c2e0e27?w=400',
         'category': 'Hoodies',
       },
       {
         'id': '9',
         'name': 'Sport Shorts',
         'price': '35.00',
-        'image': 'https://images.unsplash.com/photo-1591195853828-11db59a44f6b?w=400',
+        'image':
+            'https://images.unsplash.com/photo-1591195853828-11db59a44f6b?w=400',
         'category': 'Shorts',
       },
       {
         'id': '10',
         'name': 'Casual Shorts',
         'price': '40.00',
-        'image': 'https://images.unsplash.com/photo-1591195524242-c8e8c675a096?w=400',
+        'image':
+            'https://images.unsplash.com/photo-1591195524242-c8e8c675a096?w=400',
         'category': 'Shorts',
       },
       {
         'id': '11',
         'name': 'Slim Fit Trousers',
         'price': '55.00',
-        'image': 'https://images.unsplash.com/photo-1624378439575-d8705ad7ae80?w=400',
+        'image':
+            'https://images.unsplash.com/photo-1624378439575-d8705ad7ae80?w=400',
         'category': 'Trousers',
       },
       {
         'id': '12',
         'name': 'Cargo Trousers',
         'price': '60.00',
-        'image': 'https://images.unsplash.com/photo-1506629082955-511b1aa562c8?w=400',
+        'image':
+            'https://images.unsplash.com/photo-1506629082955-511b1aa562c8?w=400',
         'category': 'Trousers',
       },
     ];

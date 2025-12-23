@@ -12,12 +12,12 @@ class MessageScreen extends StatelessWidget {
   final String chatAvatar;
   final bool isOnline;
 
-  MessageScreen({
-    Key? key,
+  const MessageScreen({
+    super.key,
     required this.chatName,
     required this.chatAvatar,
     this.isOnline = true,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -82,17 +82,19 @@ class MessageScreen extends StatelessWidget {
           children: [
             // Messages List
             Expanded(
-              child: Obx(() => ListView.builder(
-                reverse: true,
-                padding: EdgeInsets.all(16.w),
-                itemCount: controller.messages.length,
-                itemBuilder: (context, index) {
-                  final message = controller.messages[index];
-                  return _buildMessageBubble(message, chatAvatar);
-                },
-              )),
+              child: Obx(
+                () => ListView.builder(
+                  reverse: true,
+                  padding: EdgeInsets.all(16.w),
+                  itemCount: controller.messages.length,
+                  itemBuilder: (context, index) {
+                    final message = controller.messages[index];
+                    return _buildMessageBubble(message, chatAvatar);
+                  },
+                ),
+              ),
             ),
-      
+
             // Message Input
             Container(
               padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
@@ -126,7 +128,7 @@ class MessageScreen extends StatelessWidget {
                     ),
                   ),
                   SizedBox(width: 12.w),
-      
+
                   // Text Input
                   Expanded(
                     child: TextField(
@@ -134,14 +136,20 @@ class MessageScreen extends StatelessWidget {
                       style: TextStyle(color: Colors.white, fontSize: 14.sp),
                       decoration: InputDecoration(
                         hintText: 'Type a message',
-                        hintStyle: TextStyle(color: Colors.grey[600], fontSize: 14.sp),
+                        hintStyle: TextStyle(
+                          color: Colors.grey[600],
+                          fontSize: 14.sp,
+                        ),
                         filled: true,
                         fillColor: Color(0xFF2A2A2A),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(25.r),
                           borderSide: BorderSide.none,
                         ),
-                        contentPadding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
+                        contentPadding: EdgeInsets.symmetric(
+                          horizontal: 20.w,
+                          vertical: 10.h,
+                        ),
                       ),
                       maxLines: null,
                       textInputAction: TextInputAction.send,
@@ -149,7 +157,7 @@ class MessageScreen extends StatelessWidget {
                     ),
                   ),
                   SizedBox(width: 12.w),
-      
+
                   // Send Button
                   GestureDetector(
                     onTap: controller.sendMessage,
@@ -160,11 +168,7 @@ class MessageScreen extends StatelessWidget {
                         color: AppColors.primaryColor,
                         shape: BoxShape.circle,
                       ),
-                      child: Icon(
-                        Icons.send,
-                        color: Colors.black,
-                        size: 20.sp,
-                      ),
+                      child: Icon(Icons.send, color: Colors.black, size: 20.sp),
                     ),
                   ),
                 ],
@@ -180,8 +184,9 @@ class MessageScreen extends StatelessWidget {
     return Padding(
       padding: EdgeInsets.only(bottom: 16.h),
       child: Row(
-        mainAxisAlignment:
-        message.isSentByMe ? MainAxisAlignment.end : MainAxisAlignment.start,
+        mainAxisAlignment: message.isSentByMe
+            ? MainAxisAlignment.end
+            : MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           // Avatar for received messages
@@ -202,7 +207,10 @@ class MessageScreen extends StatelessWidget {
                   : CrossAxisAlignment.start,
               children: [
                 Container(
-                  padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 16.w,
+                    vertical: 12.h,
+                  ),
                   decoration: BoxDecoration(
                     color: message.isSentByMe
                         ? Color(0xFF7C9631)
@@ -210,27 +218,31 @@ class MessageScreen extends StatelessWidget {
                     borderRadius: BorderRadius.only(
                       topLeft: Radius.circular(16.r),
                       topRight: Radius.circular(16.r),
-                      bottomLeft: message.isSentByMe ? Radius.circular(16.r) : Radius.zero,
-                      bottomRight: message.isSentByMe ? Radius.zero : Radius.circular(16.r),
+                      bottomLeft: message.isSentByMe
+                          ? Radius.circular(16.r)
+                          : Radius.zero,
+                      bottomRight: message.isSentByMe
+                          ? Radius.zero
+                          : Radius.circular(16.r),
                     ),
                   ),
                   child: message.imageUrl != null
                       ? ClipRRect(
-                    borderRadius: BorderRadius.circular(8.r),
-                    child: Image.file(
-                      File(message.imageUrl!),
-                      width: 200.w,
-                      fit: BoxFit.cover,
-                    ),
-                  )
+                          borderRadius: BorderRadius.circular(8.r),
+                          child: Image.file(
+                            File(message.imageUrl!),
+                            width: 200.w,
+                            fit: BoxFit.cover,
+                          ),
+                        )
                       : Text(
-                    message.text,
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 14.sp,
-                      height: 1.4,
-                    ),
-                  ),
+                          message.text,
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 14.sp,
+                            height: 1.4,
+                          ),
+                        ),
                 ),
                 SizedBox(height: 4.h),
                 Row(

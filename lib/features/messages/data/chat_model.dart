@@ -1,5 +1,3 @@
-import 'package:get/get.dart';
-
 class ChatMessage {
   final String id;
   final String name;

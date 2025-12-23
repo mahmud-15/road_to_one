@@ -1,17 +1,12 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
-import '../../data/model/progress_model.dart';
 
 class ProgressData {
   int workouts;
   List<PictureItem> pictures;
 
-  ProgressData({
-    required this.workouts,
-    required this.pictures,
-  });
+  ProgressData({required this.workouts, required this.pictures});
 }
 
 class PictureItem {
@@ -19,11 +14,8 @@ class PictureItem {
   String caption;
   DateTime dateAdded;
 
-  PictureItem({
-    required this.imageUrl,
-    this.caption = '',
-    DateTime? dateAdded,
-  }) : dateAdded = dateAdded ?? DateTime.now();
+  PictureItem({required this.imageUrl, this.caption = '', DateTime? dateAdded})
+    : dateAdded = dateAdded ?? DateTime.now();
 
   Map<String, dynamic> toJson() => {
     'imageUrl': imageUrl,
@@ -37,6 +29,7 @@ class PictureItem {
     dateAdded: DateTime.parse(json['dateAdded']),
   );
 }
+
 class MyProgressController extends GetxController {
   final ImagePicker _imagePicker = ImagePicker();
 
@@ -52,42 +45,61 @@ class MyProgressController extends GetxController {
 
   // All data for different time periods
   final Map<int, ProgressData> _progressData = {
-    0: ProgressData(workouts: 4, pictures: [
-      PictureItem(
-        imageUrl: 'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=400',
-        caption: 'Morning workout',
-      ),
-      PictureItem(
-        imageUrl: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=400',
-        caption: 'Gym session',
-      ),
-    ]),
-    1: ProgressData(workouts: 20, pictures: [
-      PictureItem(
-        imageUrl: 'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=400',
-        caption: 'Week 1 progress',
-      ),
-      PictureItem(
-        imageUrl: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=400',
-        caption: 'Cardio day',
-      ),
-      PictureItem(
-        imageUrl: 'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=400',
-        caption: 'Strength training',
-      ),
-    ]),
-    2: ProgressData(workouts: 156, pictures: [
-      PictureItem(
-        imageUrl: 'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=400',
-        caption: 'Year progress',
-      ),
-    ]),
-    3: ProgressData(workouts: 325, pictures: [
-      PictureItem(
-        imageUrl: 'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=400',
-        caption: 'Total journey',
-      ),
-    ]),
+    0: ProgressData(
+      workouts: 4,
+      pictures: [
+        PictureItem(
+          imageUrl:
+              'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=400',
+          caption: 'Morning workout',
+        ),
+        PictureItem(
+          imageUrl:
+              'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=400',
+          caption: 'Gym session',
+        ),
+      ],
+    ),
+    1: ProgressData(
+      workouts: 20,
+      pictures: [
+        PictureItem(
+          imageUrl:
+              'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=400',
+          caption: 'Week 1 progress',
+        ),
+        PictureItem(
+          imageUrl:
+              'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=400',
+          caption: 'Cardio day',
+        ),
+        PictureItem(
+          imageUrl:
+              'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=400',
+          caption: 'Strength training',
+        ),
+      ],
+    ),
+    2: ProgressData(
+      workouts: 156,
+      pictures: [
+        PictureItem(
+          imageUrl:
+              'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=400',
+          caption: 'Year progress',
+        ),
+      ],
+    ),
+    3: ProgressData(
+      workouts: 325,
+      pictures: [
+        PictureItem(
+          imageUrl:
+              'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=400',
+          caption: 'Total journey',
+        ),
+      ],
+    ),
   };
 
   @override
@@ -138,10 +150,7 @@ class MyProgressController extends GetxController {
     Get.dialog(
       AlertDialog(
         backgroundColor: const Color(0xFF2d2d2d),
-        title: const Text(
-          'Add Caption',
-          style: TextStyle(color: Colors.white),
-        ),
+        title: const Text('Add Caption', style: TextStyle(color: Colors.white)),
         content: TextField(
           controller: captionController,
           style: const TextStyle(color: Colors.white),
@@ -166,10 +175,7 @@ class MyProgressController extends GetxController {
         actions: [
           TextButton(
             onPressed: () => Get.back(),
-            child: Text(
-              'Cancel',
-              style: TextStyle(color: Colors.grey[400]),
-            ),
+            child: Text('Cancel', style: TextStyle(color: Colors.grey[400])),
           ),
           TextButton(
             onPressed: () {
@@ -238,10 +244,7 @@ class MyProgressController extends GetxController {
           actions: [
             TextButton(
               onPressed: () => Get.back(),
-              child: Text(
-                'Cancel',
-                style: TextStyle(color: Colors.grey[400]),
-              ),
+              child: Text('Cancel', style: TextStyle(color: Colors.grey[400])),
             ),
             TextButton(
               onPressed: () {
@@ -286,10 +289,5 @@ class MyProgressController extends GetxController {
         snackPosition: SnackPosition.BOTTOM,
       );
     }
-  }
-
-  @override
-  void onClose() {
-    super.onClose();
   }
 }

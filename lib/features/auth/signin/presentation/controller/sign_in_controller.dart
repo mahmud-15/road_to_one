@@ -1,5 +1,3 @@
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:road_project_flutter/utils/constants/app_string.dart';
@@ -49,12 +47,17 @@ class SignInController extends GetxController {
           ..showSnackBar(SnackBar(content: Text(data['message'])));
         LocalStorage.token = data['data']['accessToken'];
         LocalStorage.userId = data['data']['userInfo']['_id'];
+        LocalStorage.profileImage = data['data']['userInfo']['profileImage'];
 
         if (isRememberMe) {
           LocalStorage.setString(LocalStorageKeys.token, LocalStorage.token);
           LocalStorage.isLogIn = true;
           LocalStorage.setBool(LocalStorageKeys.isLogIn, LocalStorage.isLogIn);
           LocalStorage.setString(LocalStorageKeys.userId, LocalStorage.userId);
+          LocalStorage.setString(
+            LocalStorageKeys.profileImage,
+            LocalStorage.profileImage,
+          );
         }
         // profile data need to be used later
         Get.offAllNamed(AppRoutes.homeNav);

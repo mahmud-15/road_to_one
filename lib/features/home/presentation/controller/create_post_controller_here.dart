@@ -18,7 +18,6 @@ class CreatePostController extends GetxController {
   void createPost() {
     if (selectedImage.value != null && captionController.text.isNotEmpty) {
       // Handle post creation
-      Get.snackbar('Success', 'Post created successfully');
     } else {
       Get.snackbar('Error', 'Please add image and caption');
     }

@@ -8,7 +8,7 @@ import '../../data/network_status.dart';
 import '../controller/network_controller.dart';
 
 class NetworkScreen extends StatelessWidget {
-  NetworkScreen({Key? key}) : super(key: key);
+  NetworkScreen({super.key});
 
   final NetworkController controller = Get.put(NetworkController());
 
@@ -33,9 +33,16 @@ class NetworkScreen extends StatelessWidget {
                 style: TextStyle(color: Colors.white, fontSize: 14.sp),
                 decoration: InputDecoration(
                   hintText: 'Search',
-                  hintStyle: TextStyle(color: Colors.grey[600], fontSize: 14.sp),
+                  hintStyle: TextStyle(
+                    color: Colors.grey[600],
+                    fontSize: 14.sp,
+                  ),
                   border: InputBorder.none,
-                  icon: Icon(Icons.search, color: Colors.grey[600], size: 20.sp),
+                  icon: Icon(
+                    Icons.search,
+                    color: Colors.grey[600],
+                    size: 20.sp,
+                  ),
                 ),
                 onChanged: (value) {
                   // Implement search functionality
@@ -46,13 +53,15 @@ class NetworkScreen extends StatelessWidget {
 
           // Users List
           Expanded(
-            child: Obx(() => ListView.builder(
-              itemCount: controller.users.length,
-              itemBuilder: (context, index) {
-                final user = controller.users[index];
-                return _buildNetworkItem(user, index);
-              },
-            )),
+            child: Obx(
+              () => ListView.builder(
+                itemCount: controller.users.length,
+                itemBuilder: (context, index) {
+                  final user = controller.users[index];
+                  return _buildNetworkItem(user, index);
+                },
+              ),
+            ),
           ),
         ],
       ),
@@ -87,10 +96,7 @@ class NetworkScreen extends StatelessWidget {
                 ),
                 Text(
                   user.role,
-                  style: TextStyle(
-                    color: Colors.grey[500],
-                    fontSize: 12.sp,
-                  ),
+                  style: TextStyle(color: Colors.grey[500], fontSize: 12.sp),
                 ),
               ],
             ),
@@ -164,7 +170,11 @@ class NetworkScreen extends StatelessWidget {
             // More Options
             GestureDetector(
               onTap: () => _showFollowingOptions(user, index),
-              child: Icon(Icons.more_vert, color: Colors.grey[400], size: 24.sp),
+              child: Icon(
+                Icons.more_vert,
+                color: Colors.grey[400],
+                size: 24.sp,
+              ),
             ),
           ],
         );
@@ -175,7 +185,11 @@ class NetworkScreen extends StatelessWidget {
             // Message Button with Icon
             ElevatedButton.icon(
               onPressed: () => controller.openMessage(user),
-              icon: Icon(Icons.chat_bubble_outline, color: Colors.white, size: 16.sp),
+              icon: Icon(
+                Icons.chat_bubble_outline,
+                color: Colors.white,
+                size: 16.sp,
+              ),
               label: Text(
                 'Message',
                 style: TextStyle(
@@ -197,7 +211,11 @@ class NetworkScreen extends StatelessWidget {
             // More Options
             GestureDetector(
               onTap: () => _showConnectedOptions(user, index),
-              child: Icon(Icons.more_vert, color: Colors.grey[400], size: 24.sp),
+              child: Icon(
+                Icons.more_vert,
+                color: Colors.grey[400],
+                size: 24.sp,
+              ),
             ),
           ],
         );

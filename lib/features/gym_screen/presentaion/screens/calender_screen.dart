@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:intl/intl.dart';
 import 'package:road_project_flutter/component/image/app_bar.dart';
 
 import '../../data/model/calender_model.dart';
 import '../controller/calender_controller.dart';
 
 class CalendarScreen extends StatelessWidget {
-  const CalendarScreen({Key? key}) : super(key: key);
+  const CalendarScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -17,7 +16,7 @@ class CalendarScreen extends StatelessWidget {
       builder: (controller) {
         return Scaffold(
           backgroundColor: const Color(0xFF1a1a1a),
-          appBar: AppBarNew(title: "Calender",),
+          appBar: AppBarNew(title: "Calender"),
           body: SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -102,11 +101,7 @@ class CalendarScreen extends StatelessWidget {
               ),
             ),
             SizedBox(width: 4.w),
-            Icon(
-              Icons.keyboard_arrow_down,
-              color: Colors.white,
-              size: 16.sp,
-            ),
+            Icon(Icons.keyboard_arrow_down, color: Colors.white, size: 16.sp),
           ],
         ),
       ),
@@ -172,7 +167,7 @@ class CalendarScreen extends StatelessWidget {
                 }).toList(),
               ),
             );
-          }).toList(),
+          }),
         ],
       ),
     );
@@ -200,10 +195,7 @@ class CalendarScreen extends StatelessWidget {
       child: Container(
         width: 32.w,
         height: 32.w,
-        decoration: BoxDecoration(
-          color: bgColor,
-          shape: BoxShape.circle,
-        ),
+        decoration: BoxDecoration(color: bgColor, shape: BoxShape.circle),
         child: Center(
           child: Text(
             day.day.toString(),
@@ -229,7 +221,7 @@ class CalendarScreen extends StatelessWidget {
               dayData['date']!,
               dayData['task']!,
               dayData['isChecked'] as bool,
-                  () => controller.toggleTask(dayData['day']!),
+              () => controller.toggleTask(dayData['day']!),
             ),
           );
         }).toList(),
@@ -238,12 +230,12 @@ class CalendarScreen extends StatelessWidget {
   }
 
   Widget _buildDayTask(
-      String day,
-      String date,
-      String task,
-      bool isChecked,
-      VoidCallback onTap,
-      ) {
+    String day,
+    String date,
+    String task,
+    bool isChecked,
+    VoidCallback onTap,
+  ) {
     return Column(
       children: [
         Text(
@@ -268,11 +260,7 @@ class CalendarScreen extends StatelessWidget {
               borderRadius: BorderRadius.circular(4.r),
             ),
             child: isChecked
-                ? Icon(
-              Icons.check,
-              color: const Color(0xFFb4ff39),
-              size: 20.sp,
-            )
+                ? Icon(Icons.check, color: const Color(0xFFb4ff39), size: 20.sp)
                 : null,
           ),
         ),

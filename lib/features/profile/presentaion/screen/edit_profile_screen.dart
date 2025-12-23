@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
 import 'package:road_project_flutter/component/image/app_bar.dart';
+import 'package:road_project_flutter/config/api/api_end_point.dart';
 import 'package:road_project_flutter/utils/constants/app_colors.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:road_project_flutter/utils/constants/app_string.dart';
 import 'dart:io';
 
 import '../../../../component/text/common_text.dart';
@@ -16,26 +19,18 @@ class EditProfileScreen extends StatefulWidget {
 }
 
 class _EditProfileScreenState extends State<EditProfileScreen> {
-  late EditProfileController controller;
   final ImagePicker _imagePicker = ImagePicker();
   List<String> interests = ['Socializing', 'Travelling', 'Adventure'];
   TextEditingController newInterestController = TextEditingController();
 
   @override
-  void initState() {
-    super.initState();
-    controller = EditProfileController();
-  }
-
-  @override
   void dispose() {
-    controller.dispose();
     newInterestController.dispose();
     super.dispose();
   }
 
   // Pick image from gallery or camera
-  Future<void> _pickImage() async {
+  Future<void> _pickImage(EditProfileController controller) async {
     showModalBottomSheet(
       context: context,
       backgroundColor: const Color(0xFF2d2d2d),
@@ -68,9 +63,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   source: ImageSource.camera,
                 );
                 if (image != null) {
-                  setState(() {
-                    controller.updateProfileImage(File(image.path));
-                  });
+                  controller.updateProfileImage(File(image.path));
                 }
               },
             ),
@@ -86,9 +79,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   source: ImageSource.gallery,
                 );
                 if (image != null) {
-                  setState(() {
-                    controller.updateProfileImage(File(image.path));
-                  });
+                  controller.updateProfileImage(File(image.path));
                 }
               },
             ),
@@ -100,9 +91,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   style: TextStyle(color: Colors.red),
                 ),
                 onTap: () {
-                  setState(() {
-                    controller.removeProfileImage();
-                  });
+                  controller.removeProfileImage();
+
                   Navigator.pop(context);
                 },
               ),
@@ -118,181 +108,192 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       backgroundColor: AppColors.upcolor,
       appBar: AppBarNew(title: "Edit Profile"),
       body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(height: 20, color: AppColors.backgroudColor),
-            // Upload Photo Section
-            Padding(
-              padding: EdgeInsets.all(20),
-              child: CommonText(
-                text: "Upload Photo",
-                fontSize: 16.sp,
-                fontWeight: FontWeight.w400,
-                color: AppColors.white50,
+        child: GetBuilder(
+          init: EditProfileController(),
+          builder: (controller) => Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(height: 20, color: AppColors.backgroudColor),
+              // Upload Photo Section
+              Padding(
+                padding: EdgeInsets.all(20),
+                child: CommonText(
+                  text: "Upload Photo",
+                  fontSize: 16.sp,
+                  fontWeight: FontWeight.w400,
+                  color: AppColors.white50,
+                ),
               ),
-            ),
-            Center(
-              child: Padding(
-                padding: const EdgeInsets.only(bottom: 20),
-                child: GestureDetector(
-                  onTap: _pickImage,
-                  child: Stack(
-                    children: [
-                      Container(
-                        width: 120,
-                        height: 120,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Colors.grey[800],
-                        ),
-                        child: ClipOval(
-                          child: controller.selectedProfileImage != null
-                              ? Image.file(
-                                  controller.selectedProfileImage!,
-                                  fit: BoxFit.cover,
-                                  width: 120,
-                                  height: 120,
-                                )
-                              : Image.network(
-                                  controller.profileImageUrl,
-                                  fit: BoxFit.cover,
-                                  width: 120,
-                                  height: 120,
-                                  errorBuilder: (context, error, stackTrace) {
-                                    return Icon(
-                                      Icons.person,
-                                      size: 60,
-                                      color: Colors.grey[600],
-                                    );
-                                  },
-                                ),
-                        ),
-                      ),
-                      Positioned(
-                        bottom: 0,
-                        right: 0,
-                        child: Container(
-                          padding: const EdgeInsets.all(8),
+              Center(
+                child: Padding(
+                  padding: const EdgeInsets.only(bottom: 20),
+                  child: GestureDetector(
+                    onTap: () => _pickImage(controller),
+                    child: Stack(
+                      children: [
+                        Container(
+                          width: 120,
+                          height: 120,
                           decoration: BoxDecoration(
-                            color: Colors.white,
                             shape: BoxShape.circle,
-                            border: Border.all(
-                              color: AppColors.upcolor,
-                              width: 3,
+                            color: Colors.grey[800],
+                          ),
+                          child: ClipOval(
+                            child: controller.selectedProfileImage != null
+                                ? Image.file(
+                                    controller.selectedProfileImage!,
+                                    fit: BoxFit.cover,
+                                    width: 120,
+                                    height: 120,
+                                  )
+                                : Image.network(
+                                    ApiEndPoint.imageUrl +
+                                        controller.user.value!.image,
+                                    fit: BoxFit.cover,
+                                    width: 120,
+                                    height: 120,
+                                    errorBuilder: (context, error, stackTrace) {
+                                      return Image.network(
+                                        AppString.defaultProfilePic,
+                                        fit: BoxFit.cover,
+                                        width: 120,
+                                        height: 120,
+                                      );
+                                    },
+                                  ),
+                          ),
+                        ),
+                        Positioned(
+                          bottom: 0,
+                          right: 0,
+                          child: Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: AppColors.upcolor,
+                                width: 3,
+                              ),
+                            ),
+                            child: const Icon(
+                              Icons.camera_alt,
+                              color: Colors.black,
+                              size: 20,
                             ),
                           ),
-                          child: const Icon(
-                            Icons.camera_alt,
-                            color: Colors.black,
-                            size: 20,
-                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ),
-            ),
-            Container(height: 20, color: AppColors.backgroudColor),
+              Container(height: 20, color: AppColors.backgroudColor),
 
-            // About Me Section
-            _buildSectionHeader('About me', () => _showAboutMeDialog()),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  CommonText(
-                    text: "Update short description about your self",
-                    fontSize: 12.sp,
-                    fontWeight: FontWeight.w400,
-                    color: AppColors.white700,
-                  ),
-                  SizedBox(height: 12.h),
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: Colors.grey[900],
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: CommonText(
-                      text: controller.aboutMe,
+              // About Me Section
+              _buildSectionHeader(
+                'About me',
+                () => _showAboutMeDialog(controller),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    CommonText(
+                      text: "Update short description about your self",
                       fontSize: 12.sp,
                       fontWeight: FontWeight.w400,
-                      textAlign: TextAlign.left,
                       color: AppColors.white700,
-                      maxLines: 8,
                     ),
-                  ),
-                ],
+                    SizedBox(height: 12.h),
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.grey[900],
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: CommonText(
+                        text: controller.user.value?.about ?? "",
+                        fontSize: 12.sp,
+                        fontWeight: FontWeight.w400,
+                        textAlign: TextAlign.left,
+                        color: AppColors.white700,
+                        maxLines: 8,
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-            SizedBox(height: 24.h),
+              SizedBox(height: 24.h),
 
-            // Details Section
-            _buildSectionHeader('Details', () => _showDetailsDialog()),
-            SizedBox(height: 14.h),
-            _buildDetailItem(
-              'User Name',
-              controller.userName,
-              controller.userNameController,
-            ),
-            SizedBox(height: 8.h),
-            _buildDetailItem(
-              'E-mail',
-              controller.email,
-              controller.emailController,
-            ),
-            SizedBox(height: 8.h),
-            _buildDetailItem(
-              'Contact no',
-              controller.contactNo,
-              controller.contactNoController,
-            ),
-            SizedBox(height: 8.h),
-            _buildDetailItem(
-              'Location',
-              controller.location,
-              controller.locationController,
-            ),
-            SizedBox(height: 8.h),
-            _buildDetailItem(
-              'Occupations',
-              controller.occupation,
-              controller.occupationController,
-            ),
-            SizedBox(height: 8.h),
-            _buildDetailItem(
-              'Dream Job',
-              controller.dreamJob,
-              controller.dreamJobController,
-            ),
-            SizedBox(height: 8.h),
-            _buildDetailItem(
-              'Education',
-              controller.education,
-              controller.educationController,
-            ),
-            SizedBox(height: 24.h),
-
-            // Interested In Section
-            _buildSectionHeader(
-              'Interested in',
-              () => _showInterestedInDialog(),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: CommonText(
-                text: controller.interestedIn,
-                fontSize: 12.sp,
-                fontWeight: FontWeight.w400,
-                color: AppColors.white700,
+              // Details Section
+              _buildSectionHeader(
+                'Details',
+                () => _showDetailsDialog(controller),
               ),
-            ),
-            SizedBox(height: 32),
-          ],
+              SizedBox(height: 14.h),
+              _buildDetailItem(
+                'User Name',
+                controller.user.value?.name ?? "N/A",
+                controller.userNameController,
+              ),
+              SizedBox(height: 8.h),
+              _buildDetailItem(
+                'E-mail',
+                controller.user.value?.email ?? "N/A",
+                controller.emailController,
+              ),
+              SizedBox(height: 8.h),
+              _buildDetailItem(
+                'Contact no',
+                controller.user.value?.mobile ?? "N/A",
+                controller.contactNoController,
+              ),
+              SizedBox(height: 8.h),
+              _buildDetailItem(
+                'Location',
+                controller.user.value?.location ?? "N/A",
+                controller.locationController,
+              ),
+              SizedBox(height: 8.h),
+              _buildDetailItem(
+                'Occupations',
+                controller.user.value?.occupation ?? "N/A",
+                controller.occupationController,
+              ),
+              SizedBox(height: 8.h),
+              _buildDetailItem(
+                'Dream Job',
+                controller.user.value?.dreamJob ?? "N/A",
+                controller.dreamJobController,
+              ),
+              SizedBox(height: 8.h),
+              _buildDetailItem(
+                'Education',
+                controller.user.value?.education ?? "N/A",
+                controller.educationController,
+              ),
+              SizedBox(height: 24.h),
+
+              // Interested In Section
+              _buildSectionHeader(
+                'Interested in',
+                () => _showInterestedInDialog(controller),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: CommonText(
+                  text: controller.interestedIn,
+                  fontSize: 12.sp,
+                  fontWeight: FontWeight.w400,
+                  color: AppColors.white700,
+                ),
+              ),
+              SizedBox(height: 32),
+            ],
+          ),
         ),
       ),
     );
@@ -360,7 +361,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   }
 
   // About Me Dialog
-  void _showAboutMeDialog() {
+  void _showAboutMeDialog(EditProfileController controller) {
     showDialog(
       context: context,
       builder: (context) => Dialog(
@@ -416,10 +417,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 height: 48,
                 child: ElevatedButton(
                   onPressed: () {
-                    setState(() {
-                      controller.aboutMe = controller.aboutMeController.text;
-                    });
-                    Navigator.pop(context);
+                    controller.updateAboutMe(context);
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFFb4ff39),
@@ -445,7 +443,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   }
 
   // Details Dialog
-  void _showDetailsDialog() {
+  void _showDetailsDialog(EditProfileController controller) {
     showDialog(
       context: context,
       builder: (context) => Dialog(
@@ -563,7 +561,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   }
 
   // Interested In Dialog
-  void _showInterestedInDialog() {
+  void _showInterestedInDialog(EditProfileController controller) {
     showDialog(
       context: context,
       builder: (context) => StatefulBuilder(

@@ -194,17 +194,15 @@ class _SignInScreenState extends State<SignInScreen> {
                             Theme(
                               data: ThemeData(
                                 checkboxTheme: CheckboxThemeData(
-                                  fillColor: MaterialStateProperty.resolveWith((
+                                  fillColor: WidgetStateProperty.resolveWith((
                                     states,
                                   ) {
-                                    if (states.contains(
-                                      MaterialState.selected,
-                                    )) {
+                                    if (states.contains(WidgetState.selected)) {
                                       return Colors.transparent;
                                     }
                                     return Colors.transparent;
                                   }),
-                                  checkColor: MaterialStateProperty.all(
+                                  checkColor: WidgetStateProperty.all(
                                     Color(0xFFD4FF00),
                                   ),
                                   side: BorderSide(

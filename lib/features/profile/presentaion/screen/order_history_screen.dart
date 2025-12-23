@@ -7,9 +7,8 @@ import 'package:road_project_flutter/utils/constants/app_colors.dart';
 import '../controller/order_history_controller.dart';
 import '../../data/order_model.dart';
 
-
 class OrderHistoryScreen extends StatelessWidget {
-  OrderHistoryScreen({Key? key}) : super(key: key);
+  OrderHistoryScreen({super.key});
 
   final OrderHistoryController controller = Get.put(OrderHistoryController());
 
@@ -21,23 +20,25 @@ class OrderHistoryScreen extends StatelessWidget {
       body: Column(
         children: [
           SizedBox(height: 12.h),
-          Obx(() => controller.orders.isEmpty
-              ? _buildEmptyState()
-              : Expanded(
-                child: ListView.separated(
-                            padding: EdgeInsets.symmetric(vertical: 16.h),
-                            itemCount: controller.orders.length,
-                            separatorBuilder: (context, index) => Divider(
-                color: Colors.white.withOpacity(0.05),
-                height: 1,
-                thickness: 1,
-                            ),
-                            itemBuilder: (context, index) {
-                final order = controller.orders[index];
-                return _buildOrderItem(order);
-                            },
-                          ),
-              )),
+          Obx(
+            () => controller.orders.isEmpty
+                ? _buildEmptyState()
+                : Expanded(
+                    child: ListView.separated(
+                      padding: EdgeInsets.symmetric(vertical: 16.h),
+                      itemCount: controller.orders.length,
+                      separatorBuilder: (context, index) => Divider(
+                        color: Colors.white.withOpacity(0.05),
+                        height: 1,
+                        thickness: 1,
+                      ),
+                      itemBuilder: (context, index) {
+                        final order = controller.orders[index];
+                        return _buildOrderItem(order);
+                      },
+                    ),
+                  ),
+          ),
         ],
       ),
     );
@@ -112,15 +113,12 @@ class OrderHistoryScreen extends StatelessWidget {
                 // Date
                 Text(
                   order.date,
-                  style: TextStyle(
-                    color: Colors.grey[600],
-                    fontSize: 12.sp,
-                  ),
+                  style: TextStyle(color: Colors.grey[600], fontSize: 12.sp),
                 ),
               ],
             ),
           ),
-          SizedBox(height: 12.h,)
+          SizedBox(height: 12.h),
         ],
       ),
     );
@@ -148,10 +146,7 @@ class OrderHistoryScreen extends StatelessWidget {
           SizedBox(height: 8.h),
           Text(
             'Your order history will appear here',
-            style: TextStyle(
-              color: Colors.grey[600],
-              fontSize: 14.sp,
-            ),
+            style: TextStyle(color: Colors.grey[600], fontSize: 14.sp),
           ),
         ],
       ),
