@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:road_project_flutter/component/text/common_text.dart';
 import 'package:road_project_flutter/utils/constants/app_colors.dart';
 
 import '../../../../component/image/app_bar.dart';
@@ -17,19 +16,38 @@ class BreakfastScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppColors.backgroudColor,
       appBar: AppBarNew(title: controller.mealType),
-      body: Obx(() => GridView.builder(
-        padding: EdgeInsets.all(16.w),
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
-          crossAxisSpacing: 16.w,
-          mainAxisSpacing: 16.h,
-          childAspectRatio: 0.85,
-        ),
-        itemCount: controller.meals.length,
-        itemBuilder: (context, index) {
-          return _buildMealItem(index);
-        },
-      )),
+      body: Obx(() {
+        if (controller.isLoading.value) {
+          return const Center(
+            child: CircularProgressIndicator(
+              color: Color(0xFFb4ff39),
+            ),
+          );
+        }
+
+        if (controller.meals.isEmpty) {
+          return const Center(
+            child: Text(
+              'No meals found',
+              style: TextStyle(color: Colors.white),
+            ),
+          );
+        }
+
+        return GridView.builder(
+          padding: EdgeInsets.all(16.w),
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,
+            crossAxisSpacing: 16.w,
+            mainAxisSpacing: 16.h,
+            childAspectRatio: 0.85,
+          ),
+          itemCount: controller.meals.length,
+          itemBuilder: (context, index) {
+            return _buildMealItem(index);
+          },
+        );
+      }),
     );
   }
 

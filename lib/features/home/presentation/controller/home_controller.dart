@@ -4,7 +4,6 @@ import 'package:road_project_flutter/config/api/api_end_point.dart';
 import 'package:road_project_flutter/config/route/app_routes.dart';
 import 'package:road_project_flutter/services/api/api_service.dart';
 import 'package:road_project_flutter/utils/constants/app_string.dart';
-import 'package:road_project_flutter/utils/log/app_log.dart';
 import 'package:road_project_flutter/utils/log/error_log.dart';
 import 'dart:async';
 
@@ -124,7 +123,9 @@ class HomeController extends GetxController {
       }
     } catch (e) {
       errorLog("Load posts failed: $e");
-      Get.offAllNamed(AppRoutes.signIn);
+      ScaffoldMessenger.of(context)
+        ..clearSnackBars()
+        ..showSnackBar(SnackBar(content: Text(AppString.someThingWrong)));
     } finally {
       postLoading.value = false;
       update();
@@ -159,7 +160,9 @@ class HomeController extends GetxController {
       }
     } catch (e) {
       errorLog("Load comments failed: $e");
-      Get.offAllNamed(AppRoutes.signIn);
+      ScaffoldMessenger.of(context)
+        ..clearSnackBars()
+        ..showSnackBar(SnackBar(content: Text(AppString.someThingWrong)));
     } finally {
       commentLoading.value = false;
       update();

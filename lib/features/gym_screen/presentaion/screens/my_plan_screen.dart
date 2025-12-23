@@ -17,25 +17,29 @@ class MyPlanScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppColors.backgroudColor,
       appBar: AppBarNew(title: "My Plan"),
-      body: Obx(() => ListView.builder(
-        padding: EdgeInsets.only(top: 20,bottom: 10),
-        itemCount: controller.plans.length,
-        itemBuilder: (context, index) {
-          final plan = controller.plans[index];
-          return _buildPlanItem(plan);
-        },
-      )),
+      body: Obx(() {
+        if (controller.isLoading.value) {
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
+        }
+
+        return ListView.builder(
+          padding: EdgeInsets.only(top: 20, bottom: 10),
+          itemCount: controller.plans.length,
+          itemBuilder: (context, index) {
+            final plan = controller.plans[index];
+            return _buildPlanItem(plan);
+          },
+        );
+      }),
     );
   }
 
   Widget _buildPlanItem(PlanModel plan) {
     return GestureDetector(
       onTap: () {
-        if (!plan.isLocked.value) {
-          controller.openPlan(plan);
-        } else {
-          controller.showLockedMessage();
-        }
+        controller.onPlanTap(plan);
       },
       child: Obx(() => Container(
         margin: EdgeInsets.only(bottom: 16.h),

@@ -1,7 +1,5 @@
-import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../../config/route/app_routes.dart';
 import '../../utils/log/app_log.dart';
 import 'storage_keys.dart';
 

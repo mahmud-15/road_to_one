@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:flutter_html/flutter_html.dart';
 import 'package:road_project_flutter/component/image/app_bar.dart';
 import 'package:road_project_flutter/utils/constants/app_colors.dart';
 
@@ -68,63 +69,67 @@ class PlanDetailScreen extends StatelessWidget {
               // Plan Description
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: 16.w),
-                child: Text(
-                  plan.description,
-                  style: TextStyle(
-                    color: Colors.grey[400],
-                    fontSize: 14.sp,
-                    height: 1.5,
-                  ),
+                child: Html(
+                  data: plan.description,
+                  style: {
+                    'body': Style(
+                      margin: Margins.zero,
+                      padding: HtmlPaddings.zero,
+                      color: Colors.grey[400],
+                      fontSize: FontSize(14.sp),
+                      lineHeight: const LineHeight(1.5),
+                    ),
+                  },
                 ),
               ),
               SizedBox(height: 24.h),
 
-              // Benefits Section
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: 16.w),
-                child: Text(
-                  'Benefits',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 18.sp,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ),
-              SizedBox(height: 12.h),
+              // // Benefits Section
+              // Padding(
+              //   padding: EdgeInsets.symmetric(horizontal: 16.w),
+              //   child: Text(
+              //     'Benefits',
+              //     style: TextStyle(
+              //       color: Colors.white,
+              //       fontSize: 18.sp,
+              //       fontWeight: FontWeight.w700,
+              //     ),
+              //   ),
+              // ),
+              // SizedBox(height: 12.h),
 
-              // Benefits List
-              ...plan.benefits.map((benefit) =>
-                  Padding(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: 16.w,
-                      vertical: 6.h,
-                    ),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Container(
-                          margin: EdgeInsets.only(top: 6.h, right: 12.w),
-                          width: 6.w,
-                          height: 6.h,
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFb4ff39),
-                            shape: BoxShape.circle,
-                          ),
-                        ),
-                        Expanded(
-                          child: Text(
-                            benefit,
-                            style: TextStyle(
-                              color: Colors.grey[400],
-                              fontSize: 14.sp,
-                              height: 1.5,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  )),
+              // // Benefits List
+              // ...plan.benefits.map((benefit) =>
+              //     Padding(
+              //       padding: EdgeInsets.symmetric(
+              //         horizontal: 16.w,
+              //         vertical: 6.h,
+              //       ),
+              //       child: Row(
+              //         crossAxisAlignment: CrossAxisAlignment.start,
+              //         children: [
+              //           Container(
+              //             margin: EdgeInsets.only(top: 6.h, right: 12.w),
+              //             width: 6.w,
+              //             height: 6.h,
+              //             decoration: BoxDecoration(
+              //               color: const Color(0xFFb4ff39),
+              //               shape: BoxShape.circle,
+              //             ),
+              //           ),
+              //           Expanded(
+              //             child: Text(
+              //               benefit,
+              //               style: TextStyle(
+              //                 color: Colors.grey[400],
+              //                 fontSize: 14.sp,
+              //                 height: 1.5,
+              //               ),
+              //             ),
+              //           ),
+              //         ],
+              //       ),
+              //     )),
               SizedBox(height: 32.h),
             ],
           ),

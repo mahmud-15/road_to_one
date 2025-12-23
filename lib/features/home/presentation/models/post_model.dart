@@ -27,18 +27,18 @@ class PostModel {
   });
 
   factory PostModel.fromJson(Map<String, dynamic> json) => PostModel(
-    id: json['_id'] ?? "",
-    creator: Creator.fromJson(json['creator']),
-    caption: json['caption'],
-    type: json['type'],
-    createAt: json['createAt'],
+    id: json['_id']?.toString() ?? "",
+    creator: Creator.fromJson((json['creator'] as Map?)?.cast<String, dynamic>() ?? const {}),
+    caption: json['caption']?.toString() ?? "",
+    type: json['type']?.toString() ?? "",
+    createAt: (json['createdAt'] ?? json['createAt'] ?? json['updatedAt'])?.toString() ?? "",
     commentOfPost: json['commentOfPost'] ?? 0,
     likeOfPost: json['likeOfPost'] ?? 0,
     isOwner: json['isOwner'] ?? false,
     hasSave: json['hasSave'] ?? false,
     isLiked: json['isLiked'] ?? false,
-    connectionStatus: json['connectionStatus'] ?? "",
-    image: json['image'] ?? [],
+    connectionStatus: json['connectionStatus']?.toString() ?? "",
+    image: (json['image'] as List?)?.map((e) => e?.toString() ?? "").where((e) => e.isNotEmpty).toList() ?? const <String>[],
   );
 }
 
@@ -55,9 +55,9 @@ class Creator {
   });
 
   factory Creator.fromJson(Map<String, dynamic> json) => Creator(
-    id: json['id'] ?? "",
-    name: json['name'] ?? "",
-    image: json['image'] ?? "",
-    profileMode: json['profileMode'] ?? "",
+    id: (json['_id'] ?? json['id'])?.toString() ?? "",
+    name: json['name']?.toString() ?? "",
+    image: json['image']?.toString() ?? "",
+    profileMode: (json['profile_mode'] ?? json['profileMode'])?.toString() ?? "",
   );
 }

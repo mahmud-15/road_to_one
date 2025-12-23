@@ -1,5 +1,7 @@
 import 'package:get/get.dart';
 
+import '../../../../config/api/api_end_point.dart';
+import '../../../../services/api/api_service.dart';
 import '../../data/model/plan_details_model.dart';
 
 class PlanDetailController extends GetxController {
@@ -17,30 +19,32 @@ class PlanDetailController extends GetxController {
   void loadPlanDetail() async {
     isLoading.value = true;
 
-    // Simulate API call
-    await Future.delayed(Duration(seconds: 1));
+    try {
+      final planId = Get.arguments?.toString();
+      if (planId == null || planId.isEmpty) {
+        planDetail.value = null;
+        return;
+      }
 
-    // Load plan details based on planId
-    planDetail.value = _getPlanDetails();
+      final url = '${ApiEndPoint.gymAndFitnessPlan}/$planId';
+      final response = await ApiService2.get(url);
+      if (response == null || response.statusCode != 200) {
+        planDetail.value = null;
+        return;
+      }
 
-    isLoading.value = false;
-  }
+      final data = response.data;
+      final payload = (data is Map) ? (data['data'] as Map?) : null;
+      if (payload == null) {
+        planDetail.value = null;
+        return;
+      }
 
-  PlanDetailModel _getPlanDetails() {
-    // Mock data - Replace with actual API call
-
-        return PlanDetailModel(
-          id: '1',
-          title: 'Push Day',
-          imageUrl: 'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=800',
-          description: 'Target the major muscle groups of the upper body: chest, shoulders, and triceps. Strengthening these areas improves pushing power, upper body aesthetics, and enhancing overall muscle balance and definition.',
-          benefits: [
-            'Builds upper body strength and muscle density.',
-            'Improves shoulder stability and joint support.',
-            'Enhances posture and core alignment.',
-            'Boosts performance in compound lifts and athletic movements.',
-            'Promotes balanced muscle development and reduces risk of injury.',
-          ],
-        );
+      planDetail.value = PlanDetailModel.fromJson(payload.cast<String, dynamic>());
+    } catch (_) {
+      planDetail.value = null;
+    } finally {
+      isLoading.value = false;
+    }
   }
 }

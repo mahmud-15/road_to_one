@@ -4,77 +4,164 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:road_project_flutter/config/route/app_routes.dart';
 
+import '../../../../config/api/api_end_point.dart';
+import '../../../../services/api/api_service.dart';
 import '../../data/details_all_model.dart';
 
 class BreakfastController extends GetxController {
-  final RxList<MealItem> meals = <MealItem>[
-    MealItem(
-      id: '1',
-      name: 'Oats',
-      imageUrl: 'https://images.unsplash.com/photo-1517673132405-a56a62b18caf?w=400',
-      isLocked: false,
-    ),
-    MealItem(
-      id: '2',
-      name: 'Pancakes',
-      imageUrl: 'https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=400',
-      isLocked: true,
-    ),
-    MealItem(
-      id: '3',
-      name: 'Eggs',
-      imageUrl: 'https://images.unsplash.com/photo-1608039829572-78524f79c4c7?w=400',
-      isLocked: true,
-    ),
-    MealItem(
-      id: '4',
-      name: 'Smoothie',
-      imageUrl: 'https://images.unsplash.com/photo-1505252585461-04db1eb84625?w=400',
-      isLocked: true,
-    ),
-    MealItem(
-      id: '5',
-      name: 'Toast',
-      imageUrl: 'https://images.unsplash.com/photo-1525351484163-7529414344d8?w=400',
-      isLocked: true,
-    ),
-    MealItem(
-      id: '6',
-      name: 'Yogurt',
-      imageUrl: 'https://images.unsplash.com/photo-1488477181946-6428a0291777?w=400',
-      isLocked: true,
-    ),
-  ].obs;
-  String mealType="";
+  final meals = <MealItem>[].obs;
+  final isLoading = false.obs;
+  final numberOfToken = 0.obs;
+
+  String mealType = "";
+  String categoryId = "";
+
+  int page = 1;
+  int limit = 10;
 
   @override
   void onInit() {
     super.onInit();
     final args = Get.arguments;
-    if (args != null) {
-      final meal = args as String;
-      if (meal == 'breakfast') {
-        mealType = "Breakfast";
-      } else if (meal == 'lunch') {
-        mealType = "Lunch";
-      } else if (meal == 'dinner') {
-        mealType = "Dinner";
+
+    if (args is Map) {
+      categoryId = (args['id'] ?? '').toString();
+      mealType = (args['title'] ?? '').toString();
+    }
+
+    if (mealType.isEmpty) {
+      mealType = 'Meals';
+    }
+
+    fetchMyToken();
+    fetchMeals();
+  }
+
+  Future<void> fetchMyToken() async {
+    try {
+      final response = await ApiService2.get(ApiEndPoint.myToken);
+      if (response == null || response.statusCode != 200) {
+        numberOfToken.value = 0;
+        return;
       }
+
+      final data = response.data;
+      final payload = (data is Map) ? (data['data'] as Map?) : null;
+      final token = payload?['numberOfToken'];
+      if (token is num) {
+        numberOfToken.value = token.toInt();
+      } else if (token is String) {
+        numberOfToken.value = int.tryParse(token) ?? 0;
+      } else {
+        numberOfToken.value = 0;
+      }
+    } catch (_) {
+      numberOfToken.value = 0;
+    }
+  }
+
+  Future<void> fetchMeals({int? page, int? limit}) async {
+    if (categoryId.isEmpty) {
+      meals.clear();
+      return;
+    }
+
+    isLoading.value = true;
+    try {
+      final p = page ?? this.page;
+      final l = limit ?? this.limit;
+      final url = '${ApiEndPoint.mealAll}/$categoryId?page=$p&limit=$l';
+      final response = await ApiService2.get(url);
+      if (response == null || response.statusCode != 200) {
+        meals.clear();
+        return;
+      }
+
+      final data = response.data;
+      final list = (data is Map) ? (data['data'] as List?) : null;
+      if (list == null) {
+        meals.clear();
+        return;
+      }
+
+      meals.assignAll(
+        list
+            .whereType<Map>()
+            .map((e) => MealItem.fromJson(
+                  e.cast<String, dynamic>(),
+                  baseImageUrl: ApiEndPoint.imageUrl,
+                ))
+            .toList(),
+      );
+    } catch (_) {
+      meals.clear();
+    } finally {
+      isLoading.value = false;
     }
   }
 
   void onMealTap(int index) {
-    if (meals[index].isLocked.value) {
-      showLockedMessage(meals[index].name);
-    } else {
+    if (!meals[index].isLocked.value) {
       openMealDetail(meals[index]);
+      return;
     }
+
+    onLockedMealTap(meals[index]);
   }
 
   void openMealDetail(MealItem meal) {
-    Get.toNamed(AppRoutes.mealDetailScreen);
+    Get.toNamed(AppRoutes.mealDetailScreen, arguments: meal.id);
     // Navigate to meal detail screen
     // Get.to(() => MealDetailScreen(meal: meal));
+  }
+
+  Future<void> onLockedMealTap(MealItem meal) async {
+    if (numberOfToken.value <= 0) {
+      Get.snackbar(
+        'No Tokens',
+        "You don't have enough tokens to open this meal.",
+        backgroundColor: Colors.grey[800],
+        colorText: Colors.white,
+        duration: const Duration(seconds: 2),
+      );
+      return;
+    }
+
+    final result = await Get.dialog<bool>(
+      AlertDialog(
+        backgroundColor: const Color(0xFF2d2d2d),
+        title: const Text(
+          'Confirmation',
+          style: TextStyle(color: Colors.white),
+        ),
+        content: const Text(
+          'Opening this meal will use 1 token. Do you want to continue?',
+          style: TextStyle(color: Colors.white70),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Get.back(result: false),
+            child: const Text(
+              'Cancel',
+              style: TextStyle(color: Colors.white70),
+            ),
+          ),
+          TextButton(
+            onPressed: () => Get.back(result: true),
+            child: const Text(
+              'Agree',
+              style: TextStyle(color: Color(0xFFb4ff39)),
+            ),
+          ),
+        ],
+      ),
+      barrierDismissible: true,
+    );
+
+    if (result == true) {
+      numberOfToken.value = (numberOfToken.value - 1).clamp(0, 1 << 31);
+      openMealDetail(meal);
+    }
   }
 
   void showLockedMessage(String mealName) {

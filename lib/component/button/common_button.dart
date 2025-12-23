@@ -51,6 +51,7 @@ class _CommonButtonState extends State<CommonButton>
           lowerBound: 0.0,
           upperBound: 0.15,
         )..addListener(() {
+          if (!mounted) return;
           setState(() {});
         });
     super.initState();
@@ -59,8 +60,8 @@ class _CommonButtonState extends State<CommonButton>
   @override
   void dispose() {
     // TODO: implement dispose
-    super.dispose();
     _animationController.dispose();
+    super.dispose();
   }
 
   @override

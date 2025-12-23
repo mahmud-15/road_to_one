@@ -55,6 +55,12 @@ class SignInController extends GetxController {
           LocalStorage.isLogIn = true;
           LocalStorage.setBool(LocalStorageKeys.isLogIn, LocalStorage.isLogIn);
           LocalStorage.setString(LocalStorageKeys.userId, LocalStorage.userId);
+        } else {
+          // Ensure previous remembered session doesn't keep auto-login enabled
+          LocalStorage.isLogIn = false;
+          LocalStorage.setBool(LocalStorageKeys.isLogIn, false);
+          LocalStorage.setString(LocalStorageKeys.token, "");
+          LocalStorage.setString(LocalStorageKeys.userId, "");
         }
         // profile data need to be used later
         Get.offAllNamed(AppRoutes.homeNav);
