@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:road_project_flutter/component/text/common_text.dart';
 import 'package:road_project_flutter/config/api/api_end_point.dart';
 import 'package:road_project_flutter/config/route/app_routes.dart';
+import 'package:road_project_flutter/features/profile/data/user_activity_model.dart';
 import 'package:road_project_flutter/features/profile/data/user_activity_photo.dart';
 import 'package:road_project_flutter/utils/constants/app_colors.dart';
 import 'package:road_project_flutter/utils/constants/app_string.dart';
@@ -86,10 +87,16 @@ class _ProfileScreenState extends State<ProfileScreen>
                               child: Image.network(
                                 ApiEndPoint.imageUrl +
                                     controller.user.value!.image,
+                                fit: BoxFit.cover,
                                 height: 80,
                                 width: 80,
                                 errorBuilder: (context, error, stackTrace) =>
-                                    Image.network(AppString.defaultProfilePic),
+                                    Image.network(
+                                      AppString.defaultProfilePic,
+                                      fit: BoxFit.cover,
+                                      height: 80,
+                                      width: 80,
+                                    ),
                               ),
                             ),
                             // CircleAvatar(
@@ -172,15 +179,52 @@ class _ProfileScreenState extends State<ProfileScreen>
                         Align(
                           alignment: Alignment.centerLeft,
                           child: CommonText(
-                            text: controller
-                                .user
-                                .value!
-                                .about, // need to set later
+                            text:
+                                "Job: ${controller.user.value?.occupation}", // need to set later
                             fontSize: 16.sp,
                             maxLines: 6,
                             textAlign: TextAlign.left,
                             fontWeight: FontWeight.w400,
                             color: AppColors.white50,
+                          ),
+                        ),
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: CommonText(
+                            text:
+                                "Dream Job: ${controller.user.value?.dreamJob}", // need to set later
+                            fontSize: 16.sp,
+                            maxLines: 6,
+                            textAlign: TextAlign.left,
+                            fontWeight: FontWeight.w400,
+                            color: AppColors.white50,
+                          ),
+                        ),
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: Row(
+                            children: [
+                              CommonText(
+                                text: "Interested in: ", // need to set later
+                                fontSize: 16.sp,
+                                maxLines: 6,
+                                textAlign: TextAlign.left,
+                                fontWeight: FontWeight.w400,
+                                color: AppColors.white50,
+                              ),
+                              ...List.generate(
+                                controller.user.value!.preferences.length,
+                                (index) => CommonText(
+                                  text:
+                                      "${controller.user.value!.preferences[index].name}${index == controller.user.value!.preferences.length - 1 ? "" : ", "}",
+                                  fontSize: 16.sp,
+                                  maxLines: 6,
+                                  textAlign: TextAlign.left,
+                                  fontWeight: FontWeight.w400,
+                                  color: AppColors.white50,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ],
@@ -217,11 +261,11 @@ class _ProfileScreenState extends State<ProfileScreen>
                     controller.imageLoading.value,
                   ),
                   _buildGridView(
-                    controller.userImage,
+                    controller.userStory,
                     controller.imageLoading.value,
                   ),
                   _buildGridView(
-                    controller.userImage,
+                    controller.userLike,
                     controller.imageLoading.value,
                   ),
                   _buildGridView(
@@ -257,7 +301,7 @@ class _ProfileScreenState extends State<ProfileScreen>
     );
   }
 
-  Widget _buildGridView(List<UserActivityPhoto> items, bool isLoading) {
+  Widget _buildGridView(List<UserActivityModel> items, bool isLoading) {
     if (isLoading) {
       return Center(child: CircularProgressIndicator());
     } else if (items.isEmpty) {
@@ -285,7 +329,7 @@ class _ProfileScreenState extends State<ProfileScreen>
               children: [
                 // Thumbnail
                 Image.network(
-                  item.type == MediaType.video ? (item.media[0]) : item.image,
+                  ApiEndPoint.imageUrl + item.file,
                   fit: BoxFit.cover,
                   loadingBuilder: (context, child, loadingProgress) {
                     if (loadingProgress == null) return child;
@@ -305,9 +349,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                     return Container(
                       color: Colors.grey[900],
                       child: Icon(
-                        item.type == MediaType.video
-                            ? Icons.videocam
-                            : Icons.image,
+                        item.type == "video" ? Icons.videocam : Icons.image,
                         size: 50,
                         color: Colors.grey[700],
                       ),
@@ -315,7 +357,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                   },
                 ),
                 // Video indicator
-                if (item.type == MediaType.video)
+                if (item.type == "video")
                   Positioned(
                     top: 8,
                     right: 8,
@@ -332,7 +374,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                     ),
                   ),
                 // Video duration
-                if (item.type == MediaType.video)
+                if (item.type == "video")
                   Positioned(
                     bottom: 8,
                     right: 8,
@@ -346,7 +388,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                         borderRadius: BorderRadius.circular(4),
                       ),
                       child: Text(
-                        item.duration.toString(),
+                        item.viewer.toString(),
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 11,
@@ -365,7 +407,7 @@ class _ProfileScreenState extends State<ProfileScreen>
 
   void _showMediaViewer(
     BuildContext context,
-    List<UserActivityPhoto> items,
+    List<UserActivityModel> items,
     int initialIndex,
   ) {
     Navigator.push(
@@ -380,7 +422,7 @@ class _ProfileScreenState extends State<ProfileScreen>
 
 // Full screen media viewer
 class MediaViewerScreen extends StatefulWidget {
-  final List<UserActivityPhoto> items;
+  final List<UserActivityModel> items;
   final int initialIndex;
 
   const MediaViewerScreen({
@@ -431,8 +473,8 @@ class _MediaViewerScreenState extends State<MediaViewerScreen> {
         itemBuilder: (context, index) {
           final item = widget.items[index];
           return Center(
-            child: item.type == MediaType.video
-                ? VideoPlayerWidget(videoUrl: item.media[0])
+            child: item.type == "video"
+                ? VideoPlayerWidget(videoUrl: ApiEndPoint.imageUrl + item.file)
                 : _buildImageViewer(item),
           );
         },
@@ -440,10 +482,10 @@ class _MediaViewerScreenState extends State<MediaViewerScreen> {
     );
   }
 
-  Widget _buildImageViewer(UserActivityPhoto item) {
+  Widget _buildImageViewer(UserActivityModel item) {
     return InteractiveViewer(
       child: Image.network(
-        item.image,
+        ApiEndPoint.imageUrl + item.file,
         fit: BoxFit.contain,
         loadingBuilder: (context, child, loadingProgress) {
           if (loadingProgress == null) return child;

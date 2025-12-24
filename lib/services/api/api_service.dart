@@ -72,6 +72,50 @@ class ApiService2 {
       return null;
     }
   }
+
+  static Future<Response<dynamic>?> formDataImage(
+    String url, {
+    required String image,
+    Map<String, dynamic>? header,
+    required bool isPost,
+  }) async {
+    final dio = Dio();
+    final mainHeader = {"Authorization": "Bearer ${LocalStorage.token}"};
+
+    appLog("Url: $url\nHeader: ${header ?? mainHeader}");
+    final formdata = FormData.fromMap({
+      'image': [await MultipartFile.fromFile(image, filename: image)],
+    });
+    try {
+      Response response;
+      if (isPost) {
+        response = await dio.post(
+          url,
+          data: formdata,
+          options: Options(headers: header ?? mainHeader),
+        );
+      } else {
+        response = await dio.patch(
+          url,
+          data: formdata,
+          options: Options(headers: header ?? mainHeader),
+        );
+      }
+
+      appLog(response);
+
+      return response;
+    } on DioException catch (e) {
+      // 👇 THIS IS WHERE 400 LIVES
+      appLog("Dio Error!");
+      appLog("Status: ${e.response?.statusCode}");
+      appLog("Data: ${e.response?.data}");
+      return e.response;
+    } on Exception catch (e) {
+      appLog(e);
+      return null;
+    }
+  }
 }
 
 class ApiService {

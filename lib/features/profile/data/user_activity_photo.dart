@@ -1,13 +1,10 @@
-import 'package:road_project_flutter/features/profile/data/media_item.dart';
-
 class UserActivityPhoto {
   final String id;
   final String creator;
   final String caption;
-  final String image;
-  final MediaType type;
-  final List<dynamic> media;
-  final num duration;
+  final List<String> image;
+  final String type;
+  final List<String> media;
   final String createdAt;
 
   UserActivityPhoto({
@@ -17,7 +14,6 @@ class UserActivityPhoto {
     required this.image,
     required this.media,
     required this.type,
-    required this.duration,
     required this.createdAt,
   });
 
@@ -26,10 +22,9 @@ class UserActivityPhoto {
         id: json['_id'] ?? "",
         creator: json['creator'] ?? "",
         caption: json['caption'] ?? "",
-        image: json['image'] ?? "",
-        media: json['media'] ?? "",
+        image: (json['image'] as List).map((e) => e.toString()).toList(),
+        media: (json['media'] as List).map((e) => e.toString()).toList(),
         type: json['type'] ?? "",
-        duration: json['duration'] ?? "",
         createdAt: json['createAt'] ?? "",
       );
 }

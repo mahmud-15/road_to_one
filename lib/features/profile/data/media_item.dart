@@ -1,8 +1,8 @@
-enum MediaType { image, video }
+enum UserMediaType { image, video }
 
 class MediaItem {
   final String url;
-  final MediaType type;
+  final UserMediaType type;
   final String? duration;
   final String? thumbnail;
 

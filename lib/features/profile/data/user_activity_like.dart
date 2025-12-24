@@ -1,6 +1,6 @@
 class UserActivityLike {
   final String id;
-  final Post post;
+  final Post? post;
   final String user;
   final String createAt;
   UserActivityLike({
@@ -14,7 +14,7 @@ class UserActivityLike {
       UserActivityLike(
         id: json['_id'] ?? "",
         user: json['user'] ?? "",
-        post: Post.formJson(json['post']),
+        post: Post.formJson(json['post'] ?? {}),
         createAt: json['createAt'] ?? "",
       );
 }
@@ -42,8 +42,8 @@ class Post {
     creator: json['creator'] ?? "",
     caption: json['caption'] ?? "",
     type: json['type'] ?? "",
-    image: json['image'] ?? [],
-    media: json['media'] ?? [],
+    image: (json['image'] as List).map((e) => e.toString()).toList(),
+    media: (json['media'] as List).map((e) => e.toString()).toList(),
     createAt: json['createAt'] ?? "",
   );
 }

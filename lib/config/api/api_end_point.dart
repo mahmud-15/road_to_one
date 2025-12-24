@@ -37,4 +37,6 @@ class ApiEndPoint {
   static const toggleLike = "$baseUrl/post/like/toggle";
   static const toggleSave = "$baseUrl/post/save/toggle";
   static const sendRequest = "$baseUrl/network-connection";
+  static const preferences = "$baseUrl/preference";
+  static const networkedUser = "$baseUrl/network-connection";
 }

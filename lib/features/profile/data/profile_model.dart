@@ -4,7 +4,7 @@ class ProfileModel {
   String name;
   String email;
   String image;
-  final List<dynamic> preferences;
+  final List<Preferences> preferences;
   final int totalPost;
   final int totalNetwork;
   String about;
@@ -36,7 +36,9 @@ class ProfileModel {
     email: json['email'] ?? "",
     image: json['image'] ?? "",
     about: json['about'] ?? "",
-    preferences: json['preferences'] ?? [],
+    preferences: (json['preferences'] as List)
+        .map((e) => Preferences.fromJson(e))
+        .toList(),
     totalPost: json['totalPost'] ?? 0,
     totalNetwork: json['totalNetwork'] ?? 0,
     dreamJob: json['dreamJob'] ?? "",
@@ -44,5 +46,17 @@ class ProfileModel {
     location: json['location'] ?? "",
     mobile: json['mobile'] ?? "",
     occupation: json['occupation'] ?? "",
+  );
+}
+
+class Preferences {
+  String id;
+  String name;
+  bool active;
+  Preferences({required this.id, required this.name, required this.active});
+  factory Preferences.fromJson(Map<String, dynamic> json) => Preferences(
+    id: json['_id'] ?? "",
+    name: json['name'] ?? "",
+    active: json['active'] ?? "",
   );
 }

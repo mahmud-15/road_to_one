@@ -1,12 +1,10 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:road_project_flutter/config/api/api_end_point.dart';
 import 'package:road_project_flutter/features/profile/data/profile_model.dart';
-import 'package:road_project_flutter/features/profile/presentaion/controller/profile_controller.dart';
 import 'package:road_project_flutter/services/api/api_service.dart';
-import 'package:road_project_flutter/services/storage/storage_services.dart';
+import 'package:road_project_flutter/utils/constants/app_string.dart';
 import 'package:road_project_flutter/utils/log/app_log.dart';
 
 class EditProfileController extends GetxController {
@@ -14,16 +12,6 @@ class EditProfileController extends GetxController {
 
   final user = Rxn<ProfileModel>();
 
-  String profileImageUrl =
-      "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop";
-  final aboutMe = "".obs;
-  String userName = "New Jack";
-  String email = "Gabriel01@gmail.com";
-  String contactNo = "+8801050000000";
-  String location = "Dhaka, Bangladesh";
-  String occupation = "Business";
-  String dreamJob = "Pilot";
-  String education = "Graduated";
   String interestedIn = "Socializing, Adventure, Travelling";
 
   // Text editing controllers
@@ -39,9 +27,35 @@ class EditProfileController extends GetxController {
 
   File? selectedProfileImage; // Selected local image
 
-  void updateProfileImage(File image) {
+  final allPreferences = <Preferences>[].obs;
+  final selectedPref = <Preferences>[].obs;
+
+  void updateProfileImage(BuildContext context, File image) async {
     selectedProfileImage = image;
     update();
+    final response = await ApiService2.formDataImage(
+      ApiEndPoint.user,
+      isPost: false,
+      image: image.path,
+    );
+    if (response == null) {
+      ScaffoldMessenger.of(context)
+        ..clearSnackBars()
+        ..showSnackBar(SnackBar(content: Text(AppString.someThingWrong)));
+    } else {
+      final data = response.data;
+      if (response.statusCode != 200) {
+        ScaffoldMessenger.of(context)
+          ..clearSnackBars()
+          ..showSnackBar(
+            SnackBar(content: Text(data['message'] ?? response.statusMessage)),
+          );
+      } else {
+        ScaffoldMessenger.of(context)
+          ..clearSnackBars()
+          ..showSnackBar(SnackBar(content: Text(data['message'])));
+      }
+    }
   }
 
   void updateAboutMe(BuildContext context) async {
@@ -64,40 +78,12 @@ class EditProfileController extends GetxController {
     }
   }
 
-  void removeProfileImage() {
+  void removeProfileImage() async {
     selectedProfileImage = null;
     update();
   }
 
-  EditProfileController() {
-    // Initialize controllers with current values
-    aboutMeController.text = aboutMe.value;
-    userNameController.text = userName;
-    emailController.text = email;
-    contactNoController.text = contactNo;
-    locationController.text = location;
-    occupationController.text = occupation;
-    dreamJobController.text = dreamJob;
-    educationController.text = education;
-    interestedInController.text = interestedIn;
-  }
-
-  void saveProfile() {
-    // Update values from controllers
-    aboutMe.value = aboutMeController.text;
-    userName = userNameController.text;
-    email = emailController.text;
-    contactNo = contactNoController.text;
-    location = locationController.text;
-    occupation = occupationController.text;
-    dreamJob = dreamJobController.text;
-    education = educationController.text;
-    interestedIn = interestedInController.text;
-
-    print("Profile saved successfully!");
-  }
-
-  void dispose() {
+  void disposeController() {
     aboutMeController.dispose();
     userNameController.dispose();
     emailController.dispose();
@@ -116,6 +102,13 @@ class EditProfileController extends GetxController {
     user.value = Get.arguments;
     appLog("username: ${user.value?.name ?? "Not found"}");
     initial();
+  }
+
+  @override
+  void onClose() {
+    // TODO: implement onClose
+    super.onClose();
+    disposeController();
   }
 
   void initial() {
@@ -159,5 +152,25 @@ class EditProfileController extends GetxController {
         ..clearSnackBars()
         ..showSnackBar(SnackBar(content: Text(response.message)));
     }
+  }
+
+  void fetchAllPref() async {
+    final url = ApiEndPoint.preferences;
+    final response = await ApiService2.get(url);
+
+    if (response != null && response.statusCode == 200) {
+      allPreferences.value = (response.data['data'] as List)
+          .map((e) => Preferences.fromJson(e))
+          .toList();
+      update();
+    }
+  }
+
+  void updatePreference(BuildContext context) async {
+    final body = {'preferences': user.value!.preferences};
+    final response = await ApiService.patch(ApiEndPoint.user, body: body);
+    ScaffoldMessenger.of(context)
+      ..clearSnackBars()
+      ..showSnackBar(SnackBar(content: Text(response.message)));
   }
 }

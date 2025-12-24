@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:road_project_flutter/component/image/app_bar.dart';
 import 'package:road_project_flutter/config/api/api_end_point.dart';
+import 'package:road_project_flutter/features/profile/data/profile_model.dart';
 import 'package:road_project_flutter/utils/constants/app_colors.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:road_project_flutter/utils/constants/app_string.dart';
@@ -20,7 +21,7 @@ class EditProfileScreen extends StatefulWidget {
 
 class _EditProfileScreenState extends State<EditProfileScreen> {
   final ImagePicker _imagePicker = ImagePicker();
-  List<String> interests = ['Socializing', 'Travelling', 'Adventure'];
+  // List<String> interests = ['Socializing', 'Travelling', 'Adventure'];
   TextEditingController newInterestController = TextEditingController();
 
   @override
@@ -63,7 +64,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   source: ImageSource.camera,
                 );
                 if (image != null) {
-                  controller.updateProfileImage(File(image.path));
+                  controller.updateProfileImage(context, File(image.path));
                 }
               },
             ),
@@ -79,7 +80,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   source: ImageSource.gallery,
                 );
                 if (image != null) {
-                  controller.updateProfileImage(File(image.path));
+                  controller.updateProfileImage(context, File(image.path));
                 }
               },
             ),
@@ -284,11 +285,22 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               ),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                child: CommonText(
-                  text: controller.interestedIn,
-                  fontSize: 12.sp,
-                  fontWeight: FontWeight.w400,
-                  color: AppColors.white700,
+                child: Row(
+                  children: [
+                    ...List.generate(controller.user.value!.preferences.length, (
+                      index,
+                    ) {
+                      final value =
+                          controller.user.value!.preferences[index].name;
+                      return CommonText(
+                        text:
+                            "$value${index == controller.user.value!.preferences.length - 1 ? "" : ", "}",
+                        fontSize: 12.sp,
+                        fontWeight: FontWeight.w400,
+                        color: AppColors.white700,
+                      );
+                    }),
+                  ],
                 ),
               ),
               SizedBox(height: 32),
@@ -550,6 +562,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
   // Interested In Dialog
   void _showInterestedInDialog(EditProfileController controller) {
+    controller.fetchAllPref();
     showDialog(
       context: context,
       builder: (context) => StatefulBuilder(
@@ -587,9 +600,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 Wrap(
                   spacing: 8,
                   runSpacing: 8,
-                  children: interests.map((interest) {
+                  children: controller.user.value!.preferences.map((interest) {
                     return Chip(
-                      label: Text(interest),
+                      label: Text(interest.name),
                       deleteIcon: const Icon(
                         Icons.close,
                         size: 16,
@@ -597,7 +610,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       ),
                       onDeleted: () {
                         setDialogState(() {
-                          interests.remove(interest);
+                          controller.user.value!.preferences.remove(interest);
                         });
                       },
                       backgroundColor: const Color(0xFF3d3d3d),
@@ -608,6 +621,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     );
                   }).toList(),
                 ),
+                const SizedBox(height: 16),
+
                 const SizedBox(height: 16),
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -639,7 +654,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                         onPressed: () {
                           if (newInterestController.text.isNotEmpty) {
                             setDialogState(() {
-                              interests.add(newInterestController.text);
+                              // controller.user.value!.preferences.add(
+                              //   newInterestController.text,
+                              // );
                               newInterestController.clear();
                             });
                           }
@@ -659,7 +676,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   child: ElevatedButton(
                     onPressed: () {
                       setState(() {
-                        controller.interestedIn = interests.join(', ');
+                        // controller.interestedIn = interests.join(', ');
                       });
                       Navigator.pop(context);
                     },

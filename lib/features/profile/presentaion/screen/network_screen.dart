@@ -8,67 +8,67 @@ import '../../data/network_status.dart';
 import '../controller/network_controller.dart';
 
 class NetworkScreen extends StatelessWidget {
-  NetworkScreen({super.key});
-
-  final NetworkController controller = Get.put(NetworkController());
+  const NetworkScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.backgroudColor,
       appBar: AppBarNew(title: "Network"),
-      body: Column(
-        children: [
-          // Search Bar
-          Padding(
-            padding: EdgeInsets.all(16.w),
-            child: Container(
-              padding: EdgeInsets.symmetric(horizontal: 16.w),
-              decoration: BoxDecoration(
-                color: Colors.grey[900],
-                borderRadius: BorderRadius.circular(25.r),
-              ),
-              child: TextField(
-                controller: controller.searchController,
-                style: TextStyle(color: Colors.white, fontSize: 14.sp),
-                decoration: InputDecoration(
-                  hintText: 'Search',
-                  hintStyle: TextStyle(
-                    color: Colors.grey[600],
-                    fontSize: 14.sp,
-                  ),
-                  border: InputBorder.none,
-                  icon: Icon(
-                    Icons.search,
-                    color: Colors.grey[600],
-                    size: 20.sp,
-                  ),
+      body: GetBuilder(
+        init: NetworkController(),
+        builder: (controller) => Column(
+          children: [
+            // Search Bar
+            Padding(
+              padding: EdgeInsets.all(16.w),
+              child: Container(
+                padding: EdgeInsets.symmetric(horizontal: 16.w),
+                decoration: BoxDecoration(
+                  color: Colors.grey[900],
+                  borderRadius: BorderRadius.circular(25.r),
                 ),
-                onChanged: (value) {
-                  // Implement search functionality
-                },
+                child: TextField(
+                  controller: controller.searchController,
+                  style: TextStyle(color: Colors.white, fontSize: 14.sp),
+                  decoration: InputDecoration(
+                    hintText: 'Search',
+                    hintStyle: TextStyle(
+                      color: Colors.grey[600],
+                      fontSize: 14.sp,
+                    ),
+                    border: InputBorder.none,
+                    icon: Icon(
+                      Icons.search,
+                      color: Colors.grey[600],
+                      size: 20.sp,
+                    ),
+                  ),
+                  onChanged: (value) {
+                    // Implement search functionality
+                  },
+                ),
               ),
             ),
-          ),
 
-          // Users List
-          Expanded(
-            child: Obx(
-              () => ListView.builder(
+            // Users List
+            Expanded(
+              child: ListView.builder(
                 itemCount: controller.users.length,
                 itemBuilder: (context, index) {
                   final user = controller.users[index];
-                  return _buildNetworkItem(user, index);
+                  return _buildNetworkItem(controller, index);
                 },
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildNetworkItem(NetworkUser user, int index) {
+  Widget _buildNetworkItem(NetworkController controller, int index) {
+    final user = controller.users[index];
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
       child: Row(
@@ -76,7 +76,7 @@ class NetworkScreen extends StatelessWidget {
           // Profile Image
           CircleAvatar(
             radius: 24.r,
-            backgroundImage: NetworkImage(user.image),
+            backgroundImage: NetworkImage(user.user.image),
             backgroundColor: Colors.grey[800],
           ),
           SizedBox(width: 12.w),
@@ -87,7 +87,7 @@ class NetworkScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  user.name,
+                  user.user.name,
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 15.sp,
@@ -95,7 +95,7 @@ class NetworkScreen extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  user.role,
+                  "",
                   style: TextStyle(color: Colors.grey[500], fontSize: 12.sp),
                 ),
               ],
@@ -103,15 +103,16 @@ class NetworkScreen extends StatelessWidget {
           ),
 
           // Action Buttons based on status
-          Obx(() => _buildActionButtons(user, index)),
+          Obx(() => _buildActionButtons(controller, index)),
         ],
       ),
     );
   }
 
-  Widget _buildActionButtons(NetworkUser user, int index) {
-    switch (user.status.value) {
-      case NetworkStatus.followRequest:
+  Widget _buildActionButtons(NetworkController controller, int index) {
+    final user = controller.users[index];
+    switch (user.status) {
+      case NetworkStatus.pending:
         return Row(
           children: [
             // Follow Back Button
@@ -143,7 +144,7 @@ class NetworkScreen extends StatelessWidget {
           ],
         );
 
-      case NetworkStatus.following:
+      case NetworkStatus.accepted:
         return Row(
           children: [
             // Message Button
@@ -169,7 +170,7 @@ class NetworkScreen extends StatelessWidget {
             SizedBox(width: 8.w),
             // More Options
             GestureDetector(
-              onTap: () => _showFollowingOptions(user, index),
+              onTap: () => _showFollowingOptions(controller, index),
               child: Icon(
                 Icons.more_vert,
                 color: Colors.grey[400],
@@ -179,53 +180,54 @@ class NetworkScreen extends StatelessWidget {
           ],
         );
 
-      case NetworkStatus.connected:
-        return Row(
-          children: [
-            // Message Button with Icon
-            ElevatedButton.icon(
-              onPressed: () => controller.openMessage(user),
-              icon: Icon(
-                Icons.chat_bubble_outline,
-                color: Colors.white,
-                size: 16.sp,
-              ),
-              label: Text(
-                'Message',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 12.sp,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.grey[800],
-                padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20.r),
-                ),
-                minimumSize: Size(0, 0),
-              ),
-            ),
-            SizedBox(width: 8.w),
-            // More Options
-            GestureDetector(
-              onTap: () => _showConnectedOptions(user, index),
-              child: Icon(
-                Icons.more_vert,
-                color: Colors.grey[400],
-                size: 24.sp,
-              ),
-            ),
-          ],
-        );
+      // case NetworkStatus.accepted:
+      //   return Row(
+      //     children: [
+      //       // Message Button with Icon
+      //       ElevatedButton.icon(
+      //         onPressed: () => controller.openMessage(user),
+      //         icon: Icon(
+      //           Icons.chat_bubble_outline,
+      //           color: Colors.white,
+      //           size: 16.sp,
+      //         ),
+      //         label: Text(
+      //           'Message',
+      //           style: TextStyle(
+      //             color: Colors.white,
+      //             fontSize: 12.sp,
+      //             fontWeight: FontWeight.w500,
+      //           ),
+      //         ),
+      //         style: ElevatedButton.styleFrom(
+      //           backgroundColor: Colors.grey[800],
+      //           padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+      //           shape: RoundedRectangleBorder(
+      //             borderRadius: BorderRadius.circular(20.r),
+      //           ),
+      //           minimumSize: Size(0, 0),
+      //         ),
+      //       ),
+      //       SizedBox(width: 8.w),
+      //       // More Options
+      //       GestureDetector(
+      //         onTap: () => _showConnectedOptions(controller, index),
+      //         child: Icon(
+      //           Icons.more_vert,
+      //           color: Colors.grey[400],
+      //           size: 24.sp,
+      //         ),
+      //       ),
+      //     ],
+      //   );
 
       default:
         return SizedBox.shrink();
     }
   }
 
-  void _showFollowingOptions(NetworkUser user, int index) {
+  void _showFollowingOptions(NetworkController controller, int index) {
+    final user = controller.users[index];
     Get.bottomSheet(
       Container(
         padding: EdgeInsets.all(20.r),
@@ -239,7 +241,7 @@ class NetworkScreen extends StatelessWidget {
             ListTile(
               leading: Icon(Icons.person_remove, color: Colors.red),
               title: Text(
-                'Unfollow ${user.name}',
+                'Unfollow ${user.user.name}',
                 style: TextStyle(color: Colors.white, fontSize: 16.sp),
               ),
               onTap: () {
@@ -264,7 +266,8 @@ class NetworkScreen extends StatelessWidget {
     );
   }
 
-  void _showConnectedOptions(NetworkUser user, int index) {
+  void _showConnectedOptions(NetworkController controller, int index) {
+    final user = controller.users[index];
     Get.bottomSheet(
       Container(
         padding: EdgeInsets.all(20.r),
@@ -278,7 +281,7 @@ class NetworkScreen extends StatelessWidget {
             ListTile(
               leading: Icon(Icons.person_remove, color: Colors.red),
               title: Text(
-                'Unfollow ${user.name}',
+                'Unfollow ${user.user.name}',
                 style: TextStyle(color: Colors.white, fontSize: 16.sp),
               ),
               onTap: () {
@@ -296,7 +299,7 @@ class NetworkScreen extends StatelessWidget {
                 Get.back();
                 Get.snackbar(
                   'Muted',
-                  'You muted ${user.name}',
+                  'You muted ${user.user.name}',
                   backgroundColor: Colors.grey[800],
                   colorText: Colors.white,
                 );
