@@ -114,7 +114,7 @@ class HomeController extends GetxController {
           final userData = (data['data'] as List)
               .map((e) => PostModel.fromJson(e))
               .toList();
-          appLog("userData: ${userData.length}");
+          //appLog("userData: ${userData.length}");
           posts.value = userData;
           update();
           // for (var c in posts) {

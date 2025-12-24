@@ -3,12 +3,16 @@
 import 'dart:convert';
 
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart' hide FormData;
 
 import '../../../../config/api/api_end_point.dart';
+import '../../../../config/route/app_routes.dart';
 import '../../../../services/storage/storage_services.dart';
-import '../screen/pay_screen.dart';
+import '../../data/models/cart_item.dart';
+import '../controller/cart_controller.dart';
+import '../screen/payment_webview_screen.dart';
 
 class ShippingInformationController extends GetxController {
   final TextEditingController addressController = TextEditingController();
@@ -16,6 +20,7 @@ class ShippingInformationController extends GetxController {
 
   var totalAmount = 0.0.obs;
   final isSaving = false.obs;
+  final isLoadingProfile = false.obs;
 
   @override
   void onInit() {
@@ -28,14 +33,48 @@ class ShippingInformationController extends GetxController {
       totalAmount.value = 87.00; 
     }
 
-   
-    loadSavedData();
+    fetchProfile();
   }
 
-  void loadSavedData() {
-    // Load from local storage or user profile
-    addressController.text = 'House C17/A, B Block, Dhanmondi Dhaka Bangladesh';
-    contactController.text = '+61 1234 5678 910';
+  Future<void> fetchProfile() async {
+    isLoadingProfile.value = true;
+    try {
+      final dio = Dio();
+      final headers = {
+        'Authorization': 'Bearer ${LocalStorage.token}',
+      };
+      final response = await dio.get(
+        ApiEndPoint.user,
+        options: Options(headers: headers),
+      );
+
+      if (response.statusCode != 200) {
+        return;
+      }
+
+      final data = response.data;
+      final payload = (data is Map) ? (data['data'] as Map?) : null;
+      if (payload == null) {
+        return;
+      }
+
+      final shipping = payload['shipping_address'];
+      if (shipping is Map) {
+        final address = (shipping['address'] ?? '').toString();
+        final contact = (shipping['contact_number'] ?? '').toString();
+
+        if (address.trim().isNotEmpty) {
+          addressController.text = address;
+        }
+        if (contact.trim().isNotEmpty) {
+          contactController.text = contact;
+        }
+      }
+    } catch (_) {
+      // ignore
+    } finally {
+      isLoadingProfile.value = false;
+    }
   }
 
   Future<void> proceedToPay() async {
@@ -63,13 +102,122 @@ class ShippingInformationController extends GetxController {
       return;
     }
 
+    final paymentUrl = await _createCheckout();
+    if (paymentUrl == null || paymentUrl.trim().isEmpty) {
+      return;
+    }
+
     Get.to(
-      PaymentScreen(
-        address: addressController.text,
-        contact: contactController.text,
-        totalAmount: totalAmount.value,
+      () => PaymentWebViewScreen(
+        paymentUrl: paymentUrl,
+        onSuccess: () async {
+          final cartController = Get.isRegistered<CartController>()
+              ? Get.find<CartController>()
+              : Get.put(CartController());
+          await cartController.clearCart();
+          Get.offAllNamed(AppRoutes.successImageScreen);
+        },
       ),
     );
+  }
+
+  Future<String?> _createCheckout() async {
+    try {
+      final cartController = Get.isRegistered<CartController>()
+          ? Get.find<CartController>()
+          : Get.put(CartController());
+
+      final items = cartController.cartItems.toList(growable: false);
+      if (items.isEmpty) {
+        _safeSnackbar(
+          'Cart',
+          'Your cart is empty.',
+          backgroundColor: Colors.red,
+        );
+        return null;
+      }
+
+      final lineItems = <Map<String, dynamic>>[];
+      for (final CartItem e in items) {
+        if (e.variantId.trim().isEmpty) {
+          continue;
+        }
+        lineItems.add({
+          'variantId': e.variantId,
+          'quantity': e.quantity,
+          'currencyCode': e.currencyCode,
+        });
+      }
+
+      if (lineItems.isEmpty) {
+        _safeSnackbar(
+          'Cart',
+          'No valid variants found in cart.',
+          backgroundColor: Colors.red,
+        );
+        return null;
+      }
+
+      if (kDebugMode) {
+        debugPrint('=== CREATE CHECKOUT REQUEST ===');
+        debugPrint('url: ${ApiEndPoint.createCheckout}');
+        debugPrint('lineItems: ${jsonEncode(lineItems)}');
+      }
+
+      final dio = Dio();
+      final headers = {
+        'Authorization': 'Bearer ${LocalStorage.token}',
+        'Content-Type': 'application/json',
+      };
+
+      final response = await dio.post(
+        ApiEndPoint.createCheckout,
+        data: {
+          'lineItems': lineItems,
+        },
+        options: Options(headers: headers),
+      );
+
+      if (kDebugMode) {
+        debugPrint('=== CREATE CHECKOUT RESPONSE ===');
+        debugPrint('statusCode: ${response.statusCode}');
+        debugPrint('data: ${jsonEncode(response.data)}');
+      }
+
+      if (response.statusCode != 200) {
+        _safeSnackbar(
+          'Failed',
+          'Could not create checkout.',
+          backgroundColor: Colors.red,
+        );
+        return null;
+      }
+
+      final data = response.data;
+      final payload = (data is Map) ? (data['data'] as Map?) : null;
+      final url = (payload?['paymentUrl'] ?? '').toString();
+      if (url.trim().isEmpty) {
+        _safeSnackbar(
+          'Failed',
+          'Payment URL missing from response.',
+          backgroundColor: Colors.red,
+        );
+        return null;
+      }
+
+      if (kDebugMode) {
+        debugPrint('paymentUrl: $url');
+      }
+
+      return url;
+    } catch (_) {
+      _safeSnackbar(
+        'Failed',
+        'Could not create checkout.',
+        backgroundColor: Colors.red,
+      );
+      return null;
+    }
   }
 
   Future<bool> _updateShippingInfo() async {

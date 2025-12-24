@@ -99,7 +99,12 @@ class CartScreen extends StatelessWidget {
                 CommonButton(
                   titleText: "Checkout",
                   onTap: (){
-                    Get.toNamed(AppRoutes.shippingInformationScreen);
+                    Get.toNamed(
+                      AppRoutes.shippingInformationScreen,
+                      arguments: {
+                        'total': controller.total,
+                      },
+                    );
                   },
                 ),
                 SizedBox(height: 20.h,),

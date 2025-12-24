@@ -74,6 +74,10 @@ class CartController extends GetxController {
     await _box.delete(keyId);
   }
 
+  Future<void> clearCart() async {
+    await _box.clear();
+  }
+
   double get subtotal {
     return cartItems.fold(0, (sum, item) => sum + (item.price * item.quantity));
   }
@@ -83,12 +87,4 @@ class CartController extends GetxController {
   double get deliveryFees => 0.00;
 
   double get total => subtotal + taxes + otherFees + deliveryFees;
-
-  void continueShoppingPressed() {
-    Get.snackbar('Continue Shopping', 'Navigating to shopping page');
-  }
-
-  void checkoutPressed() {
-    Get.snackbar('Checkout', 'Proceeding to checkout');
-  }
 }

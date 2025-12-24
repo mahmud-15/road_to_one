@@ -47,6 +47,8 @@ class ApiEndPoint {
   static const storeProducts = "$baseUrl/store/products";
   static const favouriteToggle = "$baseUrl/favourite/toggle";
   static const storeProductDetail = "$baseUrl/store/product";
+  static const createCheckout = "$baseUrl/store/product/create-checkout";
+  static const storeOrderHistory = "$baseUrl/store/order-history";
   static const storyUser = "$baseUrl/story/user";
   static const toggleLike = "$baseUrl/post/like/toggle";
   static const toggleSave = "$baseUrl/post/save/toggle";

@@ -55,6 +55,7 @@ class ProductDetailScreen extends StatelessWidget {
           final priceAmount = double.tryParse(variant?.price.amount ?? '') ?? 0.0;
           final currencyCode = variant?.price.currencyCode ?? '';
           final productId = detail.id;
+          final variantId = variant?.id ?? '';
           final cartKey = '$productId|$selectedColor|$selectedSize';
 
           final colorOpt = detail.options.firstWhereOrNull(
@@ -395,6 +396,7 @@ class ProductDetailScreen extends StatelessWidget {
                                           CartItem(
                                             keyId: cartKey,
                                             productId: productId,
+                                            variantId: variantId,
                                             name: detail.title,
                                             image: imageUrl,
                                             color: selectedColor,

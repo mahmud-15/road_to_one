@@ -3,6 +3,7 @@ import 'package:hive/hive.dart';
 class CartItem {
   final String keyId;
   final String productId;
+  final String variantId;
   final String name;
   final String image;
   final String color;
@@ -14,6 +15,7 @@ class CartItem {
   const CartItem({
     required this.keyId,
     required this.productId,
+    required this.variantId,
     required this.name,
     required this.image,
     required this.color,
@@ -26,6 +28,7 @@ class CartItem {
   CartItem copyWith({
     String? keyId,
     String? productId,
+    String? variantId,
     String? name,
     String? image,
     String? color,
@@ -37,6 +40,7 @@ class CartItem {
     return CartItem(
       keyId: keyId ?? this.keyId,
       productId: productId ?? this.productId,
+      variantId: variantId ?? this.variantId,
       name: name ?? this.name,
       image: image ?? this.image,
       color: color ?? this.color,
@@ -67,6 +71,7 @@ class CartItemAdapter extends TypeAdapter<CartItem> {
     return CartItem(
       keyId: (fields[0] ?? '').toString(),
       productId: (fields[1] ?? '').toString(),
+      variantId: (fields[9] ?? '').toString(),
       name: (fields[2] ?? '').toString(),
       image: (fields[3] ?? '').toString(),
       color: (fields[4] ?? '').toString(),
@@ -80,11 +85,13 @@ class CartItemAdapter extends TypeAdapter<CartItem> {
   @override
   void write(BinaryWriter writer, CartItem obj) {
     writer
-      ..writeByte(9)
+      ..writeByte(10)
       ..writeByte(0)
       ..write(obj.keyId)
       ..writeByte(1)
       ..write(obj.productId)
+      ..writeByte(9)
+      ..write(obj.variantId)
       ..writeByte(2)
       ..write(obj.name)
       ..writeByte(3)
