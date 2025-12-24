@@ -53,13 +53,21 @@ class NetworkScreen extends StatelessWidget {
 
             // Users List
             Expanded(
-              child: ListView.builder(
-                itemCount: controller.users.length,
-                itemBuilder: (context, index) {
-                  final user = controller.users[index];
-                  return _buildNetworkItem(controller, index);
-                },
-              ),
+              child: controller.isLoading.value
+                  ? Center(child: CircularProgressIndicator())
+                  : controller.users.isEmpty
+                  ? Center(
+                      child: Text(
+                        "No network found",
+                        style: TextStyle(color: AppColors.white),
+                      ),
+                    )
+                  : ListView.builder(
+                      itemCount: controller.users.length,
+                      itemBuilder: (context, index) {
+                        return _buildNetworkItem(controller, index);
+                      },
+                    ),
             ),
           ],
         ),

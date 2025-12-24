@@ -33,7 +33,7 @@ class EditProfileController extends GetxController {
   void updateProfileImage(BuildContext context, File image) async {
     selectedProfileImage = image;
     update();
-    final response = await ApiService2.formDataImage(
+    final response = await ApiService2.multipart(
       ApiEndPoint.user,
       isPost: false,
       image: image.path,

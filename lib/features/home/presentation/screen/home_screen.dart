@@ -188,7 +188,7 @@ class HomeScreen extends StatelessWidget {
             isOwn: true,
           ), // need to change later
           isLoading
-              ? Center(child: CircularProgressIndicator())
+              ? Center(child: SizedBox.shrink())
               : stories.isEmpty
               ? SizedBox.shrink()
               : Expanded(
@@ -220,7 +220,7 @@ class StoryItem extends StatelessWidget {
           // ✅ Navigate to CreateStoryScreen
           Get.to(() => CreateStoryScreen());
         } else {
-          Get.to(() => const StoryViewScreen());
+          Get.toNamed(AppRoutes.storyViewScreen, arguments: story.id);
         }
       },
       child: Container(

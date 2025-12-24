@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:road_project_flutter/config/api/api_end_point.dart';
 import 'dart:io';
+
+import 'package:road_project_flutter/services/api/api_service.dart';
+import 'package:road_project_flutter/utils/constants/app_string.dart';
 
 class CreatePostController extends GetxController {
   final ImagePicker _picker = ImagePicker();
@@ -15,11 +19,29 @@ class CreatePostController extends GetxController {
     }
   }
 
-  void createPost() {
+  void createPost(BuildContext context) async {
     if (selectedImage.value != null && captionController.text.isNotEmpty) {
+      final body = {'caption': captionController.text.trim(), 'type': 'image'};
+      final response = await ApiService2.multipart(
+        ApiEndPoint.allPost,
+        isPost: true,
+        body: body,
+        image: selectedImage.value!.path,
+      );
+      if (response == null) {
+        ScaffoldMessenger.of(context)
+          ..clearSnackBars()
+          ..showSnackBar(SnackBar(content: Text(AppString.someThingWrong)));
+      } else {
+        ScaffoldMessenger.of(context)
+          ..clearSnackBars()
+          ..showSnackBar(SnackBar(content: Text(response.data['message'])));
+      }
       // Handle post creation
     } else {
-      Get.snackbar('Error', 'Please add image and caption');
+      ScaffoldMessenger.of(context)
+        ..clearSnackBars()
+        ..showSnackBar(SnackBar(content: Text("Please add image and caption")));
     }
   }
 

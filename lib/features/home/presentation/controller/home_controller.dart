@@ -118,9 +118,9 @@ class HomeController extends GetxController {
           appLog("userData: ${userData.length}");
           posts.value = userData;
           update();
-          // for (var c in posts) {
-          //   loadComments(context, c.id);
-          // }
+          for (var c in posts) {
+            loadComments(context, c.id);
+          }
         }
       }
     } catch (e) {
