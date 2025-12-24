@@ -5,8 +5,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:road_project_flutter/component/button/common_button.dart';
 import 'package:road_project_flutter/component/image/app_bar.dart';
-import 'package:road_project_flutter/config/route/app_routes.dart';
-import 'package:road_project_flutter/features/store/presentation/screen/pay_screen.dart';
 import 'package:road_project_flutter/utils/constants/app_colors.dart';
 
 import '../controller/shipping_information_controller.dart';
@@ -149,16 +147,18 @@ class ShippingInformationScreen extends StatelessWidget {
                     ],
                   ),
                   SizedBox(height: 20.h),
-                  CommonButton(
-                      titleText: "Process to Pay",
-                      onTap: () {
-                        Get.to(PaymentScreen(
-                          address: controller.addressController.text,
-                          contact: controller.contactController.text,
-                          totalAmount: controller.totalAmount.value,
-                        ));
-                      }
-                  )
+                  Obx(() {
+                    final saving = controller.isSaving.value;
+                    return AbsorbPointer(
+                      absorbing: saving,
+                      child: CommonButton(
+                        titleText: saving ? "Saving..." : "Process to Pay",
+                        onTap: () {
+                          controller.proceedToPay();
+                        },
+                      ),
+                    );
+                  })
                 ],
               ),
             ),
