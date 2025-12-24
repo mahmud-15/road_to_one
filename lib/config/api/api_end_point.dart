@@ -36,10 +36,15 @@ class ApiEndPoint {
 
   static const taskCalender = "$baseUrl/task-calendar";
   static const gymAndFitnessPlan = "$baseUrl/gym-and-fitness-plan";
+  static const businessAndMindsetPlan = "$baseUrl/business-and-mindset-plan";
   static const myToken = "$baseUrl/my-token";
   static const uploadWorkoutPicture = "$baseUrl/task-calendar/upload-workout-picture";
   static const workoutProgress = "$baseUrl/task-calendar/workout-progress";
   static const mealAndRecipeCategory = "$baseUrl/meal-and-recipe-category";
   static const mealAll = "$baseUrl/meal/all";
   static const meal = "$baseUrl/meal";
+  static const storeCollection = "$baseUrl/store/collection";
+  static const storeProducts = "$baseUrl/store/products";
+  static const favouriteToggle = "$baseUrl/favourite/toggle";
+  static const storeProductDetail = "$baseUrl/store/product";
 }

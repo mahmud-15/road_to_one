@@ -160,6 +160,8 @@ class BreakfastController extends GetxController {
 
     if (result == true) {
       numberOfToken.value = (numberOfToken.value - 1).clamp(0, 1 << 31);
+      meal.isLocked.value = false;
+      meals.refresh();
       openMealDetail(meal);
     }
   }

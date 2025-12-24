@@ -135,8 +135,23 @@ class MyPlanController extends GetxController {
 
     if (result == true) {
       numberOfToken.value = (numberOfToken.value - 1).clamp(0, 1 << 31);
+      _unlockPlanInList(plan.id);
       openPlan(plan);
     }
+  }
+
+  void _unlockPlanInList(String planId) {
+    if (planId.isEmpty) {
+      return;
+    }
+
+    final idx = plans.indexWhere((p) => p.id == planId);
+    if (idx == -1) {
+      return;
+    }
+
+    plans[idx].isLocked.value = false;
+    plans.refresh();
   }
 
   void showLockedMessage() {

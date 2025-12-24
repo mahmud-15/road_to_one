@@ -30,18 +30,28 @@ class CartScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // Cart Items List
-                    Obx(() => ListView.builder(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemCount: controller.cartItems.length,
-                      itemBuilder: (context, index) {
-                        final item = controller.cartItems[index];
-                        return Padding(
-                          padding: const EdgeInsets.only(bottom: 16),
-                          child: CartItemCard(item: item),
+                    Obx(() {
+                      if (controller.cartItems.isEmpty) {
+                        return const Center(
+                          child: Text(
+                            'Cart is empty',
+                            style: TextStyle(color: Colors.white),
+                          ),
                         );
-                      },
-                    )),
+                      }
+                      return ListView.builder(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemCount: controller.cartItems.length,
+                        itemBuilder: (context, index) {
+                          final item = controller.cartItems[index];
+                          return Padding(
+                            padding: const EdgeInsets.only(bottom: 16),
+                            child: CartItemCard(item: item),
+                          );
+                        },
+                      );
+                    }),
                     SizedBox(height: 24.h),
                     // Cost Summary
                     CommonText(
@@ -174,7 +184,7 @@ class CartItemCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  item.description,
+                  '${item.color} / ${item.size}',
                   style: TextStyle(
                     color: Colors.grey.shade500,
                     fontSize: 12,
@@ -182,7 +192,7 @@ class CartItemCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  '\$${item.price.toStringAsFixed(0)}',
+                  '${item.price.toStringAsFixed(2)} ${item.currencyCode}',
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 16,
@@ -197,7 +207,7 @@ class CartItemCard extends StatelessWidget {
           Column(
             children: [
               GestureDetector(
-                onTap: () => controller.removeItem(item.id),
+                onTap: () => controller.removeItem(item.keyId),
                 child: Icon(
                   Icons.delete_outline,
                   color: Colors.grey.shade500,
@@ -213,7 +223,7 @@ class CartItemCard extends StatelessWidget {
                 child: Row(
                   children: [
                     GestureDetector(
-                      onTap: () => controller.decrementQuantity(item.id),
+                      onTap: () => controller.decrementQuantity(item.keyId),
                       child: Container(
                         padding: const EdgeInsets.all(4),
                         child: const Icon(
@@ -223,19 +233,19 @@ class CartItemCard extends StatelessWidget {
                         ),
                       ),
                     ),
-                    Obx(() => Container(
+                    Container(
                       padding: const EdgeInsets.symmetric(horizontal: 12),
                       child: Text(
-                        '${item.quantity.value}',
+                        '${item.quantity}',
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
-                    )),
+                    ),
                     GestureDetector(
-                      onTap: () => controller.incrementQuantity(item.id),
+                      onTap: () => controller.incrementQuantity(item.keyId),
                       child: Container(
                         padding: const EdgeInsets.all(4),
                         child: const Icon(
