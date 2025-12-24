@@ -503,19 +503,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 height: 48,
                 child: ElevatedButton(
                   onPressed: () {
-                    setState(() {
-                      controller.userName = controller.userNameController.text;
-                      controller.email = controller.emailController.text;
-                      controller.contactNo =
-                          controller.contactNoController.text;
-                      controller.location = controller.locationController.text;
-                      controller.occupation =
-                          controller.occupationController.text;
-                      controller.dreamJob = controller.dreamJobController.text;
-                      controller.education =
-                          controller.educationController.text;
-                    });
-                    Navigator.pop(context);
+                    controller.updateDetails(context);
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFFb4ff39),

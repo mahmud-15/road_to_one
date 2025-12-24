@@ -124,54 +124,36 @@ class EditProfileController extends GetxController {
     emailController.text = user.value!.email;
     contactNoController.text = user.value!.mobile;
     locationController.text = user.value!.location;
+    occupationController.text = user.value!.occupation;
+    dreamJobController.text = user.value!.dreamJob;
+    educationController.text = user.value!.education;
 
     // write all the field of user to controller
   }
 
-  void updateProfile(
-    BuildContext context, {
-    String? name,
-    String? mobile,
-    String? location,
-    String? occupation,
-    String? dreamJob,
-    String? education,
-    String? image,
-    String? about,
-    String? preferences1,
-    String? preferences2,
-    String? profileMode,
-    Map<String?, dynamic>? shippingAddress,
-  }) async {
+  void updateDetails(BuildContext context) async {
+    user.value!.name = userNameController.text.trim();
+    user.value!.email = emailController.text.trim();
+    user.value!.mobile = contactNoController.text.trim();
+    user.value!.location = locationController.text.trim();
+    user.value!.occupation = occupationController.text.trim();
+    user.value!.dreamJob = dreamJobController.text.trim();
+    user.value!.education = educationController.text.trim();
+    update();
     final body = {
-      'name': name,
-      'mobile': mobile,
-      'location': location,
-      'occupation': occupation,
-      'dreamJob': dreamJob,
-      'education': education,
-      'image': image,
-      'about': about,
-      'preferences[0]': preferences1,
-      'preferences[1]': preferences2,
-      'profileMode': profileMode,
-      'shipping_address': shippingAddress,
+      'name': user.value!.name,
+      'mobile': user.value!.mobile,
+      'location': user.value!.location,
+      'occupation': user.value!.occupation,
+      'dreamJob': user.value!.dreamJob,
+      'education': user.value!.education,
     };
-
-    final header = {
-      'Content-Type': "multipart/form-data",
-      'Authorization': "Bearer ${LocalStorage.token}",
-    };
-
-    final response = await ApiService.patch(
-      ApiEndPoint.user,
-      body: body,
-      header: header,
-    );
-    if (response.statusCode != 200) {
+    final response = await ApiService.patch(ApiEndPoint.user, body: body);
+    if (response.isSuccess) {
       ScaffoldMessenger.of(context)
         ..clearSnackBars()
         ..showSnackBar(SnackBar(content: Text(response.message)));
+      Navigator.of(context).pop();
     } else {
       ScaffoldMessenger.of(context)
         ..clearSnackBars()
