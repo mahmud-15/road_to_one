@@ -666,6 +666,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                               // controller.user.value!.preferences.add(
                               //   newInterestController.text,
                               // );
+                              controller.updatePreference(context);
                               newInterestController.clear();
                             });
                           }
