@@ -14,12 +14,12 @@ class PaymentScreen extends StatelessWidget {
   final String? contact;
   final double? totalAmount;
 
-  PaymentScreen({
-    Key? key,
-    this.address="DFDSF DSFDF",
-    this.contact="3454545",
-    this.totalAmount=1231,
-  }) : super(key: key);
+  const PaymentScreen({
+    super.key,
+    this.address = "DFDSF DSFDF",
+    this.contact = "3454545",
+    this.totalAmount = 1231,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -43,13 +43,13 @@ class PaymentScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     CommonText(
-                        text: "Shipping to",
-                        fontSize: 16.sp,
-                        fontWeight: FontWeight.w500,
-                        color: AppColors.white50,
+                      text: "Shipping to",
+                      fontSize: 16.sp,
+                      fontWeight: FontWeight.w500,
+                      color: AppColors.white50,
                     ),
                     SizedBox(height: 12.h),
-        
+
                     // Shipping Address Card
                     Container(
                       padding: EdgeInsets.all(16.w),
@@ -96,9 +96,9 @@ class PaymentScreen extends StatelessWidget {
                         ],
                       ),
                     ),
-        
+
                     SizedBox(height: 32.h),
-        
+
                     CommonText(
                       text: "Payment Method",
                       fontSize: 16.sp,
@@ -106,35 +106,41 @@ class PaymentScreen extends StatelessWidget {
                       color: AppColors.white50,
                     ),
                     SizedBox(height: 16.h),
-        
+
                     // Payment Methods
-                    Obx(() => _buildPaymentOption(
-                      controller: controller,
-                      icon: Icons.monetization_on,
-                      iconColor: Colors.orange,
-                      label: 'Cash on Delivery',
-                      value: 'cash',
-                    )),
+                    Obx(
+                      () => _buildPaymentOption(
+                        controller: controller,
+                        icon: Icons.monetization_on,
+                        iconColor: Colors.orange,
+                        label: 'Cash on Delivery',
+                        value: 'cash',
+                      ),
+                    ),
                     SizedBox(height: 12.h),
-        
-                    Obx(() => _buildPaymentOption(
-                      controller: controller,
-                      icon: Icons.payment,
-                      iconColor: Colors.blue,
-                      label: 'Pay with Paypal',
-                      value: 'paypal',
-                    )),
+
+                    Obx(
+                      () => _buildPaymentOption(
+                        controller: controller,
+                        icon: Icons.payment,
+                        iconColor: Colors.blue,
+                        label: 'Pay with Paypal',
+                        value: 'paypal',
+                      ),
+                    ),
                     SizedBox(height: 12.h),
-        
-                    Obx(() => _buildPaymentOption(
-                      controller: controller,
-                      icon: Icons.credit_card,
-                      iconColor: Colors.red,
-                      label: 'Pay with Card',
-                      value: 'card',
-                    )),
+
+                    Obx(
+                      () => _buildPaymentOption(
+                        controller: controller,
+                        icon: Icons.credit_card,
+                        iconColor: Colors.red,
+                        label: 'Pay with Card',
+                        value: 'card',
+                      ),
+                    ),
                     SizedBox(height: 16.h),
-        
+
                     // Add Card Button
                     Container(
                       width: double.infinity,
@@ -150,11 +156,7 @@ class PaymentScreen extends StatelessWidget {
                         onPressed: () {
                           // Add card logic
                         },
-                        icon: Icon(
-                          Icons.add,
-                          color: Colors.white,
-                          size: 20.sp,
-                        ),
+                        icon: Icon(Icons.add, color: Colors.white, size: 20.sp),
                         label: Text(
                           'Add Card',
                           style: TextStyle(
@@ -169,7 +171,7 @@ class PaymentScreen extends StatelessWidget {
                 ),
               ),
             ),
-        
+
             // Pay Button
             Padding(
               padding: EdgeInsets.all(20.h),
@@ -218,11 +220,7 @@ class PaymentScreen extends StatelessWidget {
                 color: iconColor.withOpacity(0.2),
                 borderRadius: BorderRadius.circular(8.r),
               ),
-              child: Icon(
-                icon,
-                color: iconColor,
-                size: 24.sp,
-              ),
+              child: Icon(icon, color: iconColor, size: 24.sp),
             ),
             SizedBox(width: 12.w),
             Expanded(
@@ -249,11 +247,7 @@ class PaymentScreen extends StatelessWidget {
                 color: isSelected ? AppColors.primaryColor : Colors.transparent,
               ),
               child: isSelected
-                  ? Icon(
-                Icons.circle,
-                size: 12.sp,
-                color: Colors.black,
-              )
+                  ? Icon(Icons.circle, size: 12.sp, color: Colors.black)
                   : null,
             ),
           ],
@@ -268,6 +262,4 @@ class PaymentScreen extends StatelessWidget {
 
 void proceedToPay() {
   // Validate inputs
-
-
 }

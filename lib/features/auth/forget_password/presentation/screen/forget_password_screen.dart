@@ -9,7 +9,7 @@ import 'package:road_project_flutter/utils/app_utils.dart';
 import 'package:road_project_flutter/utils/constants/app_colors.dart';
 
 class ForgetPasswordScreen extends StatefulWidget {
-  const ForgetPasswordScreen({Key? key}) : super(key: key);
+  const ForgetPasswordScreen({super.key});
 
   @override
   State<ForgetPasswordScreen> createState() => _ForgetPasswordScreenState();

@@ -2,14 +2,13 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:road_project_flutter/component/image/app_bar.dart';
 import 'package:road_project_flutter/utils/constants/app_colors.dart';
 
 import '../controller/create_stroy_controllers.dart';
 
 class CreateStoryScreen extends StatelessWidget {
-  CreateStoryScreen({Key? key}) : super(key: key);
+  CreateStoryScreen({super.key});
 
   final CreateStoryController controller = Get.put(CreateStoryController());
 
@@ -21,12 +20,13 @@ class CreateStoryScreen extends StatelessWidget {
       body: SafeArea(
         child: Column(
           children: [
-
             // Image Preview Area
             Expanded(
-              child: Obx(() => controller.selectedImage.value != null
-                  ? _buildImagePreview()
-                  : _buildPlaceholder()),
+              child: Obx(
+                () => controller.selectedImage.value != null
+                    ? _buildImagePreview()
+                    : _buildPlaceholder(),
+              ),
             ),
 
             // Bottom Actions
@@ -44,11 +44,7 @@ class CreateStoryScreen extends StatelessWidget {
         children: [
           GestureDetector(
             onTap: () => Get.back(),
-            child: Icon(
-              Icons.arrow_back_ios,
-              color: Colors.white,
-              size: 20.sp,
-            ),
+            child: Icon(Icons.arrow_back_ios, color: Colors.white, size: 20.sp),
           ),
           SizedBox(width: 12.w),
           Text(
@@ -90,37 +86,40 @@ class CreateStoryScreen extends StatelessWidget {
                 },
                 child: controller.isEditing.value
                     ? Container(
-                  width: 200,
-                  padding: const EdgeInsets.all(8),
-                  color: Colors.black54,
-                  child: TextField(
-                    controller: controller.textController,
-                    style: const TextStyle(color: Colors.white, fontSize: 18),
-                    decoration: const InputDecoration(
-                      border: InputBorder.none,
-                      hintText: "Enter text",
-                      hintStyle: TextStyle(color: Colors.white70),
-                    ),
-                    onSubmitted: (value) {
-                      controller.saveEditedText(value);
-                    },
-                  ),
-                )
+                        width: 200,
+                        padding: const EdgeInsets.all(8),
+                        color: Colors.black54,
+                        child: TextField(
+                          controller: controller.textController,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 18,
+                          ),
+                          decoration: const InputDecoration(
+                            border: InputBorder.none,
+                            hintText: "Enter text",
+                            hintStyle: TextStyle(color: Colors.white70),
+                          ),
+                          onSubmitted: (value) {
+                            controller.saveEditedText(value);
+                          },
+                        ),
+                      )
                     : Text(
-                  controller.editedText.value,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                    shadows: [
-                      Shadow(
-                        color: Colors.black,
-                        offset: Offset(1, 1),
-                        blurRadius: 3,
+                        controller.editedText.value,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                          shadows: [
+                            Shadow(
+                              color: Colors.black,
+                              offset: Offset(1, 1),
+                              blurRadius: 3,
+                            ),
+                          ],
+                        ),
                       ),
-                    ],
-                  ),
-                ),
               ),
             ),
 
@@ -148,11 +147,7 @@ class CreateStoryScreen extends StatelessWidget {
                       ),
                     ),
                     SizedBox(width: 6.w),
-                    Icon(
-                      Icons.text_fields,
-                      color: Colors.white,
-                      size: 20.sp,
-                    ),
+                    Icon(Icons.text_fields, color: Colors.white, size: 20.sp),
                   ],
                 ),
               ),
@@ -162,7 +157,6 @@ class CreateStoryScreen extends StatelessWidget {
       );
     });
   }
-
 
   Widget _buildPlaceholder() {
     return Center(
@@ -177,10 +171,7 @@ class CreateStoryScreen extends StatelessWidget {
           SizedBox(height: 16.h),
           Text(
             'Select an image to create story',
-            style: TextStyle(
-              color: Colors.grey.shade500,
-              fontSize: 16.sp,
-            ),
+            style: TextStyle(color: Colors.grey.shade500, fontSize: 16.sp),
           ),
         ],
       ),
@@ -190,9 +181,11 @@ class CreateStoryScreen extends StatelessWidget {
   Widget _buildBottomActions() {
     return Container(
       padding: EdgeInsets.all(16.r),
-      child: Obx(() => controller.selectedImage.value != null
-          ? _buildCreateButton()
-          : _buildSelectImageButton()),
+      child: Obx(
+        () => controller.selectedImage.value != null
+            ? _buildCreateButton()
+            : _buildSelectImageButton(),
+      ),
     );
   }
 

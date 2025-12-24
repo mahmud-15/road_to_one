@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:road_project_flutter/config/api/api_end_point.dart';
 import 'package:road_project_flutter/config/route/app_routes.dart';
 import 'package:road_project_flutter/features/home/presentation/screen/showstory_screen.dart';
 import 'package:road_project_flutter/features/home/presentation/screen/story_screen.dart';
+import 'package:road_project_flutter/services/storage/storage_services.dart';
+import 'package:road_project_flutter/utils/app_utils.dart';
 import 'package:road_project_flutter/utils/constants/app_colors.dart';
+import 'package:road_project_flutter/utils/constants/app_string.dart';
 
 import '../controller/home_controller.dart';
-import '../models/post_model.dart';
 import '../models/story_model.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -30,9 +33,10 @@ class HomeScreen extends StatelessWidget {
               ),
 
               // Stories Section
-              controller.storyLoading.value
-                  ? Center(child: CircularProgressIndicator())
-                  : _buildStoriesSection(controller.stories),
+              _buildStoriesSection(
+                controller.stories,
+                controller.storyLoading.value,
+              ),
 
               // Posts Section
               controller.postLoading.value
@@ -49,10 +53,7 @@ class HomeScreen extends StatelessWidget {
                         controller: controller.scrollController,
                         itemCount: controller.posts.length,
                         itemBuilder: (context, index) {
-                          return PostCard(
-                            post: controller.posts[index],
-                            controller: controller,
-                          );
+                          return PostCard(index: index, controller: controller);
                         },
                       ),
                     ),
@@ -168,22 +169,37 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildStoriesSection(List<StoryModel> stories) {
+  Widget _buildStoriesSection(List<StoryModel> stories, bool isLoading) {
     return Container(
       height: 110.h,
       padding: EdgeInsets.symmetric(vertical: 10.h),
       child: Row(
         children: [
-          StoryItem(story: stories[0], isOwn: true), // need to change later
-          Expanded(
-            child: ListView.builder(
-              scrollDirection: Axis.horizontal,
-              itemCount: stories.length,
-              itemBuilder: (context, index) {
-                return StoryItem(story: stories[index], isOwn: false);
-              },
+          StoryItem(
+            story: StoryModel(
+              id: "",
+              name: "Your Story",
+              image: LocalStorage.profileImage,
+              storyCount: 0,
+              priority: 0,
+              isWatched: false,
+              connectionStatus: "",
             ),
-          ),
+            isOwn: true,
+          ), // need to change later
+          isLoading
+              ? Center(child: CircularProgressIndicator())
+              : stories.isEmpty
+              ? SizedBox.shrink()
+              : Expanded(
+                  child: ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: stories.length,
+                    itemBuilder: (context, index) {
+                      return StoryItem(story: stories[index], isOwn: false);
+                    },
+                  ),
+                ),
         ],
       ),
     );
@@ -227,8 +243,12 @@ class StoryItem extends StatelessWidget {
                   ),
                   child: Padding(
                     padding: EdgeInsets.all(3.r),
-                    child: CircleAvatar(
-                      backgroundImage: NetworkImage(story.image),
+                    child: ClipOval(
+                      child: Image.network(
+                        ApiEndPoint.imageUrl + story.image,
+                        errorBuilder: (context, error, stackTrace) =>
+                            Image.network(AppString.defaultProfilePic),
+                      ),
                     ),
                   ),
                 ),
@@ -263,11 +283,10 @@ class StoryItem extends StatelessWidget {
 }
 
 class PostCard extends StatelessWidget {
-  final PostModel post;
+  final int index;
   final HomeController controller;
 
-  const PostCard({Key? key, required this.post, required this.controller})
-    : super(key: key);
+  const PostCard({super.key, required this.index, required this.controller});
 
   @override
   Widget build(BuildContext context) {
@@ -278,13 +297,13 @@ class PostCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Post Header
-          _buildPostHeader(),
+          _buildPostHeader(context),
 
           // Post Images
           _buildPostImages(),
 
           // Post Actions
-          _buildPostActions(),
+          _buildPostActions(context),
 
           // Post Caption
           SizedBox(height: 8.h),
@@ -297,14 +316,22 @@ class PostCard extends StatelessWidget {
     );
   }
 
-  Widget _buildPostHeader() {
+  Widget _buildPostHeader(BuildContext context) {
     return Padding(
       padding: EdgeInsets.all(12.r),
       child: Row(
         children: [
-          CircleAvatar(
-            radius: 20.r,
-            backgroundImage: NetworkImage(post.creator.image),
+          ClipOval(
+            child: Image.network(
+              height: 80,
+              width: 80,
+              ApiEndPoint.imageUrl + controller.posts[index].creator.image,
+              errorBuilder: (context, error, stackTrace) => Image.network(
+                AppString.defaultProfilePic,
+                height: 70,
+                width: 70,
+              ),
+            ),
           ),
           SizedBox(width: 12.w),
           Expanded(
@@ -312,7 +339,7 @@ class PostCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  post.creator.name,
+                  controller.posts[index].creator.name,
                   style: TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.w600,
@@ -320,7 +347,7 @@ class PostCard extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  post.createAt,
+                  Utils.timeAgo(controller.posts[index].createAt),
                   style: TextStyle(
                     color: Colors.grey.shade500,
                     fontSize: 12.sp,
@@ -330,7 +357,10 @@ class PostCard extends StatelessWidget {
             ),
           ),
           GestureDetector(
-            onTap: () => controller.onConnectTap(post.creator.name),
+            onTap: () => controller.onConnectTap(
+              context,
+              controller.posts[index].creator.id,
+            ),
             child: Container(
               padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 6.h),
               decoration: BoxDecoration(
@@ -338,7 +368,7 @@ class PostCard extends StatelessWidget {
                 borderRadius: BorderRadius.circular(20.r),
               ),
               child: Text(
-                'Connect',
+                "Connect",
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 13.sp,
@@ -349,7 +379,7 @@ class PostCard extends StatelessWidget {
           ),
           SizedBox(width: 8.w),
           GestureDetector(
-            onTap: () => controller.onMoreTap(post.id),
+            onTap: () => controller.onMoreTap(controller.posts[index].id),
             child: Icon(
               Icons.more_vert,
               color: Colors.grey.shade400,
@@ -362,12 +392,15 @@ class PostCard extends StatelessWidget {
   }
 
   Widget _buildPostImages() {
-    final pageController = controller.getPageController(post.id);
-    final currentPage = controller.getCurrentPage(post.id);
+    final pageController = controller.getPageController(
+      controller.posts[index].id,
+    );
+    final currentPage = controller.getCurrentPage(controller.posts[index].id);
 
-    if (pageController == null || currentPage == null) {
-      return const SizedBox.shrink();
-    }
+    // I hide this
+    // if (pageController == null || currentPage == null) {
+    //   return const SizedBox.shrink();
+    // }
 
     return Stack(
       alignment: Alignment.bottomCenter,
@@ -376,11 +409,13 @@ class PostCard extends StatelessWidget {
           height: 400.h,
           child: PageView.builder(
             controller: pageController,
-            onPageChanged: (page) => controller.onPageChanged(post.id, page),
-            itemCount: post.image.length,
-            itemBuilder: (context, index) {
+            onPageChanged: (page) =>
+                controller.onPageChanged(controller.posts[index].id, page),
+            itemCount: controller.posts[index].image.length,
+            itemBuilder: (context, imageIndex) {
               return Image.network(
-                post.image[index],
+                ApiEndPoint.imageUrl +
+                    controller.posts[index].image[imageIndex],
                 fit: BoxFit.cover,
                 errorBuilder: (context, error, stackTrace) {
                   return Container(
@@ -394,24 +429,22 @@ class PostCard extends StatelessWidget {
             },
           ),
         ),
-        if (post.image.length > 1)
+        if (controller.posts[index].image.length > 1)
           Positioned(
             bottom: 10.h,
-            child: Obx(
-              () => Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: List.generate(
-                  post.image.length,
-                  (index) => Container(
-                    margin: EdgeInsets.symmetric(horizontal: 3.w),
-                    width: 6.w,
-                    height: 6.h,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: currentPage.value == index
-                          ? Colors.white
-                          : Colors.white.withOpacity(0.4),
-                    ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: List.generate(
+                controller.posts[index].image.length,
+                (dotIndex) => Container(
+                  margin: EdgeInsets.symmetric(horizontal: 3.w),
+                  width: 6.w,
+                  height: 6.h,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: currentPage!.value == dotIndex
+                        ? Colors.white
+                        : Colors.white.withOpacity(0.4),
                   ),
                 ),
               ),
@@ -421,27 +454,31 @@ class PostCard extends StatelessWidget {
     );
   }
 
-  Widget _buildPostActions() {
+  Widget _buildPostActions(BuildContext context) {
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
       child: Row(
         children: [
           GestureDetector(
-            onTap: () => controller.toggleLike(post.id),
+            onTap: () => controller.toggleLike(controller.posts[index].id),
             child: Icon(
-              post.isLiked ? Icons.favorite : Icons.favorite_border,
-              color: post.isLiked ? Colors.red : AppColors.primaryColor,
+              controller.posts[index].isLiked
+                  ? Icons.favorite
+                  : Icons.favorite_border,
+              color: controller.posts[index].isLiked
+                  ? Colors.red
+                  : AppColors.primaryColor,
               size: 26.sp,
             ),
           ),
           SizedBox(width: 4.w),
           Text(
-            '${post.likeOfPost}',
+            '${controller.posts[index].likeOfPost}',
             style: TextStyle(color: AppColors.primaryColor, fontSize: 14.sp),
           ),
           SizedBox(width: 20.w),
           GestureDetector(
-            onTap: () => controller.onCommentTap(post.id),
+            onTap: () => controller.onCommentTap(controller.posts[index].id),
             child: Icon(
               Icons.chat_bubble_outline,
               color: AppColors.primaryColor,
@@ -450,14 +487,17 @@ class PostCard extends StatelessWidget {
           ),
           SizedBox(width: 4.w),
           Text(
-            '${post.commentOfPost}',
+            '${controller.posts[index].commentOfPost}',
             style: TextStyle(color: Colors.white, fontSize: 14.sp),
           ),
           const Spacer(),
           GestureDetector(
-            onTap: () => controller.onSaveTap(post.id),
+            onTap: () =>
+                controller.onSaveTap(context, controller.posts[index].id),
             child: Icon(
-              Icons.bookmark_border,
+              controller.posts[index].hasSave
+                  ? Icons.bookmark
+                  : Icons.bookmark_border,
               color: Colors.white,
               size: 26.sp,
             ),
@@ -478,10 +518,10 @@ class PostCard extends StatelessWidget {
               style: TextStyle(color: Colors.white, fontSize: 14.sp),
               children: [
                 TextSpan(
-                  text: '${post.creator.name} ',
+                  text: '${controller.posts[index].creator.name} ',
                   style: const TextStyle(fontWeight: FontWeight.w600),
                 ),
-                TextSpan(text: post.caption),
+                TextSpan(text: controller.posts[index].caption),
               ],
             ),
           ),
@@ -496,7 +536,6 @@ class PostCard extends StatelessWidget {
   }
 
   // Widget _buildCommentsSection() {
-
   //   return Padding(
   //     padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
   //     child: Column(

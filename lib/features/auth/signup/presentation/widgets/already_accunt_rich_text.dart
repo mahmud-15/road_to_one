@@ -7,7 +7,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../../../config/route/app_routes.dart';
 import '../../../../../utils/constants/app_colors.dart';
-import '../../../../../utils/constants/app_string.dart';
 
 class AlreadyAccountRichText extends StatelessWidget {
   const AlreadyAccountRichText({super.key});

@@ -2,16 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:road_project_flutter/component/text/common_text.dart';
+import 'package:road_project_flutter/config/api/api_end_point.dart';
 import 'package:road_project_flutter/config/route/app_routes.dart';
+import 'package:road_project_flutter/features/profile/data/user_activity_model.dart';
 import 'package:road_project_flutter/features/profile/data/user_activity_photo.dart';
 import 'package:road_project_flutter/utils/constants/app_colors.dart';
+import 'package:road_project_flutter/utils/constants/app_string.dart';
 import 'package:video_player/video_player.dart';
 
 import '../../data/media_item.dart';
 import '../controller/profile_controller.dart';
 
 class ProfileScreen extends StatefulWidget {
-  const ProfileScreen({Key? key}) : super(key: key);
+  const ProfileScreen({super.key});
 
   @override
   State<ProfileScreen> createState() => _ProfileScreenState();
@@ -67,102 +70,165 @@ class _ProfileScreenState extends State<ProfileScreen>
       ),
       body: GetBuilder(
         init: ProfileController(),
-        initState: (state) => state.controller!.initial(context),
         builder: (controller) => Column(
           children: [
             // Profile Header
             Padding(
               padding: const EdgeInsets.all(16.0),
-              child: Column(
-                children: [
-                  // Profile Picture and Stats
-                  Row(
-                    children: [
-                      // Profile Picture
-                      CircleAvatar(
-                        radius: 40,
-                        backgroundImage: NetworkImage(
-                          controller.user.value?.image ??
-                              controller.profileImage,
-                        ),
-                        backgroundColor: Colors.grey[800],
-                      ),
-                      SizedBox(width: 30.h),
-                      // Stats
-                      Expanded(
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              child: controller.isLoading.value
+                  ? Center(child: CircularProgressIndicator())
+                  : Column(
+                      children: [
+                        // Profile Picture and Stats
+                        Row(
                           children: [
-                            _buildStatColumn(
-                              controller.user.value!.totalPost.toString(),
-                              'Posts',
+                            // Profile Picture
+                            ClipOval(
+                              child: Image.network(
+                                ApiEndPoint.imageUrl +
+                                    controller.user.value!.image,
+                                fit: BoxFit.cover,
+                                height: 80,
+                                width: 80,
+                                errorBuilder: (context, error, stackTrace) =>
+                                    Image.network(
+                                      AppString.defaultProfilePic,
+                                      fit: BoxFit.cover,
+                                      height: 80,
+                                      width: 80,
+                                    ),
+                              ),
                             ),
-                            GestureDetector(
-                              onTap: () {
-                                Get.toNamed(AppRoutes.networkScreen);
-                              },
-                              child: _buildStatColumn(
-                                controller.user.value!.totalNetwork.toString(),
-                                'Network',
+                            // CircleAvatar(
+                            //   radius: 40,
+                            //   backgroundImage: NetworkImage(
+                            //     "${controller.user.value?.image}",
+                            //   ),
+                            //   backgroundColor: Colors.grey[800],
+                            //   onBackgroundImageError: (exception, stackTrace) =>
+                            //       NetworkImage(AppString.defaultProfilePic),
+                            // ),
+                            SizedBox(width: 30.h),
+                            // Stats
+                            Expanded(
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceEvenly,
+                                children: [
+                                  _buildStatColumn(
+                                    controller.user.value!.totalPost.toString(),
+                                    'Posts',
+                                  ),
+                                  GestureDetector(
+                                    onTap: () {
+                                      Get.toNamed(AppRoutes.networkScreen);
+                                    },
+                                    child: _buildStatColumn(
+                                      controller.user.value!.totalNetwork
+                                          .toString(),
+                                      'Network',
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
                           ],
                         ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 12.h),
-                  // Name
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: CommonText(
-                      text: controller.user.value!.name,
-                      fontSize: 20.sp,
-                      fontWeight: FontWeight.w500,
-                      color: AppColors.white50,
-                    ),
-                  ),
-                  SizedBox(height: 14.h),
-                  // Edit Profile Button
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: GestureDetector(
-                      onTap: () {
-                        Get.toNamed(AppRoutes.editProfileScreen);
-                      },
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 6,
+                        SizedBox(height: 12.h),
+                        // Name
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: CommonText(
+                            text: controller.user.value!.name,
+                            fontSize: 20.sp,
+                            fontWeight: FontWeight.w500,
+                            color: AppColors.white50,
+                          ),
                         ),
-                        decoration: BoxDecoration(
-                          color: Colors.grey[800],
-                          borderRadius: BorderRadius.circular(8),
+                        SizedBox(height: 14.h),
+                        // Edit Profile Button
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: GestureDetector(
+                            onTap: () {
+                              Get.toNamed(
+                                AppRoutes.editProfileScreen,
+                                arguments: controller.user.value,
+                              );
+                            },
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 6,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.grey[800],
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: CommonText(
+                                text: "Edit Profile",
+                                fontSize: 12.sp,
+                                fontWeight: FontWeight.w400,
+                                color: AppColors.white50,
+                              ),
+                            ),
+                          ),
                         ),
-                        child: CommonText(
-                          text: "Edit Profile",
-                          fontSize: 12.sp,
-                          fontWeight: FontWeight.w400,
-                          color: AppColors.white50,
+                        SizedBox(height: 12.h),
+                        // Bio
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: CommonText(
+                            text:
+                                "Job: ${controller.user.value?.occupation}", // need to set later
+                            fontSize: 16.sp,
+                            maxLines: 6,
+                            textAlign: TextAlign.left,
+                            fontWeight: FontWeight.w400,
+                            color: AppColors.white50,
+                          ),
                         ),
-                      ),
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: CommonText(
+                            text:
+                                "Dream Job: ${controller.user.value?.dreamJob}", // need to set later
+                            fontSize: 16.sp,
+                            maxLines: 6,
+                            textAlign: TextAlign.left,
+                            fontWeight: FontWeight.w400,
+                            color: AppColors.white50,
+                          ),
+                        ),
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: Row(
+                            children: [
+                              CommonText(
+                                text: "Interested in: ", // need to set later
+                                fontSize: 16.sp,
+                                maxLines: 6,
+                                textAlign: TextAlign.left,
+                                fontWeight: FontWeight.w400,
+                                color: AppColors.white50,
+                              ),
+                              ...List.generate(
+                                controller.user.value!.preferences.length,
+                                (index) => CommonText(
+                                  text:
+                                      "${controller.user.value!.preferences[index].name}${index == controller.user.value!.preferences.length - 1 ? "" : ", "}",
+                                  fontSize: 16.sp,
+                                  maxLines: 6,
+                                  textAlign: TextAlign.left,
+                                  fontWeight: FontWeight.w400,
+                                  color: AppColors.white50,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
-                  SizedBox(height: 12.h),
-                  // Bio
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: CommonText(
-                      text: controller.bio, // need to set later
-                      fontSize: 16.sp,
-                      maxLines: 6,
-                      textAlign: TextAlign.left,
-                      fontWeight: FontWeight.w400,
-                      color: AppColors.white50,
-                    ),
-                  ),
-                ],
-              ),
             ),
 
             // Tab Bar
@@ -190,10 +256,22 @@ class _ProfileScreenState extends State<ProfileScreen>
               child: TabBarView(
                 controller: _tabController,
                 children: [
-                  _buildGridView(controller.userImage),
-                  _buildGridView(controller.userImage),
-                  _buildGridView(controller.userImage),
-                  _buildGridView(controller.userImage),
+                  _buildGridView(
+                    controller.userImage,
+                    controller.imageLoading.value,
+                  ),
+                  _buildGridView(
+                    controller.userStory,
+                    controller.imageLoading.value,
+                  ),
+                  _buildGridView(
+                    controller.userLike,
+                    controller.imageLoading.value,
+                  ),
+                  _buildGridView(
+                    controller.userImage,
+                    controller.imageLoading.value,
+                  ),
                 ],
               ),
             ),
@@ -223,107 +301,113 @@ class _ProfileScreenState extends State<ProfileScreen>
     );
   }
 
-  Widget _buildGridView(List<UserActivityPhoto> items) {
-    return GridView.builder(
-      padding: const EdgeInsets.all(1),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 3,
-        crossAxisSpacing: 2,
-        mainAxisSpacing: 2,
-        childAspectRatio: 1,
-      ),
-      itemCount: items.length,
-      itemBuilder: (context, index) {
-        final item = items[index];
-        return GestureDetector(
-          onTap: () {
-            _showMediaViewer(context, items, index);
-          },
-          child: Stack(
-            fit: StackFit.expand,
-            children: [
-              // Thumbnail
-              Image.network(
-                item.type == MediaType.video ? (item.media[0]) : item.image,
-                fit: BoxFit.cover,
-                loadingBuilder: (context, child, loadingProgress) {
-                  if (loadingProgress == null) return child;
-                  return Container(
-                    color: Colors.grey[900],
-                    child: Center(
-                      child: CircularProgressIndicator(
-                        value: loadingProgress.expectedTotalBytes != null
-                            ? loadingProgress.cumulativeBytesLoaded /
-                                  loadingProgress.expectedTotalBytes!
-                            : null,
+  Widget _buildGridView(List<UserActivityModel> items, bool isLoading) {
+    if (isLoading) {
+      return Center(child: CircularProgressIndicator());
+    } else if (items.isEmpty) {
+      return Center(
+        child: Text("No item found", style: TextStyle(color: AppColors.white)),
+      );
+    } else {
+      return GridView.builder(
+        padding: const EdgeInsets.all(1),
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 3,
+          crossAxisSpacing: 2,
+          mainAxisSpacing: 2,
+          childAspectRatio: 1,
+        ),
+        itemCount: items.length,
+        itemBuilder: (context, index) {
+          final item = items[index];
+          return GestureDetector(
+            onTap: () {
+              _showMediaViewer(context, items, index);
+            },
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                // Thumbnail
+                Image.network(
+                  ApiEndPoint.imageUrl + item.file,
+                  fit: BoxFit.cover,
+                  loadingBuilder: (context, child, loadingProgress) {
+                    if (loadingProgress == null) return child;
+                    return Container(
+                      color: Colors.grey[900],
+                      child: Center(
+                        child: CircularProgressIndicator(
+                          value: loadingProgress.expectedTotalBytes != null
+                              ? loadingProgress.cumulativeBytesLoaded /
+                                    loadingProgress.expectedTotalBytes!
+                              : null,
+                        ),
                       ),
-                    ),
-                  );
-                },
-                errorBuilder: (context, error, stackTrace) {
-                  return Container(
-                    color: Colors.grey[900],
+                    );
+                  },
+                  errorBuilder: (context, error, stackTrace) {
+                    return Container(
+                      color: Colors.grey[900],
+                      child: Icon(
+                        item.type == "video" ? Icons.videocam : Icons.image,
+                        size: 50,
+                        color: Colors.grey[700],
+                      ),
+                    );
+                  },
+                ),
+                // Video indicator
+                if (item.type == "video")
+                  Positioned(
+                    top: 8,
+                    right: 8,
                     child: Icon(
-                      item.type == MediaType.video
-                          ? Icons.videocam
-                          : Icons.image,
-                      size: 50,
-                      color: Colors.grey[700],
+                      Icons.videocam,
+                      color: Colors.white,
+                      size: 20,
+                      shadows: [
+                        Shadow(
+                          color: Colors.black.withOpacity(0.8),
+                          blurRadius: 8,
+                        ),
+                      ],
                     ),
-                  );
-                },
-              ),
-              // Video indicator
-              if (item.type == MediaType.video)
-                Positioned(
-                  top: 8,
-                  right: 8,
-                  child: Icon(
-                    Icons.videocam,
-                    color: Colors.white,
-                    size: 20,
-                    shadows: [
-                      Shadow(
-                        color: Colors.black.withOpacity(0.8),
-                        blurRadius: 8,
-                      ),
-                    ],
                   ),
-                ),
-              // Video duration
-              if (item.type == MediaType.video && item.duration != null)
-                Positioned(
-                  bottom: 8,
-                  right: 8,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 6,
-                      vertical: 2,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.black.withOpacity(0.7),
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                    child: Text(
-                      item.duration.toString(),
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 11,
-                        fontWeight: FontWeight.w500,
+                // Video duration
+                if (item.type == "video")
+                  Positioned(
+                    bottom: 8,
+                    right: 8,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 2,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.black.withOpacity(0.7),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Text(
+                        item.viewer.toString(),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
                     ),
                   ),
-                ),
-            ],
-          ),
-        );
-      },
-    );
+              ],
+            ),
+          );
+        },
+      );
+    }
   }
 
   void _showMediaViewer(
     BuildContext context,
-    List<UserActivityPhoto> items,
+    List<UserActivityModel> items,
     int initialIndex,
   ) {
     Navigator.push(
@@ -338,14 +422,14 @@ class _ProfileScreenState extends State<ProfileScreen>
 
 // Full screen media viewer
 class MediaViewerScreen extends StatefulWidget {
-  final List<UserActivityPhoto> items;
+  final List<UserActivityModel> items;
   final int initialIndex;
 
   const MediaViewerScreen({
-    Key? key,
+    super.key,
     required this.items,
     required this.initialIndex,
-  }) : super(key: key);
+  });
 
   @override
   State<MediaViewerScreen> createState() => _MediaViewerScreenState();
@@ -389,8 +473,8 @@ class _MediaViewerScreenState extends State<MediaViewerScreen> {
         itemBuilder: (context, index) {
           final item = widget.items[index];
           return Center(
-            child: item.type == MediaType.video
-                ? VideoPlayerWidget(videoUrl: item.media[0])
+            child: item.type == "video"
+                ? VideoPlayerWidget(videoUrl: ApiEndPoint.imageUrl + item.file)
                 : _buildImageViewer(item),
           );
         },
@@ -398,10 +482,10 @@ class _MediaViewerScreenState extends State<MediaViewerScreen> {
     );
   }
 
-  Widget _buildImageViewer(UserActivityPhoto item) {
+  Widget _buildImageViewer(UserActivityModel item) {
     return InteractiveViewer(
       child: Image.network(
-        item.image,
+        ApiEndPoint.imageUrl + item.file,
         fit: BoxFit.contain,
         loadingBuilder: (context, child, loadingProgress) {
           if (loadingProgress == null) return child;
@@ -438,7 +522,7 @@ class _MediaViewerScreenState extends State<MediaViewerScreen> {
 class VideoPlayerWidget extends StatefulWidget {
   final String videoUrl;
 
-  const VideoPlayerWidget({Key? key, required this.videoUrl}) : super(key: key);
+  const VideoPlayerWidget({super.key, required this.videoUrl});
 
   @override
   State<VideoPlayerWidget> createState() => _VideoPlayerWidgetState();

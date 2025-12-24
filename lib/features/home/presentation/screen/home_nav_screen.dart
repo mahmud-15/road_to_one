@@ -8,7 +8,6 @@ import 'package:road_project_flutter/features/mealscreen/presentation/screen/mea
 import 'package:road_project_flutter/features/profile/presentaion/screen/profile_screen.dart';
 import 'package:road_project_flutter/features/store/presentation/screen/store_screen.dart';
 import '../../../../utils/constants/app_colors.dart';
-import '../../../../utils/constants/app_string.dart';
 import 'home_screen.dart';
 
 class HomeNavScreen extends StatelessWidget {
@@ -30,15 +29,17 @@ class HomeNavScreen extends StatelessWidget {
     final controller = Get.find<HomeNavController>();
 
     return Obx(
-          () => Scaffold(
+      () => Scaffold(
         body: IndexedStack(
           index: controller.selectedIndex.value,
           children: [
             controller.selectedIndex.value == 0 ? HomeScreen() : Container(),
-            controller.selectedIndex.value== 1 ? ProfileScreen():Container(),
+            controller.selectedIndex.value == 1 ? ProfileScreen() : Container(),
             controller.selectedIndex.value == 2 ? GymScreen() : Container(),
             controller.selectedIndex.value == 3 ? MealScreen() : Container(),
-            controller.selectedIndex.value == 4 ? BusinessScreen() : Container(),
+            controller.selectedIndex.value == 4
+                ? BusinessScreen()
+                : Container(),
             controller.selectedIndex.value == 5 ? StoreScreen() : Container(),
           ],
         ),
@@ -71,7 +72,7 @@ class HomeNavScreen extends StatelessWidget {
               onTap: controller.changeIndex,
               selectedItemColor: AppColors.primaryColor,
               unselectedItemColor: const Color(0xffA1A1A1),
-              showSelectedLabels: false,  // hide text
+              showSelectedLabels: false, // hide text
               showUnselectedLabels: false, // hide text
               iconSize: 24.sp,
               elevation: 0,
@@ -85,7 +86,9 @@ class HomeNavScreen extends StatelessWidget {
                       width: 32.w,
                       height: 32.h,
                       colorFilter: ColorFilter.mode(
-                        isSelected ? AppColors.primaryColor : const Color(0xffA1A1A1),
+                        isSelected
+                            ? AppColors.primaryColor
+                            : const Color(0xffA1A1A1),
                         BlendMode.srcIn,
                       ),
                     ),
@@ -114,7 +117,8 @@ class HomeNavController extends GetxController {
   }
 
   void changeIndex(int index) {
-    if (index == selectedIndex.value) return; // Prevent rebuilding if same index
+    if (index == selectedIndex.value)
+      return; // Prevent rebuilding if same index
     selectedIndex.value = index;
   }
 }

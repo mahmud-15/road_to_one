@@ -1,13 +1,18 @@
-import 'dart:convert';
-
+// ignore_for_file: public_member_api_docs, sort_constructors_first
 class ProfileModel {
   final String id;
-  final String name;
-  final String email;
-  final String image;
-  final List<dynamic> preferences;
+  String name;
+  String email;
+  String image;
+  final List<Preferences> preferences;
   final int totalPost;
   final int totalNetwork;
+  String about;
+  String mobile;
+  String location;
+  String occupation;
+  String dreamJob;
+  String education;
 
   ProfileModel({
     required this.id,
@@ -17,34 +22,41 @@ class ProfileModel {
     required this.preferences,
     required this.totalPost,
     required this.totalNetwork,
+    required this.about,
+    required this.mobile,
+    required this.location,
+    required this.occupation,
+    required this.dreamJob,
+    required this.education,
   });
 
-  Map<String, dynamic> toMap() {
-    return <String, dynamic>{
-      'id': id,
-      'name': name,
-      'email': email,
-      'image': image,
-      'preferences': preferences,
-      'totalPost': totalPost,
-      'totalNetwork': totalNetwork,
-    };
-  }
+  factory ProfileModel.fromJson(Map<String, dynamic> json) => ProfileModel(
+    id: json['id'] ?? "",
+    name: json['name'] ?? "",
+    email: json['email'] ?? "",
+    image: json['image'] ?? "",
+    about: json['about'] ?? "",
+    preferences: (json['preferences'] as List)
+        .map((e) => Preferences.fromJson(e))
+        .toList(),
+    totalPost: json['totalPost'] ?? 0,
+    totalNetwork: json['totalNetwork'] ?? 0,
+    dreamJob: json['dreamJob'] ?? "",
+    education: json['education'] ?? "",
+    location: json['location'] ?? "",
+    mobile: json['mobile'] ?? "",
+    occupation: json['occupation'] ?? "",
+  );
+}
 
-  factory ProfileModel.fromMap(Map<String, dynamic> map) {
-    return ProfileModel(
-      id: map['_id'] ?? "",
-      name: map['name'] ?? "N/A",
-      email: map['email'] ?? "N/A",
-      image: map['image'] ?? "",
-      preferences: List<dynamic>.from((map['preferences'] ?? [])),
-      totalPost: map['totalPost'] ?? 0,
-      totalNetwork: map['totalNetwork'] ?? 0,
-    );
-  }
-
-  String toJson() => json.encode(toMap());
-
-  factory ProfileModel.fromJson(String source) =>
-      ProfileModel.fromMap(json.decode(source) as Map<String, dynamic>);
+class Preferences {
+  String id;
+  String name;
+  bool active;
+  Preferences({required this.id, required this.name, required this.active});
+  factory Preferences.fromJson(Map<String, dynamic> json) => Preferences(
+    id: json['_id'] ?? "",
+    name: json['name'] ?? "",
+    active: json['active'] ?? "",
+  );
 }

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:get/get_core/src/get_main.dart';
 import 'package:road_project_flutter/component/image/common_image.dart';
 import 'package:road_project_flutter/component/text/common_text.dart';
 import 'package:road_project_flutter/config/route/app_routes.dart';
@@ -19,7 +18,10 @@ class SuccessDialog {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20.r),
           ),
-          contentPadding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 25.h),
+          contentPadding: EdgeInsets.symmetric(
+            horizontal: 20.w,
+            vertical: 25.h,
+          ),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [

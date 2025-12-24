@@ -1,17 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:intl_phone_field/phone_number.dart';
 import 'package:road_project_flutter/component/button/common_button.dart';
 import 'package:road_project_flutter/component/text/common_text.dart';
 import 'package:road_project_flutter/features/auth/phone_signup/presentation/controller/phonesignupcontroller.dart';
 import 'package:road_project_flutter/utils/constants/app_colors.dart';
 
-import '../../../signup/presentation/controller/sign_up_controller.dart';
 import 'package:country_picker/country_picker.dart';
 
 class PhoneSignUpScreen extends StatelessWidget {
-  const PhoneSignUpScreen({Key? key}) : super(key: key);
+  const PhoneSignUpScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -37,10 +35,10 @@ class PhoneSignUpScreen extends StatelessWidget {
 
               // Title
               CommonText(
-                  text: "Sign Up",
-                  fontSize: 36.sp,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.white50,
+                text: "Sign Up",
+                fontSize: 36.sp,
+                fontWeight: FontWeight.w600,
+                color: AppColors.white50,
               ),
 
               const SizedBox(height: 8),
@@ -57,10 +55,10 @@ class PhoneSignUpScreen extends StatelessWidget {
 
               // Mobile Number Label
               CommonText(
-                  text: "Mobile Number",
-                  fontSize: 14.sp,
-                  fontWeight: FontWeight.w400,
-                  color: AppColors.white50,
+                text: "Mobile Number",
+                fontSize: 14.sp,
+                fontWeight: FontWeight.w400,
+                color: AppColors.white50,
               ),
 
               const SizedBox(height: 12),
@@ -69,10 +67,7 @@ class PhoneSignUpScreen extends StatelessWidget {
               Container(
                 decoration: BoxDecoration(
                   border: Border(
-                    bottom: BorderSide(
-                      color: Colors.grey[800]!,
-                      width: 1,
-                    ),
+                    bottom: BorderSide(color: Colors.grey[800]!, width: 1),
                   ),
                 ),
                 child: Row(
@@ -95,9 +90,7 @@ class PhoneSignUpScreen extends StatelessWidget {
                             ),
                             inputDecoration: InputDecoration(
                               hintText: 'Search',
-                              hintStyle: TextStyle(
-                                color: Colors.grey[600],
-                              ),
+                              hintStyle: TextStyle(color: Colors.grey[600]),
                               prefixIcon: Icon(
                                 Icons.search,
                                 color: Colors.grey[600],
@@ -120,29 +113,31 @@ class PhoneSignUpScreen extends StatelessWidget {
                           },
                         );
                       },
-                      child: Obx(() => Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        child: Row(
-                          children: [
-                            Text(
-                              controller.selectedCountryFlag.value,
-                              style: TextStyle(fontSize: 24.sp),
-                            ),
-                            SizedBox(width: 4.w),
-                            Text(
-                              controller.selectedCountryCode.value,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 16,
+                      child: Obx(
+                        () => Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          child: Row(
+                            children: [
+                              Text(
+                                controller.selectedCountryFlag.value,
+                                style: TextStyle(fontSize: 24.sp),
                               ),
-                            ),
-                            const Icon(
-                              Icons.arrow_drop_down,
-                              color: Colors.white,
-                            ),
-                          ],
+                              SizedBox(width: 4.w),
+                              Text(
+                                controller.selectedCountryCode.value,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                ),
+                              ),
+                              const Icon(
+                                Icons.arrow_drop_down,
+                                color: Colors.white,
+                              ),
+                            ],
+                          ),
                         ),
-                      )),
+                      ),
                     ),
 
                     // Vertical Divider
@@ -178,12 +173,7 @@ class PhoneSignUpScreen extends StatelessWidget {
               ),
 
               SizedBox(height: 40.h),
-              CommonButton(
-                  titleText: "Get Otp",
-                  onTap: (){
-                    
-                  },
-              )
+              CommonButton(titleText: "Get Otp", onTap: () {}),
             ],
           ),
         ),

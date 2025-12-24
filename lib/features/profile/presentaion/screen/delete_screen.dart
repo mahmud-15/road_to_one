@@ -9,7 +9,7 @@ import '../../../../config/route/app_routes.dart';
 import '../controller/delete_controller.dart';
 
 class DeleteScreen extends StatelessWidget {
-  DeleteScreen({Key? key}) : super(key: key);
+  DeleteScreen({super.key});
 
   final controller = Get.put(DeleteController());
 
@@ -37,7 +37,7 @@ class DeleteScreen extends StatelessWidget {
                       ),
                     ),
                     SizedBox(height: 16.h),
-        
+
                     // Warning Message
                     Text(
                       'This action will delete your all plans and permanently erase your all data. You cannot undo this action.',
@@ -48,7 +48,7 @@ class DeleteScreen extends StatelessWidget {
                       ),
                     ),
                     SizedBox(height: 16.h),
-        
+
                     // Confirmation Message
                     Text(
                       'If you are sure you want to proceed, enter your password below',
@@ -59,7 +59,7 @@ class DeleteScreen extends StatelessWidget {
                       ),
                     ),
                     SizedBox(height: 32.h),
-        
+
                     // Password Field Label
                     Text(
                       'Enter Password',
@@ -70,49 +70,56 @@ class DeleteScreen extends StatelessWidget {
                       ),
                     ),
                     SizedBox(height: 12.h),
-        
+
                     // Password Input
-                    Obx(() => TextField(
-                      controller: controller.passwordController,
-                      obscureText: !controller.isPasswordVisible.value,
-                      style: TextStyle(color: Colors.white, fontSize: 14.sp),
-                      decoration: InputDecoration(
-                        hintText: 'Enter Password',
-                        hintStyle: TextStyle(color: Colors.grey[700], fontSize: 14.sp),
-                        suffixIcon: IconButton(
-                          icon: Icon(
-                            controller.isPasswordVisible.value
-                                ? Icons.visibility
-                                : Icons.visibility_off,
-                            color: Colors.grey[600],
-                            size: 20.sp,
+                    Obx(
+                      () => TextField(
+                        controller: controller.passwordController,
+                        obscureText: !controller.isPasswordVisible.value,
+                        style: TextStyle(color: Colors.white, fontSize: 14.sp),
+                        decoration: InputDecoration(
+                          hintText: 'Enter Password',
+                          hintStyle: TextStyle(
+                            color: Colors.grey[700],
+                            fontSize: 14.sp,
                           ),
-                          onPressed: controller.togglePasswordVisibility,
+                          suffixIcon: IconButton(
+                            icon: Icon(
+                              controller.isPasswordVisible.value
+                                  ? Icons.visibility
+                                  : Icons.visibility_off,
+                              color: Colors.grey[600],
+                              size: 20.sp,
+                            ),
+                            onPressed: controller.togglePasswordVisibility,
+                          ),
+                          enabledBorder: UnderlineInputBorder(
+                            borderSide: BorderSide(color: Colors.grey[800]!),
+                          ),
+                          focusedBorder: UnderlineInputBorder(
+                            borderSide: BorderSide(
+                              color: AppColors.primaryColor,
+                            ),
+                          ),
+                          contentPadding: EdgeInsets.symmetric(vertical: 12.h),
                         ),
-                        enabledBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(color: Colors.grey[800]!),
-                        ),
-                        focusedBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(color: AppColors.primaryColor),
-                        ),
-                        contentPadding: EdgeInsets.symmetric(vertical: 12.h),
                       ),
-                    )),
+                    ),
                   ],
                 ),
               ),
             ),
-        
+
             // Delete Account Button
             Padding(
               padding: const EdgeInsets.all(20),
               child: CommonButton(
-                  titleText: "Delete Account",
-                  onTap: () {
-                    Get.toNamed(AppRoutes.settingScreen);
-                  }
+                titleText: "Delete Account",
+                onTap: () {
+                  Get.toNamed(AppRoutes.settingScreen);
+                },
               ),
-            )
+            ),
           ],
         ),
       ),

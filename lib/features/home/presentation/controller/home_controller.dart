@@ -114,11 +114,12 @@ class HomeController extends GetxController {
           final userData = (data['data'] as List)
               .map((e) => PostModel.fromJson(e))
               .toList();
+          appLog("userData: ${userData.length}");
           posts.value = userData;
           update();
-          for (var c in posts) {
-            loadComments(context, c.id);
-          }
+          // for (var c in posts) {
+          //   loadComments(context, c.id);
+          // }
         }
       }
     } catch (e) {
@@ -222,24 +223,75 @@ class HomeController extends GetxController {
   }
 
   // Post actions
-  void toggleLike(String postId) {
+  void toggleLike(String postId) async {
     int index = posts.indexWhere((post) => post.id == postId);
     if (index != -1) {
       posts[index].isLiked = !posts[index].isLiked;
       posts.refresh();
+      update();
+      if (posts[index].isLiked) {
+        posts[index].likeOfPost += 1;
+      } else {
+        posts[index].likeOfPost -= 1;
+      }
+      update();
+      final url = "${ApiEndPoint.toggleLike}/$postId";
+      try {
+        await ApiService2.post(url, body: {});
+      } catch (e) {
+        errorLog("error in toggle like $e");
+      }
     }
   }
 
-  void onCommentTap(String postId) {
-    Get.snackbar('Comment', 'Comment on post $postId');
+  void onCommentTap(String postId) {}
+
+  void onSaveTap(BuildContext context, String postId) async {
+    final url = "${ApiEndPoint.toggleSave}/$postId";
+    final response = await ApiService2.post(url, body: {});
+    if (response == null) {
+      ScaffoldMessenger.of(context)
+        ..clearSnackBars()
+        ..showSnackBar(SnackBar(content: Text(AppString.someThingWrong)));
+    } else {
+      final data = response.data;
+      if (response.statusCode != 200) {
+        ScaffoldMessenger.of(context)
+          ..clearSnackBars()
+          ..showSnackBar(SnackBar(content: Text(data['message'])));
+      } else {
+        ScaffoldMessenger.of(context)
+          ..clearSnackBars()
+          ..showSnackBar(SnackBar(content: Text(data['message'])));
+        int index = posts.indexWhere((post) => post.id == postId);
+        posts[index].hasSave = !posts[index].hasSave;
+        update();
+      }
+    }
   }
 
-  void onSaveTap(String postId) {
-    Get.snackbar('Save', 'Post $postId saved');
-  }
-
-  void onConnectTap(String userName) {
-    Get.snackbar('Connect', 'Connected with $userName');
+  void onConnectTap(BuildContext context, String userId) async {
+    final body = {"requestTo": userId};
+    final response = await ApiService2.post(
+      ApiEndPoint.sendRequest,
+      body: body,
+    );
+    if (response == null) {
+      ScaffoldMessenger.of(context)
+        ..clearSnackBars()
+        ..showSnackBar(SnackBar(content: Text(AppString.someThingWrong)));
+    } else {
+      final data = response.data;
+      if (response.statusCode != 200) {
+        ScaffoldMessenger.of(context)
+          ..clearSnackBars()
+          ..showSnackBar(SnackBar(content: Text(data['message'])));
+      } else {
+        ScaffoldMessenger.of(context)
+          ..clearSnackBars()
+          ..showSnackBar(SnackBar(content: Text(data['message'])));
+      }
+    }
   }
 
   void onMoreTap(String postId) {

@@ -3,14 +3,14 @@ class PostModel {
   final Creator creator;
   final String caption;
   final String type;
-  final String createAt;
+  final DateTime createAt;
   final int commentOfPost;
-  final int likeOfPost;
+  int likeOfPost;
   final bool isOwner;
-  final bool hasSave;
+  bool hasSave;
   bool isLiked;
   final String connectionStatus;
-  final List<String> image;
+  final List<dynamic> image;
   PostModel({
     required this.id,
     required this.creator,
@@ -27,18 +27,18 @@ class PostModel {
   });
 
   factory PostModel.fromJson(Map<String, dynamic> json) => PostModel(
-    id: json['_id']?.toString() ?? "",
-    creator: Creator.fromJson((json['creator'] as Map?)?.cast<String, dynamic>() ?? const {}),
-    caption: json['caption']?.toString() ?? "",
-    type: json['type']?.toString() ?? "",
-    createAt: (json['createdAt'] ?? json['createAt'] ?? json['updatedAt'])?.toString() ?? "",
+    id: json['_id'] ?? "",
+    creator: Creator.fromJson(json['creator']),
+    caption: json['caption'] ?? "",
+    type: json['type'] ?? "",
+    createAt: DateTime.parse(json['createdAt']),
     commentOfPost: json['commentOfPost'] ?? 0,
     likeOfPost: json['likeOfPost'] ?? 0,
     isOwner: json['isOwner'] ?? false,
     hasSave: json['hasSave'] ?? false,
     isLiked: json['isLiked'] ?? false,
-    connectionStatus: json['connectionStatus']?.toString() ?? "",
-    image: (json['image'] as List?)?.map((e) => e?.toString() ?? "").where((e) => e.isNotEmpty).toList() ?? const <String>[],
+    connectionStatus: json['connectionStatus'] ?? "",
+    image: json['image'] ?? [],
   );
 }
 
@@ -55,9 +55,9 @@ class Creator {
   });
 
   factory Creator.fromJson(Map<String, dynamic> json) => Creator(
-    id: (json['_id'] ?? json['id'])?.toString() ?? "",
-    name: json['name']?.toString() ?? "",
-    image: json['image']?.toString() ?? "",
-    profileMode: (json['profile_mode'] ?? json['profileMode'])?.toString() ?? "",
+    id: json['id'] ?? "",
+    name: json['name'] ?? "",
+    image: json['image'] ?? "",
+    profileMode: json['profileMode'] ?? "",
   );
 }

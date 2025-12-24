@@ -1,31 +1,3 @@
-import 'dart:convert';
-
-// ignore_for_file: public_member_api_docs, sort_constructors_first
-
-// class StoryModelAll {
-//   List<StoryModel> stories;
-//   StoryModelAll({required this.stories});
-
-//   Map<String, dynamic> toMap() {
-//     return <String, dynamic>{'stories': stories.map((x) => x.toMap()).toList()};
-//   }
-
-//   factory StoryModelAll.fromMap(Map<String, dynamic> map) {
-//     return StoryModelAll(
-//       stories: List<StoryModel>.from(
-//         (map['stories'] as List<dynamic>).map<StoryModel>(
-//           (x) => StoryModel.fromMap(x as Map<String, dynamic>),
-//         ),
-//       ),
-//     );
-//   }
-
-//   String toJson() => json.encode(toMap());
-
-//   factory StoryModelAll.fromJson(String source) =>
-//       StoryModelAll.fromMap(json.decode(source) as Map<String, dynamic>);
-// }
-
 class StoryModel {
   final String id;
   final String name;

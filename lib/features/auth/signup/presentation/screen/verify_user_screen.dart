@@ -4,7 +4,7 @@ import 'package:pin_code_fields/pin_code_fields.dart';
 import 'package:road_project_flutter/features/auth/signup/presentation/controller/verify_user_controller.dart';
 
 class VerifyUserScreen extends StatelessWidget {
-  const VerifyUserScreen({Key? key}) : super(key: key);
+  const VerifyUserScreen({super.key});
 
   @override
   Widget build(BuildContext context) {

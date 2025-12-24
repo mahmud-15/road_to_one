@@ -1,32 +1,3 @@
-import 'dart:convert';
-
-// ignore_for_file: public_member_api_docs, sort_constructors_first
-class UserActivityAllStory {
-  List<UserActivityStory> userActivity;
-  UserActivityAllStory({required this.userActivity});
-
-  Map<String, dynamic> toMap() {
-    return <String, dynamic>{
-      'userActivity': userActivity.map((x) => x.toMap()).toList(),
-    };
-  }
-
-  factory UserActivityAllStory.fromMap(Map<String, dynamic> map) {
-    return UserActivityAllStory(
-      userActivity: List<UserActivityStory>.from(
-        (map['userActivity'] as List<int>).map<UserActivityStory>(
-          (x) => UserActivityStory.fromMap(x as Map<String, dynamic>),
-        ),
-      ),
-    );
-  }
-
-  String toJson() => json.encode(toMap());
-
-  factory UserActivityAllStory.fromJson(String source) =>
-      UserActivityAllStory.fromMap(json.decode(source) as Map<String, dynamic>);
-}
-
 class UserActivityStory {
   final String id;
   final Creator creator;
@@ -43,32 +14,15 @@ class UserActivityStory {
     required this.createAt,
   });
 
-  Map<String, dynamic> toMap() {
-    return <String, dynamic>{
-      '_id': id,
-      'creator': creator.toMap(),
-      'caption': caption,
-      'image': image,
-      'media': media,
-      'createAt': createAt,
-    };
-  }
-
-  factory UserActivityStory.fromMap(Map<String, dynamic> map) {
-    return UserActivityStory(
-      id: map['_id'] ?? "",
-      creator: Creator.fromMap(map['creator'] as Map<String, dynamic>),
-      caption: map['caption'] as String,
-      image: map['image'] as String,
-      media: map['media'] as String,
-      createAt: map['createAt'] as String,
-    );
-  }
-
-  String toJson() => json.encode(toMap());
-
-  factory UserActivityStory.fromJson(String source) =>
-      UserActivityStory.fromMap(json.decode(source) as Map<String, dynamic>);
+  factory UserActivityStory.fromJson(Map<String, dynamic> json) =>
+      UserActivityStory(
+        id: json['_id'] ?? "",
+        creator: Creator.fromJson(json['creator']),
+        caption: json['caption'] ?? "",
+        image: json['image'] ?? "",
+        media: json['media'] ?? "",
+        createAt: json['createAt'] ?? "",
+      );
 }
 
 class Creator {
@@ -96,38 +50,16 @@ class Creator {
     required this.location,
   });
 
-  Map<String, dynamic> toMap() {
-    return <String, dynamic>{
-      'id': id,
-      'name': name,
-      'email': email,
-      'image': image,
-      'role': role,
-      'status': status,
-      'verified': verified,
-      'profileMode': profileMode,
-      'createAt': createAt,
-      'location': location,
-    };
-  }
-
-  factory Creator.fromMap(Map<String, dynamic> map) {
-    return Creator(
-      id: map['id'] ?? "",
-      name: map['name'] ?? "N/A",
-      email: map['email'] ?? "",
-      image: map['image'] ?? "",
-      role: map['role'] ?? "",
-      status: map['status'] ?? "",
-      verified: map['verified'] ?? false,
-      profileMode: map['profileMode'] ?? "",
-      createAt: map['createAt'] ?? "",
-      location: map['location'] ?? "",
-    );
-  }
-
-  String toJson() => json.encode(toMap());
-
-  factory Creator.fromJson(String source) =>
-      Creator.fromMap(json.decode(source) as Map<String, dynamic>);
+  factory Creator.fromJson(Map<String, dynamic> json) => Creator(
+    id: json['_id'] ?? "",
+    name: json['name'] ?? "",
+    email: json['email'] ?? "",
+    image: json['image'] ?? "",
+    role: json['role'] ?? "",
+    status: json['status'] ?? "",
+    verified: json['verified'] ?? false,
+    profileMode: json['profileMode'] ?? "",
+    createAt: json['createAt'] ?? "",
+    location: json['location'] ?? "",
+  );
 }

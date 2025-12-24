@@ -1,8 +1,5 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get/get_state_manager/src/simple/get_controllers.dart';
 import 'package:road_project_flutter/config/route/app_routes.dart';
 
 import '../../../../config/api/api_end_point.dart';

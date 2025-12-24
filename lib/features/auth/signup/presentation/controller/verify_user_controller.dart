@@ -4,7 +4,6 @@ import 'package:road_project_flutter/config/api/api_end_point.dart';
 import 'package:road_project_flutter/services/api/api_service.dart';
 import 'package:road_project_flutter/services/storage/storage_keys.dart';
 import 'package:road_project_flutter/services/storage/storage_services.dart';
-import 'package:road_project_flutter/utils/app_utils.dart';
 import 'package:road_project_flutter/utils/constants/app_string.dart';
 
 class VerifyUserController extends GetxController {

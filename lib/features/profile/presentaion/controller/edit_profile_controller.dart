@@ -1,23 +1,17 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:road_project_flutter/config/api/api_end_point.dart';
+import 'package:road_project_flutter/features/profile/data/profile_model.dart';
 import 'package:road_project_flutter/services/api/api_service.dart';
-import 'package:road_project_flutter/services/storage/storage_services.dart';
+import 'package:road_project_flutter/utils/constants/app_string.dart';
+import 'package:road_project_flutter/utils/log/app_log.dart';
 
-class EditProfileController {
+class EditProfileController extends GetxController {
   // Profile data
-  String profileImageUrl =
-      "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop";
-  String aboutMe =
-      "Scelerisque Phasellus Donec amet, eget ipsum, consectetur id varius at, nec nec odor ipsum amet, iincidunt quis vitae";
-  String userName = "New Jack";
-  String email = "Gabriel01@gmail.com";
-  String contactNo = "+8801050000000";
-  String location = "Dhaka, Bangladesh";
-  String occupation = "Business";
-  String dreamJob = "Pilot";
-  String education = "Graduated";
+
+  final user = Rxn<ProfileModel>();
+
   String interestedIn = "Socializing, Adventure, Travelling";
 
   // Text editing controllers
@@ -33,43 +27,63 @@ class EditProfileController {
 
   File? selectedProfileImage; // Selected local image
 
-  void updateProfileImage(File image) {
+  final allPreferences = <Preferences>[].obs;
+  final selectedPref = <Preferences>[].obs;
+
+  void updateProfileImage(BuildContext context, File image) async {
     selectedProfileImage = image;
+    update();
+    final response = await ApiService2.formDataImage(
+      ApiEndPoint.user,
+      isPost: false,
+      image: image.path,
+    );
+    if (response == null) {
+      ScaffoldMessenger.of(context)
+        ..clearSnackBars()
+        ..showSnackBar(SnackBar(content: Text(AppString.someThingWrong)));
+    } else {
+      final data = response.data;
+      if (response.statusCode != 200) {
+        ScaffoldMessenger.of(context)
+          ..clearSnackBars()
+          ..showSnackBar(
+            SnackBar(content: Text(data['message'] ?? response.statusMessage)),
+          );
+      } else {
+        ScaffoldMessenger.of(context)
+          ..clearSnackBars()
+          ..showSnackBar(SnackBar(content: Text(data['message'])));
+      }
+    }
   }
 
-  void removeProfileImage() {
+  void updateAboutMe(BuildContext context) async {
+    final value = aboutMeController.text;
+    user.value!.about = value;
+    update();
+    final response = await ApiService.patch(
+      ApiEndPoint.user,
+      body: {'about': value},
+    );
+    if (response.isSuccess) {
+      ScaffoldMessenger.of(context)
+        ..clearSnackBars()
+        ..showSnackBar(SnackBar(content: Text(response.message)));
+      Navigator.pop(context);
+    } else {
+      ScaffoldMessenger.of(context)
+        ..clearSnackBars()
+        ..showSnackBar(SnackBar(content: Text(response.message)));
+    }
+  }
+
+  void removeProfileImage() async {
     selectedProfileImage = null;
+    update();
   }
 
-  EditProfileController() {
-    // Initialize controllers with current values
-    aboutMeController.text = aboutMe;
-    userNameController.text = userName;
-    emailController.text = email;
-    contactNoController.text = contactNo;
-    locationController.text = location;
-    occupationController.text = occupation;
-    dreamJobController.text = dreamJob;
-    educationController.text = education;
-    interestedInController.text = interestedIn;
-  }
-
-  void saveProfile() {
-    // Update values from controllers
-    aboutMe = aboutMeController.text;
-    userName = userNameController.text;
-    email = emailController.text;
-    contactNo = contactNoController.text;
-    location = locationController.text;
-    occupation = occupationController.text;
-    dreamJob = dreamJobController.text;
-    education = educationController.text;
-    interestedIn = interestedInController.text;
-
-    print("Profile saved successfully!");
-  }
-
-  void dispose() {
+  void disposeController() {
     aboutMeController.dispose();
     userNameController.dispose();
     emailController.dispose();
@@ -81,54 +95,82 @@ class EditProfileController {
     interestedInController.dispose();
   }
 
-  void updateProfile(
-    BuildContext context, {
-    String? name,
-    String? mobile,
-    String? location,
-    String? occupation,
-    String? dreamJob,
-    String? education,
-    String? image,
-    String? about,
-    String? preferences1,
-    String? preferences2,
-    String? profileMode,
-    Map<String?, dynamic>? shippingAddress,
-  }) async {
+  @override
+  void onInit() {
+    // TODO: implement onInit
+    super.onInit();
+    user.value = Get.arguments;
+    appLog("username: ${user.value?.name ?? "Not found"}");
+    initial();
+  }
+
+  @override
+  void onClose() {
+    // TODO: implement onClose
+    super.onClose();
+    disposeController();
+  }
+
+  void initial() {
+    aboutMeController.text = user.value!.about;
+    userNameController.text = user.value!.name;
+    emailController.text = user.value!.email;
+    contactNoController.text = user.value!.mobile;
+    locationController.text = user.value!.location;
+    occupationController.text = user.value!.occupation;
+    dreamJobController.text = user.value!.dreamJob;
+    educationController.text = user.value!.education;
+
+    // write all the field of user to controller
+  }
+
+  void updateDetails(BuildContext context) async {
+    user.value!.name = userNameController.text.trim();
+    user.value!.email = emailController.text.trim();
+    user.value!.mobile = contactNoController.text.trim();
+    user.value!.location = locationController.text.trim();
+    user.value!.occupation = occupationController.text.trim();
+    user.value!.dreamJob = dreamJobController.text.trim();
+    user.value!.education = educationController.text.trim();
+    update();
     final body = {
-      'name': name,
-      'mobile': mobile,
-      'location': location,
-      'occupation': occupation,
-      'dreamJob': dreamJob,
-      'education': education,
-      'image': image,
-      'about': about,
-      'preferences[0]': preferences1,
-      'preferences[1]': preferences2,
-      'profileMode': profileMode,
-      'shipping_address': shippingAddress,
+      'name': user.value!.name,
+      'mobile': user.value!.mobile,
+      'location': user.value!.location,
+      'occupation': user.value!.occupation,
+      'dreamJob': user.value!.dreamJob,
+      'education': user.value!.education,
     };
-
-    final header = {
-      'Content-Type': "multipart/form-data",
-      'Authorization': "Bearer ${LocalStorage.token}",
-    };
-
-    final response = await ApiService.patch(
-      ApiEndPoint.user,
-      body: body,
-      header: header,
-    );
-    if (response.statusCode != 200) {
+    final response = await ApiService.patch(ApiEndPoint.user, body: body);
+    if (response.isSuccess) {
       ScaffoldMessenger.of(context)
         ..clearSnackBars()
         ..showSnackBar(SnackBar(content: Text(response.message)));
+      Navigator.of(context).pop();
     } else {
       ScaffoldMessenger.of(context)
         ..clearSnackBars()
         ..showSnackBar(SnackBar(content: Text(response.message)));
     }
+  }
+
+  void fetchAllPref() async {
+    final url = ApiEndPoint.preferences;
+    final response = await ApiService2.get(url);
+
+    if (response != null && response.statusCode == 200) {
+      allPreferences.value = (response.data['data'] as List)
+          .map((e) => Preferences.fromJson(e))
+          .toList();
+      update();
+    }
+  }
+
+  void updatePreference(BuildContext context) async {
+    final body = {'preferences': user.value!.preferences};
+    final response = await ApiService.patch(ApiEndPoint.user, body: body);
+    ScaffoldMessenger.of(context)
+      ..clearSnackBars()
+      ..showSnackBar(SnackBar(content: Text(response.message)));
   }
 }

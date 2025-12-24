@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:road_project_flutter/component/button/common_button.dart';
-import 'package:road_project_flutter/component/image/app_bar.dart';
 import 'package:road_project_flutter/component/image/common_image.dart';
 
 import '../../../../component/text/common_text.dart';
@@ -24,9 +23,9 @@ class SuccessPaymentScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               CommonImage(
-                  imageSrc: "assets/images/success_home.png",
-                  height: 367.h,
-                  width: 375.w,
+                imageSrc: "assets/images/success_home.png",
+                height: 367.h,
+                width: 375.w,
               ),
               CommonText(
                 text: "Thank You",
@@ -43,11 +42,11 @@ class SuccessPaymentScreen extends StatelessWidget {
               ),
               SizedBox(height: 24.h),
               CommonButton(
-                  titleText: "Go to Home",
-                onTap: (){
-                       Get.offAllNamed(AppRoutes.homeNav);
+                titleText: "Go to Home",
+                onTap: () {
+                  Get.offAllNamed(AppRoutes.homeNav);
                 },
-              )
+              ),
             ],
           ),
         ),
