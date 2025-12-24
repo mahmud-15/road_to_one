@@ -461,23 +461,16 @@ class _StoryViewScreenState extends State<StoryViewScreen>
                                 SizedBox(width: 12.w),
                                 GestureDetector(
                                   onTap: () {
-                                    setState(() {
-                                      // Toggle like animation or add to liked messages
-                                    });
-                                    Get.snackbar(
-                                      'Liked',
-                                      'You liked this story',
-                                      backgroundColor: Colors.red.withOpacity(
-                                        0.8,
-                                      ),
-                                      colorText: Colors.white,
-                                      duration: const Duration(seconds: 1),
-                                      snackPosition: SnackPosition.TOP,
-                                      margin: EdgeInsets.all(16.r),
-                                    );
+                                    controller.toggleStoryLike(_currentIndex);
                                   },
                                   child: Icon(
-                                    Icons.favorite_border,
+                                    controller
+                                            .userStory
+                                            .value!
+                                            .stories[_currentIndex]
+                                            .isLiked
+                                        ? Icons.favorite
+                                        : Icons.favorite_border,
                                     color: Colors.white,
                                     size: 28.sp,
                                   ),

@@ -54,4 +54,17 @@ class ShowStoryController extends GetxController {
       update();
     }
   }
+
+  void toggleStoryLike(int index) async {
+    userStory.value!.stories[index].isLiked =
+        !userStory.value!.stories[index].isLiked;
+    update();
+    final url =
+        "${ApiEndPoint.story}/${userStory.value!.stories[index].id}/likes/toggle";
+    try {
+      await ApiService2.post(url, body: {});
+    } catch (e) {
+      errorLog("error in toggle like: $e");
+    }
+  }
 }
