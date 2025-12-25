@@ -16,4 +16,5 @@ class AppIcons {
   static const String nailCare = "$baseurl/nail_care.svg";
   static const String skinCare = "$baseurl/skin_care.svg";
   static const String makeup = "$baseurl/makeup.svg";
+  static const String removeUser = "$baseurl/remove_user.png";
 }

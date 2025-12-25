@@ -7,6 +7,7 @@ import 'package:road_project_flutter/features/profile/data/profile_model.dart';
 import 'package:road_project_flutter/features/profile/data/user_activity_like.dart';
 import 'package:road_project_flutter/features/profile/data/user_activity_model.dart';
 import 'package:road_project_flutter/features/profile/data/user_activity_photo.dart';
+import 'package:road_project_flutter/features/profile/data/user_activity_save.dart';
 import 'package:road_project_flutter/features/profile/data/user_activity_story.dart';
 import 'package:road_project_flutter/services/api/api_service.dart';
 import 'package:road_project_flutter/services/storage/storage_services.dart';
@@ -23,7 +24,7 @@ class ProfileController extends GetxController {
   final saveLoading = false.obs;
   final user = Rxn<ProfileModel>();
   final userImage = RxList<UserActivityModel>();
-  final userStory = RxList<UserActivityModel>();
+  final userVideo = RxList<UserActivityModel>();
   final userLike = RxList<UserActivityModel>();
   final userSave = RxList<UserActivityModel>();
   // final String username = "Alex Peterson";
@@ -212,7 +213,8 @@ class ProfileController extends GetxController {
     fetchProfile(context);
     fetchAllImage(context);
     fetchPost(context);
-    fetchStory(context);
+    fetchVideo(context);
+    fetchSave(context);
   }
 
   void fetchProfile(BuildContext context) async {
@@ -250,7 +252,7 @@ class ProfileController extends GetxController {
     update();
     try {
       final url =
-          "${ApiEndPoint.userActivity}/${LocalStorage.userId}?type=photo";
+          "${ApiEndPoint.userActivity}/${LocalStorage.userId}?type=post";
       final response = await ApiService2.get(url);
       if (response == null) {
         ScaffoldMessenger.of(context)
@@ -263,36 +265,43 @@ class ProfileController extends GetxController {
             ..clearSnackBars()
             ..showSnackBar(SnackBar(content: Text(data['message'])));
         } else {
-          final userData = (data['data'] as List)
-              .map((e) => UserActivityPhoto.fromJson(e))
-              .toList();
-          if (userData.isNotEmpty) {
+          final temp = data['data'] as List;
+          if (temp.isNotEmpty) {
+            final userData = temp
+                .map((e) => UserActivityPhoto.fromJson(e))
+                .toList();
             userImage.value = userData
+                .where(
+                  (e) => e.type == 'image'
+                      ? e.image.isNotEmpty
+                      : e.media.isNotEmpty,
+                )
                 .map(
                   (e) => UserActivityModel(
-                    file: e.type == 'image' ? e.image[0] : e.media[0],
+                    file: e.type == 'image' ? e.image.first : e.media.first,
                     type: e.type,
                   ),
                 )
                 .toList();
+
+            update();
           }
-          update();
         }
       }
     } catch (e) {
-      errorLog("error in image: $e");
+      errorLog("error in post: $e");
     } finally {
       imageLoading.value = false;
       update();
     }
   }
 
-  void fetchStory(BuildContext context) async {
+  void fetchVideo(BuildContext context) async {
     storyLoading.value = true;
     update();
     try {
       final url =
-          "${ApiEndPoint.userActivity}/${LocalStorage.userId}?type=story";
+          "${ApiEndPoint.userActivity}/${LocalStorage.userId}?type=video";
       final response = await ApiService2.get(url);
       if (response == null) {
         ScaffoldMessenger.of(context)
@@ -305,15 +314,18 @@ class ProfileController extends GetxController {
             ..clearSnackBars()
             ..showSnackBar(SnackBar(content: Text(data['message'])));
         } else {
-          final userData = (data['data'] as List)
-              .map((e) => UserActivityStory.fromJson(e))
-              .toList();
-          if (userData.isNotEmpty) {
-            userStory.value = userData
-                .map((e) => UserActivityModel(file: e.image, type: 'image'))
+          final temp = data['data'] as List;
+          if (temp.isNotEmpty) {
+            userVideo.value = temp
+                .map(
+                  (e) => UserActivityModel(
+                    file: (e['media'] as List).first,
+                    type: 'video',
+                  ),
+                )
                 .toList();
+            update();
           }
-          update();
         }
       }
     } catch (e) {
@@ -342,18 +354,27 @@ class ProfileController extends GetxController {
             ..clearSnackBars()
             ..showSnackBar(SnackBar(content: Text(data['message'])));
         } else {
-          final userData = (data['data'] as List)
-              .map((e) => UserActivityLike.fromJson(e))
-              .toList();
-          if (userData.isNotEmpty) {
+          final temp = data['data'] as List;
+          if (temp.isNotEmpty) {
+            final userData = (data['data'] as List)
+                .map((e) => UserActivityLike.fromJson(e))
+                .toList();
             userLike.value = userData
+                .where(
+                  (element) =>
+                      (element.post != null) &&
+                      (element.post!.image.isNotEmpty),
+                )
                 .map(
-                  (e) =>
-                      UserActivityModel(file: e.post!.image[0], type: 'image'),
+                  (e) => UserActivityModel(
+                    file: e.post!.image.first,
+                    type: "image",
+                  ),
                 )
                 .toList();
+
+            update();
           }
-          update();
         }
       }
     } catch (e) {
@@ -382,11 +403,16 @@ class ProfileController extends GetxController {
             ..showSnackBar(SnackBar(content: Text(data['message'])));
         } else {
           final userdata = (data['data'] as List)
-              .map((e) => PostModel.fromJson(e))
+              .map((e) => UserActivitySave.fromJson(e))
               .toList();
           if (userdata.isNotEmpty) {
             userSave.value = userdata
-                .map((e) => UserActivityModel(file: e.image[0], type: 'image'))
+                .map(
+                  (e) => UserActivityModel(
+                    file: e.post.image.first,
+                    type: 'image',
+                  ),
+                )
                 .toList();
           }
           update();

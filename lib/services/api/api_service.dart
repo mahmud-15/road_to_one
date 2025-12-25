@@ -73,31 +73,74 @@ class ApiService2 {
     }
   }
 
-  static Future<Response<dynamic>?> formDataImage(
+  static Future<Response<dynamic>?> patch(
     String url, {
-    required String image,
+    Map<dynamic, dynamic>? body,
+    Map<String, dynamic>? header,
+  }) async {
+    final dio = Dio();
+    final mainHeader = {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer ${LocalStorage.token}",
+    };
+
+    appLog("Url: $url\nHeader: ${header ?? mainHeader}\nBody: $body");
+
+    try {
+      final response = await dio.patch(
+        url,
+        data: body,
+        options: Options(headers: header ?? mainHeader),
+      );
+      appLog(response);
+
+      return response;
+    } on DioException catch (e) {
+      // 👇 THIS IS WHERE 400 LIVES
+      appLog("Dio Error!");
+      appLog("Status: ${e.response?.statusCode}");
+      appLog("Data: ${e.response?.data}");
+      return e.response;
+    } on Exception catch (e) {
+      appLog(e);
+      return null;
+    }
+  }
+
+  static Future<Response<dynamic>?> multipart(
+    String url, {
+    Map<String, dynamic>? body,
+    String? image,
     Map<String, dynamic>? header,
     required bool isPost,
   }) async {
+    final formData = FormData();
+    if (body != null) {
+      body.forEach((key, value) => formData.fields.add(MapEntry(key, value)));
+    }
+    if (image != null) {
+      formData.files.add(
+        MapEntry('image', await MultipartFile.fromFile(image)),
+      );
+    }
+
     final dio = Dio();
     final mainHeader = {"Authorization": "Bearer ${LocalStorage.token}"};
 
     appLog("Url: $url\nHeader: ${header ?? mainHeader}");
-    final formdata = FormData.fromMap({
-      'image': [await MultipartFile.fromFile(image, filename: image)],
-    });
+
     try {
       Response response;
       if (isPost) {
         response = await dio.post(
           url,
-          data: formdata,
+          data: formData,
           options: Options(headers: header ?? mainHeader),
         );
       } else {
         response = await dio.patch(
           url,
-          data: formdata,
+          data: formData,
           options: Options(headers: header ?? mainHeader),
         );
       }

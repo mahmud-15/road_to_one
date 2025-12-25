@@ -9,8 +9,8 @@ class PostModel {
   final bool isOwner;
   bool hasSave;
   bool isLiked;
-  final String connectionStatus;
-  final List<dynamic> image;
+  String connectionStatus;
+  final List<String> image;
   PostModel({
     required this.id,
     required this.creator,
@@ -38,7 +38,9 @@ class PostModel {
     hasSave: json['hasSave'] ?? false,
     isLiked: json['isLiked'] ?? false,
     connectionStatus: json['connectionStatus'] ?? "",
-    image: json['image'] ?? [],
+    image: json['image'] != null
+        ? (json['image'] as List).map((e) => e.toString()).toList()
+        : [],
   );
 }
 
@@ -55,7 +57,7 @@ class Creator {
   });
 
   factory Creator.fromJson(Map<String, dynamic> json) => Creator(
-    id: json['id'] ?? "",
+    id: json['_id'] ?? "",
     name: json['name'] ?? "",
     image: json['image'] ?? "",
     profileMode: json['profileMode'] ?? "",

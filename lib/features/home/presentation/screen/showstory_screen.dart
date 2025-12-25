@@ -5,6 +5,7 @@ import 'package:road_project_flutter/config/api/api_end_point.dart';
 import 'package:road_project_flutter/features/home/presentation/controller/show_story_controller.dart';
 import 'package:road_project_flutter/features/home/presentation/models/user_story_model.dart';
 import 'package:road_project_flutter/utils/app_utils.dart';
+import 'package:road_project_flutter/utils/constants/app_string.dart';
 
 class StoryViewScreen extends StatefulWidget {
   const StoryViewScreen({super.key});
@@ -179,6 +180,13 @@ class _StoryViewScreenState extends State<StoryViewScreen>
                           fit: BoxFit.cover,
                           width: double.infinity,
                           height: double.infinity,
+                          errorBuilder: (context, error, stackTrace) =>
+                              Image.network(
+                                AppString.defaultProfilePic,
+                                fit: BoxFit.cover,
+                                width: double.infinity,
+                                height: double.infinity,
+                              ),
                         );
                       },
                     ),
@@ -252,7 +260,8 @@ class _StoryViewScreenState extends State<StoryViewScreen>
                                 CircleAvatar(
                                   radius: 20.r,
                                   backgroundImage: NetworkImage(
-                                    controller.userStory.value!.user.image,
+                                    ApiEndPoint.imageUrl +
+                                        controller.userStory.value!.user.image,
                                   ),
                                 ),
                                 SizedBox(width: 12.w),
@@ -452,23 +461,16 @@ class _StoryViewScreenState extends State<StoryViewScreen>
                                 SizedBox(width: 12.w),
                                 GestureDetector(
                                   onTap: () {
-                                    setState(() {
-                                      // Toggle like animation or add to liked messages
-                                    });
-                                    Get.snackbar(
-                                      'Liked',
-                                      'You liked this story',
-                                      backgroundColor: Colors.red.withOpacity(
-                                        0.8,
-                                      ),
-                                      colorText: Colors.white,
-                                      duration: const Duration(seconds: 1),
-                                      snackPosition: SnackPosition.TOP,
-                                      margin: EdgeInsets.all(16.r),
-                                    );
+                                    controller.toggleStoryLike(_currentIndex);
                                   },
                                   child: Icon(
-                                    Icons.favorite_border,
+                                    controller
+                                            .userStory
+                                            .value!
+                                            .stories[_currentIndex]
+                                            .isLiked
+                                        ? Icons.favorite
+                                        : Icons.favorite_border,
                                     color: Colors.white,
                                     size: 28.sp,
                                   ),

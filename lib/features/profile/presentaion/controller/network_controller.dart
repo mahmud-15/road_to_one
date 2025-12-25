@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:road_project_flutter/config/api/api_end_point.dart';
 import 'package:road_project_flutter/services/api/api_service.dart';
 import 'package:road_project_flutter/utils/constants/app_string.dart';
+import 'package:road_project_flutter/utils/log/error_log.dart';
 
 import '../../data/network_status.dart';
 
@@ -10,6 +11,7 @@ class NetworkController extends GetxController {
   final TextEditingController searchController = TextEditingController();
 
   RxList<NetworkUser> users = <NetworkUser>[].obs;
+  final isLoading = false.obs;
 
   @override
   void onInit() {
@@ -19,28 +21,48 @@ class NetworkController extends GetxController {
   }
 
   void fetchUsers(BuildContext context) async {
-    final response = await ApiService2.get(ApiEndPoint.networkedUser);
-    if (response == null) {
-      ScaffoldMessenger.of(context)
-        ..clearSnackBars()
-        ..showSnackBar(SnackBar(content: Text(AppString.someThingWrong)));
-    } else {
-      final data = response.data;
-      if (response.statusCode != 200) {
+    isLoading.value = true;
+    update();
+    try {
+      final response = await ApiService2.get(ApiEndPoint.networkedUser);
+      if (response == null) {
         ScaffoldMessenger.of(context)
           ..clearSnackBars()
-          ..showSnackBar(SnackBar(content: Text(data['message'])));
+          ..showSnackBar(SnackBar(content: Text(AppString.someThingWrong)));
       } else {
-        final userData = (data['data'] as List)
-            .map((e) => NetworkUser.fromJson(e))
-            .toList();
-        users.value = userData;
-        update();
+        final data = response.data;
+        if (response.statusCode != 200) {
+          ScaffoldMessenger.of(context)
+            ..clearSnackBars()
+            ..showSnackBar(SnackBar(content: Text(data['message'])));
+        } else {
+          final userData = (data['data'] as List)
+              .map((e) => NetworkUser.fromJson(e))
+              .toList();
+          users.value = userData;
+          update();
+        }
       }
+    } catch (e) {
+      errorLog("error in user network: $e");
+    } finally {
+      isLoading.value = false;
+      update();
     }
   }
 
-  void acceptFollowRequest(int index) {
+  void acceptFollowRequest(BuildContext context, int index) async {
+    try {
+      final body = {"status": "accepted"};
+      final url = "${ApiEndPoint.networkedUser}/${users[index].id}";
+      final response = await ApiService2.patch(url, body: body);
+      if (response != null && response.statusCode == 200) {
+        users[index].status = "accepted";
+        update();
+      }
+    } catch (e) {
+      errorLog("error in accept follow request: $e");
+    }
     // users[index].status = NetworkStatus.accepted;
     // users.refresh();
     // Get.snackbar(
@@ -52,7 +74,18 @@ class NetworkController extends GetxController {
     // );
   }
 
-  void rejectFollowRequest(int index) {
+  void rejectFollowRequest(BuildContext context, int index) async {
+    try {
+      final body = {"status": "rejected"};
+      final url = "${ApiEndPoint.networkedUser}/${users[index].id}";
+      final response = await ApiService2.patch(url, body: body);
+      if (response != null && response.statusCode == 200) {
+        users.removeAt(index);
+        update();
+      }
+    } catch (e) {
+      errorLog("error in reject follow request: $e");
+    }
     // final userName = users[index].name;
     // users.removeAt(index);
     // Get.snackbar(
@@ -64,8 +97,21 @@ class NetworkController extends GetxController {
     // );
   }
 
-  void unfollowUser(int index) {
+  void unfollowUser(BuildContext context, int index) async {
+    try {
+      final url =
+          "${ApiEndPoint.networkedUser}/disconnect/${users[index].user.id}";
+      final response = await ApiService2.patch(url);
+      if (response != null && response.statusCode == 200) {
+        users.removeAt(index);
+        update();
+      }
+    } catch (e) {
+      errorLog("error in unfollow: $e");
+    }
+
     // final userName = users[index].name;
+
     // users.removeAt(index);
     // Get.snackbar(
     //   'Unfollowed',

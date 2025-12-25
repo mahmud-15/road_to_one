@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:road_project_flutter/component/image/app_bar.dart';
+import 'package:road_project_flutter/config/api/api_end_point.dart';
 import 'package:road_project_flutter/utils/constants/app_colors.dart';
+import 'package:road_project_flutter/utils/constants/app_icons.dart';
+import 'package:road_project_flutter/utils/constants/app_string.dart';
 
 import '../../data/network_status.dart';
 import '../controller/network_controller.dart';
@@ -53,13 +56,21 @@ class NetworkScreen extends StatelessWidget {
 
             // Users List
             Expanded(
-              child: ListView.builder(
-                itemCount: controller.users.length,
-                itemBuilder: (context, index) {
-                  final user = controller.users[index];
-                  return _buildNetworkItem(controller, index);
-                },
-              ),
+              child: controller.isLoading.value
+                  ? Center(child: CircularProgressIndicator())
+                  : controller.users.isEmpty
+                  ? Center(
+                      child: Text(
+                        "No network found",
+                        style: TextStyle(color: AppColors.white),
+                      ),
+                    )
+                  : ListView.builder(
+                      itemCount: controller.users.length,
+                      itemBuilder: (context, index) {
+                        return _buildNetworkItem(context, controller, index);
+                      },
+                    ),
             ),
           ],
         ),
@@ -67,7 +78,11 @@ class NetworkScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildNetworkItem(NetworkController controller, int index) {
+  Widget _buildNetworkItem(
+    BuildContext context,
+    NetworkController controller,
+    int index,
+  ) {
     final user = controller.users[index];
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
@@ -76,8 +91,20 @@ class NetworkScreen extends StatelessWidget {
           // Profile Image
           CircleAvatar(
             radius: 24.r,
-            backgroundImage: NetworkImage(user.user.image),
             backgroundColor: Colors.grey[800],
+            child: ClipOval(
+              child: Image.network(
+                fit: BoxFit.cover,
+                width: 48.r,
+                height: 48.r,
+                ApiEndPoint.imageUrl + user.user.image,
+                errorBuilder: (context, error, stackTrace) => Image.network(
+                  AppString.defaultProfilePic,
+                  width: 48.r,
+                  height: 48.r,
+                ),
+              ),
+            ),
           ),
           SizedBox(width: 12.w),
 
@@ -103,21 +130,25 @@ class NetworkScreen extends StatelessWidget {
           ),
 
           // Action Buttons based on status
-          Obx(() => _buildActionButtons(controller, index)),
+          Obx(() => _buildActionButtons(context, controller, index)),
         ],
       ),
     );
   }
 
-  Widget _buildActionButtons(NetworkController controller, int index) {
+  Widget _buildActionButtons(
+    BuildContext context,
+    NetworkController controller,
+    int index,
+  ) {
     final user = controller.users[index];
     switch (user.status) {
-      case NetworkStatus.pending:
+      case "pending":
         return Row(
           children: [
             // Follow Back Button
             ElevatedButton(
-              onPressed: () => controller.acceptFollowRequest(index),
+              onPressed: () => controller.acceptFollowRequest(context, index),
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFFb4ff39),
                 padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
@@ -127,7 +158,7 @@ class NetworkScreen extends StatelessWidget {
                 minimumSize: Size(0, 0),
               ),
               child: Text(
-                'Follow back',
+                'Accept',
                 style: TextStyle(
                   color: Colors.black,
                   fontSize: 12.sp,
@@ -136,15 +167,35 @@ class NetworkScreen extends StatelessWidget {
               ),
             ),
             SizedBox(width: 8.w),
-            // Close/Reject Button
-            GestureDetector(
-              onTap: () => controller.rejectFollowRequest(index),
-              child: Icon(Icons.close, color: Colors.white, size: 24.sp),
+            ElevatedButton(
+              onPressed: () => controller.rejectFollowRequest(context, index),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.transparent,
+                padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+                shape: RoundedRectangleBorder(
+                  side: BorderSide(color: Colors.red),
+                  borderRadius: BorderRadius.circular(20.r),
+                ),
+                minimumSize: Size(0, 0),
+              ),
+              child: Text(
+                'Decline',
+                style: TextStyle(
+                  color: Colors.red,
+                  fontSize: 12.sp,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
             ),
+            // Close/Reject Button
+            // GestureDetector(
+            //   onTap: () => controller.rejectFollowRequest(context, index),
+            //   child: Icon(Icons.close, color: Colors.white, size: 24.sp),
+            // ),
           ],
         );
 
-      case NetworkStatus.accepted:
+      case "accepted":
         return Row(
           children: [
             // Message Button
@@ -161,22 +212,26 @@ class NetworkScreen extends StatelessWidget {
               child: Text(
                 'Message',
                 style: TextStyle(
-                  color: Colors.white,
+                  color: Color(0xFFb4ff39),
                   fontSize: 12.sp,
                   fontWeight: FontWeight.w500,
                 ),
               ),
             ),
             SizedBox(width: 8.w),
-            // More Options
             GestureDetector(
-              onTap: () => _showFollowingOptions(controller, index),
-              child: Icon(
-                Icons.more_vert,
-                color: Colors.grey[400],
-                size: 24.sp,
-              ),
+              onTap: () => controller.unfollowUser(context, index),
+              child: Image.asset(AppIcons.removeUser),
             ),
+            // More Options
+            // GestureDetector(
+            //   onTap: () => _showFollowingOptions(controller, index),
+            //   child: Icon(
+            //     Icons.more_vert,
+            //     color: Colors.grey[400],
+            //     size: 24.sp,
+            //   ),
+            // ),
           ],
         );
 
@@ -226,99 +281,99 @@ class NetworkScreen extends StatelessWidget {
     }
   }
 
-  void _showFollowingOptions(NetworkController controller, int index) {
-    final user = controller.users[index];
-    Get.bottomSheet(
-      Container(
-        padding: EdgeInsets.all(20.r),
-        decoration: BoxDecoration(
-          color: const Color(0xFF2d2d2d),
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              leading: Icon(Icons.person_remove, color: Colors.red),
-              title: Text(
-                'Unfollow ${user.user.name}',
-                style: TextStyle(color: Colors.white, fontSize: 16.sp),
-              ),
-              onTap: () {
-                controller.unfollowUser(index);
-                Get.back();
-              },
-            ),
-            ListTile(
-              leading: Icon(Icons.block, color: Colors.red),
-              title: Text(
-                'Block',
-                style: TextStyle(color: Colors.white, fontSize: 16.sp),
-              ),
-              onTap: () {
-                controller.blockUser(index);
-                Get.back();
-              },
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+  // void _showFollowingOptions(NetworkController controller, int index) {
+  //   final user = controller.users[index];
+  //   Get.bottomSheet(
+  //     Container(
+  //       padding: EdgeInsets.all(20.r),
+  //       decoration: BoxDecoration(
+  //         color: const Color(0xFF2d2d2d),
+  //         borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
+  //       ),
+  //       child: Column(
+  //         mainAxisSize: MainAxisSize.min,
+  //         children: [
+  //           ListTile(
+  //             leading: Icon(Icons.person_remove, color: Colors.red),
+  //             title: Text(
+  //               'Unfollow ${user.user.name}',
+  //               style: TextStyle(color: Colors.white, fontSize: 16.sp),
+  //             ),
+  //             onTap: () {
+  //               controller.unfollowUser(index);
+  //               Get.back();
+  //             },
+  //           ),
+  //           ListTile(
+  //             leading: Icon(Icons.block, color: Colors.red),
+  //             title: Text(
+  //               'Block',
+  //               style: TextStyle(color: Colors.white, fontSize: 16.sp),
+  //             ),
+  //             onTap: () {
+  //               controller.blockUser(index);
+  //               Get.back();
+  //             },
+  //           ),
+  //         ],
+  //       ),
+  //     ),
+  //   );
+  // }
 
-  void _showConnectedOptions(NetworkController controller, int index) {
-    final user = controller.users[index];
-    Get.bottomSheet(
-      Container(
-        padding: EdgeInsets.all(20.r),
-        decoration: BoxDecoration(
-          color: const Color(0xFF2d2d2d),
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              leading: Icon(Icons.person_remove, color: Colors.red),
-              title: Text(
-                'Unfollow ${user.user.name}',
-                style: TextStyle(color: Colors.white, fontSize: 16.sp),
-              ),
-              onTap: () {
-                controller.unfollowUser(index);
-                Get.back();
-              },
-            ),
-            ListTile(
-              leading: Icon(Icons.notifications_off, color: Colors.white),
-              title: Text(
-                'Mute',
-                style: TextStyle(color: Colors.white, fontSize: 16.sp),
-              ),
-              onTap: () {
-                Get.back();
-                Get.snackbar(
-                  'Muted',
-                  'You muted ${user.user.name}',
-                  backgroundColor: Colors.grey[800],
-                  colorText: Colors.white,
-                );
-              },
-            ),
-            ListTile(
-              leading: Icon(Icons.block, color: Colors.red),
-              title: Text(
-                'Block',
-                style: TextStyle(color: Colors.white, fontSize: 16.sp),
-              ),
-              onTap: () {
-                controller.blockUser(index);
-                Get.back();
-              },
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+  // void _showConnectedOptions(NetworkController controller, int index) {
+  //   final user = controller.users[index];
+  //   Get.bottomSheet(
+  //     Container(
+  //       padding: EdgeInsets.all(20.r),
+  //       decoration: BoxDecoration(
+  //         color: const Color(0xFF2d2d2d),
+  //         borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
+  //       ),
+  //       child: Column(
+  //         mainAxisSize: MainAxisSize.min,
+  //         children: [
+  //           ListTile(
+  //             leading: Icon(Icons.person_remove, color: Colors.red),
+  //             title: Text(
+  //               'Unfollow ${user.user.name}',
+  //               style: TextStyle(color: Colors.white, fontSize: 16.sp),
+  //             ),
+  //             onTap: () {
+  //               controller.unfollowUser(index);
+  //               Get.back();
+  //             },
+  //           ),
+  //           ListTile(
+  //             leading: Icon(Icons.notifications_off, color: Colors.white),
+  //             title: Text(
+  //               'Mute',
+  //               style: TextStyle(color: Colors.white, fontSize: 16.sp),
+  //             ),
+  //             onTap: () {
+  //               Get.back();
+  //               Get.snackbar(
+  //                 'Muted',
+  //                 'You muted ${user.user.name}',
+  //                 backgroundColor: Colors.grey[800],
+  //                 colorText: Colors.white,
+  //               );
+  //             },
+  //           ),
+  //           ListTile(
+  //             leading: Icon(Icons.block, color: Colors.red),
+  //             title: Text(
+  //               'Block',
+  //               style: TextStyle(color: Colors.white, fontSize: 16.sp),
+  //             ),
+  //             onTap: () {
+  //               controller.blockUser(index);
+  //               Get.back();
+  //             },
+  //           ),
+  //         ],
+  //       ),
+  //     ),
+  //   );
+  // }
 }

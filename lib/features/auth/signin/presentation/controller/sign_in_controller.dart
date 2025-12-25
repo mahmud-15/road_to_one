@@ -45,9 +45,9 @@ class SignInController extends GetxController {
         ScaffoldMessenger.of(context)
           ..clearSnackBars()
           ..showSnackBar(SnackBar(content: Text(data['message'])));
-        LocalStorage.token = data['data']['accessToken'];
-        LocalStorage.userId = data['data']['userInfo']['_id'];
-        LocalStorage.profileImage = data['data']['userInfo']['profileImage'];
+        LocalStorage.token = data['data']['accessToken'] ?? "";
+        LocalStorage.userId = data['data']['userInfo']['_id'] ?? "";
+        LocalStorage.profileImage = data['data']['userInfo']['image'] ?? "";
 
         if (isRememberMe) {
           LocalStorage.setString(LocalStorageKeys.token, LocalStorage.token);
