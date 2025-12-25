@@ -9,7 +9,7 @@ class PostModel {
   final bool isOwner;
   bool hasSave;
   bool isLiked;
-  final String connectionStatus;
+  String connectionStatus;
   final List<String> image;
   PostModel({
     required this.id,
@@ -57,7 +57,7 @@ class Creator {
   });
 
   factory Creator.fromJson(Map<String, dynamic> json) => Creator(
-    id: json['id'] ?? "",
+    id: json['_id'] ?? "",
     name: json['name'] ?? "",
     image: json['image'] ?? "",
     profileMode: json['profileMode'] ?? "",

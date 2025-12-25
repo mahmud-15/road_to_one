@@ -278,12 +278,13 @@ class HomeController extends GetxController {
     }
   }
 
-  void onConnectTap(BuildContext context, String userId) async {
-    final body = {"requestTo": userId};
+  void onCancelConnect(BuildContext context, PostModel post) async {
+    final body = {"requestTo": post.creator.id};
     final response = await ApiService2.post(
-      ApiEndPoint.sendRequest,
+      "${ApiEndPoint.sendRequest}/cancel",
       body: body,
     );
+
     if (response == null) {
       ScaffoldMessenger.of(context)
         ..clearSnackBars()
@@ -298,6 +299,39 @@ class HomeController extends GetxController {
         ScaffoldMessenger.of(context)
           ..clearSnackBars()
           ..showSnackBar(SnackBar(content: Text(data['message'])));
+        posts
+            .where((e) => e.creator.id == post.creator.id)
+            .forEach((e) => e.connectionStatus = "not_requested");
+        update();
+      }
+    }
+  }
+
+  void onConnectTap(BuildContext context, PostModel post) async {
+    final body = {"requestTo": post.creator.id};
+    final response = await ApiService2.post(
+      ApiEndPoint.sendRequest,
+      body: body,
+    );
+
+    if (response == null) {
+      ScaffoldMessenger.of(context)
+        ..clearSnackBars()
+        ..showSnackBar(SnackBar(content: Text(AppString.someThingWrong)));
+    } else {
+      final data = response.data;
+      if (response.statusCode != 200) {
+        ScaffoldMessenger.of(context)
+          ..clearSnackBars()
+          ..showSnackBar(SnackBar(content: Text(data['message'])));
+      } else {
+        ScaffoldMessenger.of(context)
+          ..clearSnackBars()
+          ..showSnackBar(SnackBar(content: Text(data['message'])));
+        posts
+            .where((e) => e.creator.id == post.creator.id)
+            .forEach((e) => e.connectionStatus = data['data']['status']);
+        update();
       }
     }
   }

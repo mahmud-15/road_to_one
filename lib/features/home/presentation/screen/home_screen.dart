@@ -401,27 +401,30 @@ class PostCard extends StatelessWidget {
               ],
             ),
           ),
-          GestureDetector(
-            onTap: () => controller.onConnectTap(
-              context,
-              controller.posts[index].creator.id,
-            ),
-            child: Container(
-              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 6.h),
-              decoration: BoxDecoration(
-                color: Colors.grey.shade800,
-                borderRadius: BorderRadius.circular(20.r),
-              ),
-              child: Text(
-                "Connect",
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 13.sp,
-                  fontWeight: FontWeight.w500,
+          if (controller.posts[index].connectionStatus != "accepted" &&
+              (controller.posts[index].creator.id != LocalStorage.userId))
+            GestureDetector(
+              onTap: () => controller.posts[index].connectionStatus == "pending"
+                  ? controller.onCancelConnect(context, controller.posts[index])
+                  : controller.onConnectTap(context, controller.posts[index]),
+              child: Container(
+                padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 6.h),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade800,
+                  borderRadius: BorderRadius.circular(20.r),
+                ),
+                child: Text(
+                  controller.posts[index].connectionStatus == "not_requested"
+                      ? "Connect"
+                      : "Requested",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 13.sp,
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
               ),
             ),
-          ),
           SizedBox(width: 8.w),
           GestureDetector(
             onTap: () => controller.onMoreTap(controller.posts[index].id),
@@ -446,6 +449,9 @@ class PostCard extends StatelessWidget {
     // if (pageController == null || currentPage == null) {
     //   return const SizedBox.shrink();
     // }
+    if (controller.posts[index].image.isEmpty) {
+      return const SizedBox.shrink();
+    }
 
     return Stack(
       alignment: Alignment.bottomCenter,

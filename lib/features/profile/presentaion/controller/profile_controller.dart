@@ -252,7 +252,7 @@ class ProfileController extends GetxController {
     update();
     try {
       final url =
-          "${ApiEndPoint.userActivity}/${LocalStorage.userId}?type=photo";
+          "${ApiEndPoint.userActivity}/${LocalStorage.userId}?type=post";
       final response = await ApiService2.get(url);
       if (response == null) {
         ScaffoldMessenger.of(context)
@@ -289,7 +289,7 @@ class ProfileController extends GetxController {
         }
       }
     } catch (e) {
-      errorLog("error in image: $e");
+      errorLog("error in post: $e");
     } finally {
       imageLoading.value = false;
       update();
