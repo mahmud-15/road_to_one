@@ -7,6 +7,7 @@ import 'package:road_project_flutter/features/profile/data/profile_model.dart';
 import 'package:road_project_flutter/features/profile/data/user_activity_like.dart';
 import 'package:road_project_flutter/features/profile/data/user_activity_model.dart';
 import 'package:road_project_flutter/features/profile/data/user_activity_photo.dart';
+import 'package:road_project_flutter/features/profile/data/user_activity_save.dart';
 import 'package:road_project_flutter/features/profile/data/user_activity_story.dart';
 import 'package:road_project_flutter/services/api/api_service.dart';
 import 'package:road_project_flutter/services/storage/storage_services.dart';
@@ -213,6 +214,7 @@ class ProfileController extends GetxController {
     fetchAllImage(context);
     fetchPost(context);
     fetchStory(context);
+    fetchSave(context);
   }
 
   void fetchProfile(BuildContext context) async {
@@ -382,11 +384,16 @@ class ProfileController extends GetxController {
             ..showSnackBar(SnackBar(content: Text(data['message'])));
         } else {
           final userdata = (data['data'] as List)
-              .map((e) => PostModel.fromJson(e))
+              .map((e) => UserActivitySave.fromJson(e))
               .toList();
           if (userdata.isNotEmpty) {
             userSave.value = userdata
-                .map((e) => UserActivityModel(file: e.image[0], type: 'image'))
+                .map(
+                  (e) => UserActivityModel(
+                    file: e.post.image.first,
+                    type: 'image',
+                  ),
+                )
                 .toList();
           }
           update();

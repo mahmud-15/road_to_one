@@ -269,7 +269,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                     controller.imageLoading.value,
                   ),
                   _buildGridView(
-                    controller.userImage,
+                    controller.userSave,
                     controller.imageLoading.value,
                   ),
                 ],
