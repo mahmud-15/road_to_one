@@ -2,7 +2,7 @@ class UserActivityLike {
   final String id;
   final Post? post;
   final String user;
-  final String createAt;
+  final DateTime createAt;
   UserActivityLike({
     required this.id,
     required this.user,
@@ -14,8 +14,8 @@ class UserActivityLike {
       UserActivityLike(
         id: json['_id'] ?? "",
         user: json['user'] ?? "",
-        post: Post.formJson(json['post'] ?? {}),
-        createAt: json['createAt'] ?? "",
+        post: json['post'] == null ? null : Post.formJson(json['post']),
+        createAt: DateTime.parse(json['createAt'].toString()),
       );
 }
 
@@ -26,7 +26,7 @@ class Post {
   final String type;
   final List<String> image;
   final List<String> media;
-  final String createAt;
+  final DateTime createAt;
   Post({
     required this.id,
     required this.creator,
@@ -48,6 +48,6 @@ class Post {
     media: json['media'] != null
         ? (json['media'] as List).map((e) => e.toString()).toList()
         : [],
-    createAt: json['createAt'] ?? "",
+    createAt: DateTime.parse(json['createAt'].toString()),
   );
 }

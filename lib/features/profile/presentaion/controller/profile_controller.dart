@@ -12,6 +12,7 @@ import 'package:road_project_flutter/features/profile/data/user_activity_story.d
 import 'package:road_project_flutter/services/api/api_service.dart';
 import 'package:road_project_flutter/services/storage/storage_services.dart';
 import 'package:road_project_flutter/utils/constants/app_string.dart';
+import 'package:road_project_flutter/utils/log/app_log.dart';
 import 'package:road_project_flutter/utils/log/error_log.dart';
 
 import '../../data/media_item.dart';
@@ -272,14 +273,17 @@ class ProfileController extends GetxController {
                 .toList();
             userImage.value = userData
                 .where(
-                  (e) => e.type == 'image'
+                  (e) => e.type.toLowerCase() == 'image'
                       ? e.image.isNotEmpty
                       : e.media.isNotEmpty,
                 )
                 .map(
                   (e) => UserActivityModel(
-                    file: e.type == 'image' ? e.image.first : e.media.first,
-                    type: e.type,
+                    file: e.type.toLowerCase() == 'image'
+                        ? e.image.first
+                        : e.media.first,
+                    type: e.type.toLowerCase(),
+                    viewer: e.videoViewCount,
                   ),
                 )
                 .toList();
@@ -301,7 +305,7 @@ class ProfileController extends GetxController {
     update();
     try {
       final url =
-          "${ApiEndPoint.userActivity}/${LocalStorage.userId}?type=video";
+          "${ApiEndPoint.userActivity}/${LocalStorage.userId}?type=video&page=1&limit=10";
       final response = await ApiService2.get(url);
       if (response == null) {
         ScaffoldMessenger.of(context)
@@ -317,10 +321,12 @@ class ProfileController extends GetxController {
           final temp = data['data'] as List;
           if (temp.isNotEmpty) {
             userVideo.value = temp
+                .where((e) => (e['media'] as List).isNotEmpty)
                 .map(
                   (e) => UserActivityModel(
                     file: (e['media'] as List).first,
                     type: 'video',
+                    viewer: e['videoViewCount'] ?? 0,
                   ),
                 )
                 .toList();
@@ -329,7 +335,7 @@ class ProfileController extends GetxController {
         }
       }
     } catch (e) {
-      errorLog("error in story: $e");
+      errorLog("error in video: $e");
     } finally {
       storyLoading.value = false;
       update();
@@ -363,12 +369,15 @@ class ProfileController extends GetxController {
                 .where(
                   (element) =>
                       (element.post != null) &&
-                      (element.post!.image.isNotEmpty),
+                      (element.post!.image.isNotEmpty ||
+                          element.post!.media.isNotEmpty),
                 )
                 .map(
                   (e) => UserActivityModel(
-                    file: e.post!.image.first,
-                    type: "image",
+                    file: e.post!.type == "image"
+                        ? e.post!.image.first
+                        : e.post!.media.first,
+                    type: e.post!.type,
                   ),
                 )
                 .toList();

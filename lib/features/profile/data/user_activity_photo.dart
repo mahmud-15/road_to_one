@@ -6,6 +6,7 @@ class UserActivityPhoto {
   final String type;
   final List<String> media;
   final String createdAt;
+  final int videoViewCount;
 
   UserActivityPhoto({
     required this.id,
@@ -15,6 +16,7 @@ class UserActivityPhoto {
     required this.media,
     required this.type,
     required this.createdAt,
+    this.videoViewCount = 0,
   });
 
   factory UserActivityPhoto.fromJson(Map<String, dynamic> json) =>
@@ -30,5 +32,6 @@ class UserActivityPhoto {
             : [],
         type: json['type'] ?? "",
         createdAt: json['createAt'] ?? "",
+        videoViewCount: json['videoViewCount'] ?? 0,
       );
 }
