@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:paginated_listview_builder/paginated_listview_builder.dart';
 import 'package:road_project_flutter/config/api/api_end_point.dart';
 import 'package:road_project_flutter/config/route/app_routes.dart';
 import 'package:road_project_flutter/services/api/api_service.dart';
@@ -15,7 +16,8 @@ import '../models/story_model.dart';
 // Home Controller - Single controller for entire screen
 class HomeController extends GetxController {
   final scrollController = ScrollController();
-
+  final postPaginatedController = PaginatedController<PostModel>();
+  final storyPaginationController = PaginatedController<StoryModel>();
   // Observable lists
   var stories = <StoryModel>[].obs;
   var posts = <PostModel>[].obs;
@@ -45,8 +47,8 @@ class HomeController extends GetxController {
   }
 
   void initial(BuildContext context) {
-    loadStories(context);
-    loadPosts(context);
+    loadStories(context, 1);
+    loadPosts(context, 1);
     initializePostControllers();
   }
 
@@ -60,14 +62,16 @@ class HomeController extends GetxController {
     for (var timer in autoScrollTimers.values) {
       timer?.cancel();
     }
+
     super.onClose();
   }
 
-  void loadStories(BuildContext context) async {
+  void loadStories(BuildContext context, int page) async {
     storyLoading.value = true;
     update();
     try {
-      final response = await ApiService2.get(ApiEndPoint.story);
+      final url = "${ApiEndPoint.story}/?page=$page&limit=10";
+      final response = await ApiService2.get(url);
 
       if (response == null) {
         ScaffoldMessenger.of(context)
@@ -80,11 +84,13 @@ class HomeController extends GetxController {
             ..clearSnackBars()
             ..showSnackBar(SnackBar(content: Text(data['message'])));
         } else {
-          final userData = (data['data'] as List)
-              .map((e) => StoryModel.fromJson(e))
-              .toList();
-          stories.value = userData;
-          update();
+          final temp = data['data'] as List;
+          if (temp.isNotEmpty) {
+            final userData = temp.map((e) => StoryModel.fromJson(e)).toList();
+            storyPaginationController.addData(userData);
+            stories.value = userData;
+            update();
+          }
         }
       }
     } catch (e) {
@@ -96,11 +102,12 @@ class HomeController extends GetxController {
     }
   }
 
-  void loadPosts(BuildContext context) async {
+  void loadPosts(BuildContext context, int page) async {
     postLoading.value = true;
     update();
     try {
-      final response = await ApiService2.get(ApiEndPoint.allPost);
+      final url = "${ApiEndPoint.allPost}?page=$page&limit=10";
+      final response = await ApiService2.get(url);
       if (response == null) {
         ScaffoldMessenger.of(context)
           ..clearSnackBars()
@@ -112,12 +119,16 @@ class HomeController extends GetxController {
             ..clearSnackBars()
             ..showSnackBar(SnackBar(content: Text(data['message'])));
         } else {
-          final userData = (data['data'] as List)
-              .map((e) => PostModel.fromJson(e))
-              .toList();
-          appLog("userData: ${userData.length}");
-          posts.value = userData;
-          update();
+          final temp = data['data'] as List;
+          if (temp.isNotEmpty) {
+            final userData = temp.map((e) => PostModel.fromJson(e)).toList();
+            appLog("userData: ${userData.length}");
+
+            postPaginatedController.addData(userData);
+
+            posts.value = userData;
+            update();
+          }
           // for (var c in posts) {
           //   loadComments(context, c.id);
           // }

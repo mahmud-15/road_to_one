@@ -10,7 +10,7 @@ class PostModel {
   bool hasSave;
   bool isLiked;
   final String connectionStatus;
-  final List<dynamic> image;
+  final List<String> image;
   PostModel({
     required this.id,
     required this.creator,
@@ -38,7 +38,9 @@ class PostModel {
     hasSave: json['hasSave'] ?? false,
     isLiked: json['isLiked'] ?? false,
     connectionStatus: json['connectionStatus'] ?? "",
-    image: json['image'] ?? [],
+    image: json['image'] != null
+        ? (json['image'] as List).map((e) => e.toString()).toList()
+        : [],
   );
 }
 

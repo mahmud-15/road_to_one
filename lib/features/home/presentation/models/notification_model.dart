@@ -31,6 +31,6 @@ class NotificationItem {
         refId: json['refId'] ?? "",
         path: json['path'] ?? "",
         seen: json['seen'] ?? false,
-        createdAt: DateTime.parse(json['createdAt']),
+        createdAt: DateTime.parse(json['createdAt'].toString()),
       );
 }

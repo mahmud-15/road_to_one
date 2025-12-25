@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:paginated_listview_builder/paginated_listview_builder.dart';
 import 'package:road_project_flutter/config/api/api_end_point.dart';
 import 'package:road_project_flutter/config/route/app_routes.dart';
-import 'package:road_project_flutter/features/home/presentation/screen/showstory_screen.dart';
+import 'package:road_project_flutter/features/home/presentation/models/post_model.dart';
 import 'package:road_project_flutter/features/home/presentation/screen/story_screen.dart';
 import 'package:road_project_flutter/services/storage/storage_services.dart';
 import 'package:road_project_flutter/utils/app_utils.dart';
 import 'package:road_project_flutter/utils/constants/app_colors.dart';
 import 'package:road_project_flutter/utils/constants/app_string.dart';
+import 'package:road_project_flutter/utils/log/app_log.dart';
 
 import '../controller/home_controller.dart';
 import '../models/story_model.dart';
@@ -33,30 +35,50 @@ class HomeScreen extends StatelessWidget {
               ),
 
               // Stories Section
-              _buildStoriesSection(
-                controller.stories,
-                controller.storyLoading.value,
-              ),
+              _buildStoriesSection(controller),
 
               // Posts Section
-              controller.postLoading.value
-                  ? Center(child: CircularProgressIndicator())
-                  : controller.posts.isEmpty
-                  ? Center(
-                      child: Text(
-                        "No Post Found",
-                        style: TextStyle(color: AppColors.white),
-                      ),
-                    )
-                  : Expanded(
-                      child: ListView.builder(
-                        controller: controller.scrollController,
-                        itemCount: controller.posts.length,
-                        itemBuilder: (context, index) {
-                          return PostCard(index: index, controller: controller);
-                        },
-                      ),
-                    ),
+              // controller.postLoading.value
+              //     ? Center(child: CircularProgressIndicator())
+              //     : controller.posts.isEmpty
+              //     ? Center(
+              //         child: Text(
+              //           "No Post Found",
+              //           style: TextStyle(color: AppColors.white),
+              //         ),
+              //       )
+              //     : Expanded(
+              //         child: ListView.builder(
+              //           controller: controller.scrollController,
+              //           itemCount: controller.posts.length,
+              //           itemBuilder: (context, index) {
+              //             return PostCard(index: index, controller: controller);
+              //           },
+              //         ),
+              //       ),
+              Expanded(
+                child: PaginatedListViewBuilder<PostModel>(
+                  controller: controller.postPaginatedController,
+                  isLoading: controller.postLoading.value,
+                  initLoadingWidget: Center(
+                    child: CircularProgressIndicator.adaptive(),
+                  ),
+                  onHitThreshold: (context, current) {
+                    if (!controller.postLoading.value) {
+                      appLog("load post current: $current");
+                      controller.loadPosts(context, current);
+                    }
+                  },
+                  endListLoadingWidget: Padding(
+                    padding: EdgeInsets.all(16),
+                    child: Center(child: CircularProgressIndicator.adaptive()),
+                  ),
+                  itemBuilder: (context, index, currentData) {
+                    return PostCard(index: index, controller: controller);
+                  },
+                  emptyStateWidget: Center(child: Text("No Post Found")),
+                ),
+              ),
             ],
           ),
         ),
@@ -169,7 +191,7 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildStoriesSection(List<StoryModel> stories, bool isLoading) {
+  Widget _buildStoriesSection(HomeController controller) {
     return Container(
       height: 110.h,
       padding: EdgeInsets.symmetric(vertical: 10.h),
@@ -187,19 +209,40 @@ class HomeScreen extends StatelessWidget {
             ),
             isOwn: true,
           ), // need to change later
-          isLoading
-              ? Center(child: SizedBox.shrink())
-              : stories.isEmpty
-              ? SizedBox.shrink()
-              : Expanded(
-                  child: ListView.builder(
-                    scrollDirection: Axis.horizontal,
-                    itemCount: stories.length,
-                    itemBuilder: (context, index) {
-                      return StoryItem(story: stories[index], isOwn: false);
-                    },
-                  ),
-                ),
+          // controller.storyLoading.value
+          //     ? Center(child: SizedBox.shrink())
+          //     : controller.stories.isEmpty
+          //     ? SizedBox.shrink()
+          //     : Expanded(
+          //         child: ListView.builder(
+          //           scrollDirection: Axis.horizontal,
+          //           itemCount: controller.stories.length,
+          //           itemBuilder: (context, index) {
+          //             return StoryItem(
+          //               story: controller.stories[index],
+          //               isOwn: false,
+          //             );
+          //           },
+          //         ),
+          //       ),
+          Expanded(
+            child: PaginatedListViewBuilder(
+              controller: controller.storyPaginationController,
+              itemBuilder: (context, index, currentData) =>
+                  StoryItem(story: currentData, isOwn: false),
+              // isLoading: controller.storyLoading.value,
+              endListLoadingWidget: Padding(
+                padding: EdgeInsets.all(16),
+                child: Center(child: CircularProgressIndicator.adaptive()),
+              ),
+              scrollDirection: Axis.horizontal,
+              onHitThreshold: (context, current) {
+                if (!controller.storyLoading.value) {
+                  controller.loadStories(context, current);
+                }
+              },
+            ),
+          ),
         ],
       ),
     );
@@ -535,6 +578,7 @@ class PostCard extends StatelessWidget {
     );
   }
 
+  // I keep it hidden
   // Widget _buildCommentsSection() {
   //   return Padding(
   //     padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
