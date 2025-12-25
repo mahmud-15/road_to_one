@@ -289,6 +289,7 @@ class StoryItem extends StatelessWidget {
                     child: ClipOval(
                       child: Image.network(
                         ApiEndPoint.imageUrl + story.image,
+                        fit: BoxFit.cover,
                         errorBuilder: (context, error, stackTrace) =>
                             Image.network(AppString.defaultProfilePic),
                       ),
@@ -368,6 +369,7 @@ class PostCard extends StatelessWidget {
             child: Image.network(
               height: 80,
               width: 80,
+              fit: BoxFit.cover,
               ApiEndPoint.imageUrl + controller.posts[index].creator.image,
               errorBuilder: (context, error, stackTrace) => Image.network(
                 AppString.defaultProfilePic,

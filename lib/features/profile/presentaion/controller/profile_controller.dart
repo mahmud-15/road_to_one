@@ -265,20 +265,27 @@ class ProfileController extends GetxController {
             ..clearSnackBars()
             ..showSnackBar(SnackBar(content: Text(data['message'])));
         } else {
-          final userData = (data['data'] as List)
-              .map((e) => UserActivityPhoto.fromJson(e))
-              .toList();
-          if (userData.isNotEmpty) {
+          final temp = data['data'] as List;
+          if (temp.isNotEmpty) {
+            final userData = temp
+                .map((e) => UserActivityPhoto.fromJson(e))
+                .toList();
             userImage.value = userData
+                .where(
+                  (e) => e.type == 'image'
+                      ? e.image.isNotEmpty
+                      : e.media.isNotEmpty,
+                )
                 .map(
                   (e) => UserActivityModel(
-                    file: e.type == 'image' ? e.image[0] : e.media[0],
+                    file: e.type == 'image' ? e.image.first : e.media.first,
                     type: e.type,
                   ),
                 )
                 .toList();
+
+            update();
           }
-          update();
         }
       }
     } catch (e) {
