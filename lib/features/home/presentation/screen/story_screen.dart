@@ -30,7 +30,7 @@ class CreateStoryScreen extends StatelessWidget {
             ),
 
             // Bottom Actions
-            _buildBottomActions(),
+            _buildBottomActions(context),
           ],
         ),
       ),
@@ -178,12 +178,12 @@ class CreateStoryScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildBottomActions() {
+  Widget _buildBottomActions(BuildContext context) {
     return Container(
       padding: EdgeInsets.all(16.r),
       child: Obx(
         () => controller.selectedImage.value != null
-            ? _buildCreateButton()
+            ? _buildCreateButton(context)
             : _buildSelectImageButton(),
       ),
     );
@@ -213,9 +213,9 @@ class CreateStoryScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildCreateButton() {
+  Widget _buildCreateButton(BuildContext context) {
     return GestureDetector(
-      onTap: controller.createStory,
+      onTap: () => controller.createStory(context),
       child: Container(
         width: double.infinity,
         padding: EdgeInsets.symmetric(vertical: 16.h),

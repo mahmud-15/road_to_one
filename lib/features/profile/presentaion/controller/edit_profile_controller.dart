@@ -6,6 +6,7 @@ import 'package:road_project_flutter/features/profile/data/profile_model.dart';
 import 'package:road_project_flutter/services/api/api_service.dart';
 import 'package:road_project_flutter/utils/constants/app_string.dart';
 import 'package:road_project_flutter/utils/log/app_log.dart';
+import 'package:road_project_flutter/utils/log/error_log.dart';
 
 class EditProfileController extends GetxController {
   // Profile data
@@ -33,28 +34,34 @@ class EditProfileController extends GetxController {
   void updateProfileImage(BuildContext context, File image) async {
     selectedProfileImage = image;
     update();
-    final response = await ApiService2.formDataImage(
-      ApiEndPoint.user,
-      isPost: false,
-      image: image.path,
-    );
-    if (response == null) {
-      ScaffoldMessenger.of(context)
-        ..clearSnackBars()
-        ..showSnackBar(SnackBar(content: Text(AppString.someThingWrong)));
-    } else {
-      final data = response.data;
-      if (response.statusCode != 200) {
+    try {
+      final response = await ApiService2.multipart(
+        ApiEndPoint.user,
+        isPost: false,
+        image: image.path,
+      );
+      if (response == null) {
         ScaffoldMessenger.of(context)
           ..clearSnackBars()
-          ..showSnackBar(
-            SnackBar(content: Text(data['message'] ?? response.statusMessage)),
-          );
+          ..showSnackBar(SnackBar(content: Text(AppString.someThingWrong)));
       } else {
-        ScaffoldMessenger.of(context)
-          ..clearSnackBars()
-          ..showSnackBar(SnackBar(content: Text(data['message'])));
+        final data = response.data;
+        if (response.statusCode != 200) {
+          ScaffoldMessenger.of(context)
+            ..clearSnackBars()
+            ..showSnackBar(
+              SnackBar(
+                content: Text(data['message'] ?? response.statusMessage),
+              ),
+            );
+        } else {
+          ScaffoldMessenger.of(context)
+            ..clearSnackBars()
+            ..showSnackBar(SnackBar(content: Text(data['message'])));
+        }
       }
+    } catch (e) {
+      errorLog("error in update profile pic: $e");
     }
   }
 
@@ -62,19 +69,23 @@ class EditProfileController extends GetxController {
     final value = aboutMeController.text;
     user.value!.about = value;
     update();
-    final response = await ApiService.patch(
-      ApiEndPoint.user,
-      body: {'about': value},
-    );
-    if (response.isSuccess) {
-      ScaffoldMessenger.of(context)
-        ..clearSnackBars()
-        ..showSnackBar(SnackBar(content: Text(response.message)));
-      Navigator.pop(context);
-    } else {
-      ScaffoldMessenger.of(context)
-        ..clearSnackBars()
-        ..showSnackBar(SnackBar(content: Text(response.message)));
+    try {
+      final response = await ApiService.patch(
+        ApiEndPoint.user,
+        body: {'about': value},
+      );
+      if (response.isSuccess) {
+        ScaffoldMessenger.of(context)
+          ..clearSnackBars()
+          ..showSnackBar(SnackBar(content: Text(response.message)));
+        Navigator.pop(context);
+      } else {
+        ScaffoldMessenger.of(context)
+          ..clearSnackBars()
+          ..showSnackBar(SnackBar(content: Text(response.message)));
+      }
+    } catch (e) {
+      errorLog("error in update about me: $e");
     }
   }
 
@@ -141,36 +152,48 @@ class EditProfileController extends GetxController {
       'dreamJob': user.value!.dreamJob,
       'education': user.value!.education,
     };
-    final response = await ApiService.patch(ApiEndPoint.user, body: body);
-    if (response.isSuccess) {
-      ScaffoldMessenger.of(context)
-        ..clearSnackBars()
-        ..showSnackBar(SnackBar(content: Text(response.message)));
-      Navigator.of(context).pop();
-    } else {
-      ScaffoldMessenger.of(context)
-        ..clearSnackBars()
-        ..showSnackBar(SnackBar(content: Text(response.message)));
+    try {
+      final response = await ApiService.patch(ApiEndPoint.user, body: body);
+      if (response.isSuccess) {
+        ScaffoldMessenger.of(context)
+          ..clearSnackBars()
+          ..showSnackBar(SnackBar(content: Text(response.message)));
+        Navigator.of(context).pop();
+      } else {
+        ScaffoldMessenger.of(context)
+          ..clearSnackBars()
+          ..showSnackBar(SnackBar(content: Text(response.message)));
+      }
+    } catch (e) {
+      errorLog("error in updateDetails: $e");
     }
   }
 
   void fetchAllPref() async {
-    final url = ApiEndPoint.preferences;
-    final response = await ApiService2.get(url);
+    try {
+      final url = ApiEndPoint.preferences;
+      final response = await ApiService2.get(url);
 
-    if (response != null && response.statusCode == 200) {
-      allPreferences.value = (response.data['data'] as List)
-          .map((e) => Preferences.fromJson(e))
-          .toList();
-      update();
+      if (response != null && response.statusCode == 200) {
+        allPreferences.value = (response.data['data'] as List)
+            .map((e) => Preferences.fromJson(e))
+            .toList();
+        update();
+      }
+    } catch (e) {
+      errorLog("error in fetch all pref: $e");
     }
   }
 
   void updatePreference(BuildContext context) async {
-    final body = {'preferences': user.value!.preferences};
-    final response = await ApiService.patch(ApiEndPoint.user, body: body);
-    ScaffoldMessenger.of(context)
-      ..clearSnackBars()
-      ..showSnackBar(SnackBar(content: Text(response.message)));
+    try {
+      final body = {'preferences': user.value!.preferences};
+      final response = await ApiService.patch(ApiEndPoint.user, body: body);
+      ScaffoldMessenger.of(context)
+        ..clearSnackBars()
+        ..showSnackBar(SnackBar(content: Text(response.message)));
+    } catch (e) {
+      errorLog("error in update preference: $e");
+    }
   }
 }

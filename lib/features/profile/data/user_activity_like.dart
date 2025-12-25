@@ -42,8 +42,12 @@ class Post {
     creator: json['creator'] ?? "",
     caption: json['caption'] ?? "",
     type: json['type'] ?? "",
-    image: (json['image'] as List).map((e) => e.toString()).toList(),
-    media: (json['media'] as List).map((e) => e.toString()).toList(),
+    image: json['image'] != null
+        ? (json['image'] as List).map((e) => e.toString()).toList()
+        : [],
+    media: json['media'] != null
+        ? (json['media'] as List).map((e) => e.toString()).toList()
+        : [],
     createAt: json['createAt'] ?? "",
   );
 }

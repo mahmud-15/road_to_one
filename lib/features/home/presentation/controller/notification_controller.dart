@@ -33,11 +33,14 @@ class NotificationController extends GetxController {
             ..clearSnackBars()
             ..showSnackBar(SnackBar(content: Text(data['message'])));
         } else {
-          final userData = (data['data'] as List)
-              .map((e) => NotificationItem.fromJson(e))
-              .toList();
-          notifications.value = userData;
-          update();
+          final temp = data['data'] as List;
+          if (temp.isNotEmpty) {
+            final userData = temp
+                .map((e) => NotificationItem.fromJson(e))
+                .toList();
+            notifications.value = userData;
+            update();
+          }
         }
       }
     } catch (e) {

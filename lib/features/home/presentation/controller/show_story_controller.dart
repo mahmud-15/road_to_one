@@ -14,14 +14,16 @@ class ShowStoryController extends GetxController {
   void onInit() {
     // TODO: implement onInit
     super.onInit();
-    fetchStory(Get.context!);
+    final storyId = Get.arguments;
+    fetchStory(Get.context!, storyId);
   }
 
-  void fetchStory(BuildContext context) async {
+  void fetchStory(BuildContext context, String storyId) async {
     isLoading.value = true;
     update();
     try {
-      final response = await ApiService2.get(ApiEndPoint.storyUser);
+      final url = "${ApiEndPoint.storyUser}/$storyId";
+      final response = await ApiService2.get(url);
       if (response == null) {
         ScaffoldMessenger.of(context)
           ..clearSnackBars()
@@ -35,9 +37,14 @@ class ShowStoryController extends GetxController {
             ..showSnackBar(SnackBar(content: Text(data['message'])));
           Get.back();
         } else {
-          final userData = UserStoryModel.fromJson(data['data'][0]);
-          userStory.value = userData;
-          update();
+          final temp = data['data']['data'] as List;
+          if (temp.isEmpty) {
+            return;
+          } else {
+            final userData = UserStoryModel.fromJson(temp.first);
+            userStory.value = userData;
+            update();
+          }
         }
       }
     } catch (e) {
@@ -45,6 +52,19 @@ class ShowStoryController extends GetxController {
     } finally {
       isLoading.value = false;
       update();
+    }
+  }
+
+  void toggleStoryLike(int index) async {
+    userStory.value!.stories[index].isLiked =
+        !userStory.value!.stories[index].isLiked;
+    update();
+    final url =
+        "${ApiEndPoint.story}/${userStory.value!.stories[index].id}/likes/toggle";
+    try {
+      await ApiService2.post(url, body: {});
+    } catch (e) {
+      errorLog("error in toggle like: $e");
     }
   }
 }

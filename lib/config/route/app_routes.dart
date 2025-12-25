@@ -12,6 +12,7 @@ import 'package:road_project_flutter/features/gym_screen/presentaion/screens/my_
 import 'package:road_project_flutter/features/gym_screen/presentaion/screens/myprogress_screen.dart';
 import 'package:road_project_flutter/features/gym_screen/presentaion/screens/plan_details_screen.dart';
 import 'package:road_project_flutter/features/home/presentation/screen/notification_screen.dart';
+import 'package:road_project_flutter/features/home/presentation/screen/showstory_screen.dart';
 import 'package:road_project_flutter/features/profile/presentaion/screen/about_use_screen.dart';
 import 'package:road_project_flutter/features/profile/presentaion/screen/change_password_screen.dart';
 import 'package:road_project_flutter/features/profile/presentaion/screen/delete_screen.dart';
@@ -34,6 +35,7 @@ import 'package:road_project_flutter/features/store/presentation/screen/pay_scre
 import 'package:road_project_flutter/features/store/presentation/screen/shipping_information_screen.dart';
 import 'package:road_project_flutter/features/store/presentation/screen/store_show.dart';
 import 'package:road_project_flutter/features/store/presentation/screen/success_payment_screen.dart';
+
 class AppRoutes {
   static const String test = "/test_screen.dart";
   static const String splash = "/splsah";
@@ -41,44 +43,48 @@ class AppRoutes {
   static const String signIn = "/signIn";
   static const String phoneSignupScreen = "/phoneSignupScreen";
   static const String forgetPasswordScreen = "/forgetPasswordScreen";
-  static const String verifyUser="/verifyUser";
-  static const String verifyAccount="/verifyAccount";
-  static const String setPasswordScreen="/setPasswordScreen";
-  static const String onBoardingFirst="/onBoardingFirst";
-  static const String onBoardingSecond="/onBoardingSecond";
-  static const String onBoardingThree="/onBoardingThree";
-  static const String homeNav="/homeNav";
-  static const String createPost="/createPost";
-  static const String cartScreen="/cartScreen";
-  static const String editProfileScreen="/editProfileScreen";
-  static const String networkScreen="/networkScreen";
-  static const String myPlanScreen="/myPlanScreen";
-  static const String planDetails="/planDetails";
-  static const String myProgressScreen="/myProgressScreen";
-  static const String calenderScreen="/calenderScreen";
-  static const String detailFoodScreen="/detailFoodScreen";
-  static const String mealDetailScreen="/mealDetailScreen";
-  static const String personalDetailsScreen="/personalDetailsScreen";
-  static const String productDetails="/productDetails";
-  static const String shippingInformationScreen="/shippingInformationScreen";
-  static const String payScreen="/payScreen";
-  static const String successImageScreen="/successImageScreen";
-  static const String chatScreenImage="/chatScreenImage";
-  static const String settingScreen="/settingScreen";
-  static const String orderHistoryScreen="/orderHistoryScreen";
-  static const String shippingInformationUpdateScreen="/shippingInformationUpdateScreen";
-  static const String changePassword="/changePassword";
-  static const String aboutUsScreen="/aboutUsScreen";
-  static const String deleteScreen="/deleteScreen";
-  static const String notificationScreen="/notificationScreen";
-
+  static const String verifyUser = "/verifyUser";
+  static const String verifyAccount = "/verifyAccount";
+  static const String setPasswordScreen = "/setPasswordScreen";
+  static const String onBoardingFirst = "/onBoardingFirst";
+  static const String onBoardingSecond = "/onBoardingSecond";
+  static const String onBoardingThree = "/onBoardingThree";
+  static const String homeNav = "/homeNav";
+  static const String createPost = "/createPost";
+  static const String cartScreen = "/cartScreen";
+  static const String editProfileScreen = "/editProfileScreen";
+  static const String networkScreen = "/networkScreen";
+  static const String myPlanScreen = "/myPlanScreen";
+  static const String planDetails = "/planDetails";
+  static const String myProgressScreen = "/myProgressScreen";
+  static const String calenderScreen = "/calenderScreen";
+  static const String detailFoodScreen = "/detailFoodScreen";
+  static const String mealDetailScreen = "/mealDetailScreen";
+  static const String personalDetailsScreen = "/personalDetailsScreen";
+  static const String productDetails = "/productDetails";
+  static const String shippingInformationScreen = "/shippingInformationScreen";
+  static const String payScreen = "/payScreen";
+  static const String successImageScreen = "/successImageScreen";
+  static const String chatScreenImage = "/chatScreenImage";
+  static const String settingScreen = "/settingScreen";
+  static const String orderHistoryScreen = "/orderHistoryScreen";
+  static const String shippingInformationUpdateScreen =
+      "/shippingInformationUpdateScreen";
+  static const String changePassword = "/changePassword";
+  static const String aboutUsScreen = "/aboutUsScreen";
+  static const String deleteScreen = "/deleteScreen";
+  static const String notificationScreen = "/notificationScreen";
+  static const String storyViewScreen = "/storyViewScreen";
 
   static List<GetPage> routes = [
     GetPage(name: splash, page: () => const SplashScreen()),
     GetPage(name: signUp, page: () => const SignUpScreen()),
     GetPage(name: signIn, page: () => const SignInScreen()),
     GetPage(name: phoneSignupScreen, page: () => const PhoneSignUpScreen()),
-    GetPage(name: forgetPasswordScreen, page: () => const ForgetPasswordScreen()),
+    GetPage(
+      name: forgetPasswordScreen,
+      page: () => const ForgetPasswordScreen(),
+    ),
     GetPage(name: verifyUser, page: () => const VerifyUserScreen()),
     GetPage(name: verifyUser, page: () => const VerifyUserScreen()),
     GetPage(name: verifyAccount, page: () => const VerifyScreen()),
@@ -99,16 +105,23 @@ class AppRoutes {
     GetPage(name: mealDetailScreen, page: () => MealDetailScreen()),
     GetPage(name: personalDetailsScreen, page: () => PersonalDetailScreen()),
     GetPage(name: productDetails, page: () => ProductDetailScreen()),
-    GetPage(name: shippingInformationScreen, page: () => ShippingInformationScreen()),
+    GetPage(
+      name: shippingInformationScreen,
+      page: () => ShippingInformationScreen(),
+    ),
     GetPage(name: payScreen, page: () => PaymentScreen()),
     GetPage(name: successImageScreen, page: () => SuccessPaymentScreen()),
     GetPage(name: chatScreenImage, page: () => ChatScreen()),
     GetPage(name: settingScreen, page: () => SettingsScreen()),
     GetPage(name: orderHistoryScreen, page: () => OrderHistoryScreen()),
-    GetPage(name: shippingInformationUpdateScreen, page: () => ShippingInformationUpdateScreen()),
+    GetPage(
+      name: shippingInformationUpdateScreen,
+      page: () => ShippingInformationUpdateScreen(),
+    ),
     GetPage(name: changePassword, page: () => ChangePasswordScreen()),
     GetPage(name: aboutUsScreen, page: () => AboutUsScreen()),
     GetPage(name: deleteScreen, page: () => DeleteScreen()),
     GetPage(name: notificationScreen, page: () => NotificationScreen()),
+    GetPage(name: storyViewScreen, page: () => StoryViewScreen()),
   ];
 }

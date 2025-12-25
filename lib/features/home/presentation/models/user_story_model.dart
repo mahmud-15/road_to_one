@@ -29,7 +29,7 @@ class Story {
   final String image;
   final DateTime createAt;
   final bool isWatchStory;
-  final bool isLiked;
+  bool isLiked;
   final int likeCount;
   Story({
     required this.id,
@@ -47,7 +47,7 @@ class Story {
     type: json['type'] ?? "",
     caption: json['caption'] ?? "",
     image: json['image'] ?? "",
-    createAt: json['createAt'] ?? "",
+    createAt: DateTime.parse(json['createdAt']),
     isWatchStory: json['isWatchStory'] ?? false,
     isLiked: json['isLiked'] ?? false,
     likeCount: json['likeCount'] ?? 0,

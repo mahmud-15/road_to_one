@@ -112,7 +112,7 @@ class CreatePostScreen extends StatelessWidget {
             CommonButton(
               titleText: "Create Post",
               onTap: () {
-                Get.toNamed(AppRoutes.homeNav);
+                controller.createPost(context);
               },
             ),
             SizedBox(height: 20.h),

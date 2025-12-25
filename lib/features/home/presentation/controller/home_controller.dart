@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:paginated_listview_builder/paginated_listview_builder.dart';
 import 'package:road_project_flutter/config/api/api_end_point.dart';
 import 'package:road_project_flutter/config/route/app_routes.dart';
 import 'package:road_project_flutter/services/api/api_service.dart';
 import 'package:road_project_flutter/utils/constants/app_string.dart';
+import 'package:road_project_flutter/utils/log/app_log.dart';
 import 'package:road_project_flutter/utils/log/error_log.dart';
 import 'dart:async';
 
@@ -14,7 +16,8 @@ import '../models/story_model.dart';
 // Home Controller - Single controller for entire screen
 class HomeController extends GetxController {
   final scrollController = ScrollController();
-
+  final postPaginatedController = PaginatedController<PostModel>();
+  final storyPaginationController = PaginatedController<StoryModel>();
   // Observable lists
   var stories = <StoryModel>[].obs;
   var posts = <PostModel>[].obs;
@@ -44,8 +47,8 @@ class HomeController extends GetxController {
   }
 
   void initial(BuildContext context) {
-    loadStories(context);
-    loadPosts(context);
+    loadStories(context, 1);
+    loadPosts(context, 1);
     initializePostControllers();
   }
 
@@ -59,14 +62,16 @@ class HomeController extends GetxController {
     for (var timer in autoScrollTimers.values) {
       timer?.cancel();
     }
+
     super.onClose();
   }
 
-  void loadStories(BuildContext context) async {
+  void loadStories(BuildContext context, int page) async {
     storyLoading.value = true;
     update();
     try {
-      final response = await ApiService2.get(ApiEndPoint.story);
+      final url = "${ApiEndPoint.story}/?page=$page&limit=10";
+      final response = await ApiService2.get(url);
 
       if (response == null) {
         ScaffoldMessenger.of(context)
@@ -79,11 +84,13 @@ class HomeController extends GetxController {
             ..clearSnackBars()
             ..showSnackBar(SnackBar(content: Text(data['message'])));
         } else {
-          final userData = (data['data'] as List)
-              .map((e) => StoryModel.fromJson(e))
-              .toList();
-          stories.value = userData;
-          update();
+          final temp = data['data'] as List;
+          if (temp.isNotEmpty) {
+            final userData = temp.map((e) => StoryModel.fromJson(e)).toList();
+            storyPaginationController.addData(userData);
+            stories.value = userData;
+            update();
+          }
         }
       }
     } catch (e) {
@@ -95,11 +102,12 @@ class HomeController extends GetxController {
     }
   }
 
-  void loadPosts(BuildContext context) async {
+  void loadPosts(BuildContext context, int page) async {
     postLoading.value = true;
     update();
     try {
-      final response = await ApiService2.get(ApiEndPoint.allPost);
+      final url = "${ApiEndPoint.allPost}?page=$page&limit=10";
+      final response = await ApiService2.get(url);
       if (response == null) {
         ScaffoldMessenger.of(context)
           ..clearSnackBars()
@@ -111,12 +119,16 @@ class HomeController extends GetxController {
             ..clearSnackBars()
             ..showSnackBar(SnackBar(content: Text(data['message'])));
         } else {
-          final userData = (data['data'] as List)
-              .map((e) => PostModel.fromJson(e))
-              .toList();
-          //appLog("userData: ${userData.length}");
-          posts.value = userData;
-          update();
+          final temp = data['data'] as List;
+          if (temp.isNotEmpty) {
+            final userData = temp.map((e) => PostModel.fromJson(e)).toList();
+            appLog("userData: ${userData.length}");
+
+            postPaginatedController.addData(userData);
+
+            posts.value = userData;
+            update();
+          }
           // for (var c in posts) {
           //   loadComments(context, c.id);
           // }
@@ -124,9 +136,7 @@ class HomeController extends GetxController {
       }
     } catch (e) {
       errorLog("Load posts failed: $e");
-      ScaffoldMessenger.of(context)
-        ..clearSnackBars()
-        ..showSnackBar(SnackBar(content: Text(AppString.someThingWrong)));
+      Get.offAllNamed(AppRoutes.signIn);
     } finally {
       postLoading.value = false;
       update();
@@ -161,9 +171,7 @@ class HomeController extends GetxController {
       }
     } catch (e) {
       errorLog("Load comments failed: $e");
-      ScaffoldMessenger.of(context)
-        ..clearSnackBars()
-        ..showSnackBar(SnackBar(content: Text(AppString.someThingWrong)));
+      Get.offAllNamed(AppRoutes.signIn);
     } finally {
       commentLoading.value = false;
       update();
@@ -270,12 +278,13 @@ class HomeController extends GetxController {
     }
   }
 
-  void onConnectTap(BuildContext context, String userId) async {
-    final body = {"requestTo": userId};
+  void onCancelConnect(BuildContext context, PostModel post) async {
+    final body = {"requestTo": post.creator.id};
     final response = await ApiService2.post(
-      ApiEndPoint.sendRequest,
+      "${ApiEndPoint.sendRequest}/cancel",
       body: body,
     );
+
     if (response == null) {
       ScaffoldMessenger.of(context)
         ..clearSnackBars()
@@ -290,6 +299,39 @@ class HomeController extends GetxController {
         ScaffoldMessenger.of(context)
           ..clearSnackBars()
           ..showSnackBar(SnackBar(content: Text(data['message'])));
+        posts
+            .where((e) => e.creator.id == post.creator.id)
+            .forEach((e) => e.connectionStatus = "not_requested");
+        update();
+      }
+    }
+  }
+
+  void onConnectTap(BuildContext context, PostModel post) async {
+    final body = {"requestTo": post.creator.id};
+    final response = await ApiService2.post(
+      ApiEndPoint.sendRequest,
+      body: body,
+    );
+
+    if (response == null) {
+      ScaffoldMessenger.of(context)
+        ..clearSnackBars()
+        ..showSnackBar(SnackBar(content: Text(AppString.someThingWrong)));
+    } else {
+      final data = response.data;
+      if (response.statusCode != 200) {
+        ScaffoldMessenger.of(context)
+          ..clearSnackBars()
+          ..showSnackBar(SnackBar(content: Text(data['message'])));
+      } else {
+        ScaffoldMessenger.of(context)
+          ..clearSnackBars()
+          ..showSnackBar(SnackBar(content: Text(data['message'])));
+        posts
+            .where((e) => e.creator.id == post.creator.id)
+            .forEach((e) => e.connectionStatus = data['data']['status']);
+        update();
       }
     }
   }

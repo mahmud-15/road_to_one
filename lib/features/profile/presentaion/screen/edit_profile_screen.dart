@@ -3,7 +3,9 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:road_project_flutter/component/image/app_bar.dart';
 import 'package:road_project_flutter/config/api/api_end_point.dart';
-import 'package:road_project_flutter/features/profile/data/profile_model.dart';
+import 'package:road_project_flutter/config/route/app_routes.dart';
+import 'package:road_project_flutter/features/home/presentation/screen/home_nav_screen.dart';
+import 'package:road_project_flutter/features/profile/presentaion/controller/profile_controller.dart';
 import 'package:road_project_flutter/utils/constants/app_colors.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:road_project_flutter/utils/constants/app_string.dart';
@@ -107,7 +109,14 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.upcolor,
-      appBar: AppBarNew(title: "Edit Profile"),
+      appBar: AppBarNew(
+        title: "Edit Profile",
+        onBackPressed: () {
+          HomeNavController().changeIndex(1);
+          ProfileController().fetchProfile(context);
+          Get.toNamed(AppRoutes.homeNav);
+        },
+      ),
       body: SingleChildScrollView(
         child: GetBuilder(
           init: EditProfileController(),
@@ -657,6 +666,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                               // controller.user.value!.preferences.add(
                               //   newInterestController.text,
                               // );
+                              controller.updatePreference(context);
                               newInterestController.clear();
                             });
                           }

@@ -3,7 +3,7 @@ enum NetworkStatus { pending, accepted, rejected }
 class NetworkUser {
   String id;
   User user;
-  NetworkStatus status;
+  String status;
   DateTime createAt;
   NetworkUser({
     required this.id,
@@ -16,7 +16,7 @@ class NetworkUser {
     id: json['_id'] ?? "",
     user: User.fromJson(json['user']),
     status: json['status'] ?? "",
-    createAt: json['createAt'] ?? "",
+    createAt: DateTime.parse(json['createdAt'].toString()),
   );
 }
 
