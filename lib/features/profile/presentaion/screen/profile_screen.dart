@@ -5,7 +5,6 @@ import 'package:road_project_flutter/component/text/common_text.dart';
 import 'package:road_project_flutter/config/api/api_end_point.dart';
 import 'package:road_project_flutter/config/route/app_routes.dart';
 import 'package:road_project_flutter/features/profile/data/user_activity_model.dart';
-import 'package:road_project_flutter/services/storage/storage_services.dart';
 import 'package:road_project_flutter/utils/constants/app_colors.dart';
 import 'package:road_project_flutter/utils/constants/app_string.dart';
 import 'package:video_player/video_player.dart';
@@ -544,7 +543,6 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
     try {
       _controller = VideoPlayerController.networkUrl(
         Uri.parse(widget.videoUrl),
-        httpHeaders: {'Authorization': 'Bearer ${LocalStorage.token}'},
       );
 
       await _controller.initialize();
