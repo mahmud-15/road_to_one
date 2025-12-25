@@ -73,6 +73,40 @@ class ApiService2 {
     }
   }
 
+  static Future<Response<dynamic>?> patch(
+    String url, {
+    Map<dynamic, dynamic>? body,
+    Map<String, dynamic>? header,
+  }) async {
+    final dio = Dio();
+    final mainHeader = {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer ${LocalStorage.token}",
+    };
+
+    appLog("Url: $url\nHeader: ${header ?? mainHeader}\nBody: $body");
+
+    try {
+      final response = await dio.patch(
+        url,
+        data: body,
+        options: Options(headers: header ?? mainHeader),
+      );
+      appLog(response);
+
+      return response;
+    } on DioException catch (e) {
+      // 👇 THIS IS WHERE 400 LIVES
+      appLog("Dio Error!");
+      appLog("Status: ${e.response?.statusCode}");
+      appLog("Data: ${e.response?.data}");
+      return e.response;
+    } on Exception catch (e) {
+      appLog(e);
+      return null;
+    }
+  }
+
   static Future<Response<dynamic>?> multipart(
     String url, {
     Map<String, dynamic>? body,

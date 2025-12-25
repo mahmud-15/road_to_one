@@ -24,7 +24,7 @@ class ProfileController extends GetxController {
   final saveLoading = false.obs;
   final user = Rxn<ProfileModel>();
   final userImage = RxList<UserActivityModel>();
-  final userStory = RxList<UserActivityModel>();
+  final userVideo = RxList<UserActivityModel>();
   final userLike = RxList<UserActivityModel>();
   final userSave = RxList<UserActivityModel>();
   // final String username = "Alex Peterson";
@@ -213,7 +213,7 @@ class ProfileController extends GetxController {
     fetchProfile(context);
     fetchAllImage(context);
     fetchPost(context);
-    fetchStory(context);
+    fetchVideo(context);
     fetchSave(context);
   }
 
@@ -296,12 +296,12 @@ class ProfileController extends GetxController {
     }
   }
 
-  void fetchStory(BuildContext context) async {
+  void fetchVideo(BuildContext context) async {
     storyLoading.value = true;
     update();
     try {
       final url =
-          "${ApiEndPoint.userActivity}/${LocalStorage.userId}?type=story";
+          "${ApiEndPoint.userActivity}/${LocalStorage.userId}?type=video";
       final response = await ApiService2.get(url);
       if (response == null) {
         ScaffoldMessenger.of(context)
@@ -314,15 +314,18 @@ class ProfileController extends GetxController {
             ..clearSnackBars()
             ..showSnackBar(SnackBar(content: Text(data['message'])));
         } else {
-          final userData = (data['data'] as List)
-              .map((e) => UserActivityStory.fromJson(e))
-              .toList();
-          if (userData.isNotEmpty) {
-            userStory.value = userData
-                .map((e) => UserActivityModel(file: e.image, type: 'image'))
+          final temp = data['data'] as List;
+          if (temp.isNotEmpty) {
+            userVideo.value = temp
+                .map(
+                  (e) => UserActivityModel(
+                    file: (e['media'] as List).first,
+                    type: 'video',
+                  ),
+                )
                 .toList();
+            update();
           }
-          update();
         }
       }
     } catch (e) {
@@ -351,18 +354,27 @@ class ProfileController extends GetxController {
             ..clearSnackBars()
             ..showSnackBar(SnackBar(content: Text(data['message'])));
         } else {
-          final userData = (data['data'] as List)
-              .map((e) => UserActivityLike.fromJson(e))
-              .toList();
-          if (userData.isNotEmpty) {
+          final temp = data['data'] as List;
+          if (temp.isNotEmpty) {
+            final userData = (data['data'] as List)
+                .map((e) => UserActivityLike.fromJson(e))
+                .toList();
             userLike.value = userData
+                .where(
+                  (element) =>
+                      (element.post != null) &&
+                      (element.post!.image.isNotEmpty),
+                )
                 .map(
-                  (e) =>
-                      UserActivityModel(file: e.post!.image[0], type: 'image'),
+                  (e) => UserActivityModel(
+                    file: e.post!.image.first,
+                    type: "image",
+                  ),
                 )
                 .toList();
+
+            update();
           }
-          update();
         }
       }
     } catch (e) {
