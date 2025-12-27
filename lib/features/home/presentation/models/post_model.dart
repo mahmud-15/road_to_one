@@ -11,6 +11,7 @@ class PostModel {
   bool isLiked;
   String connectionStatus;
   final List<String> image;
+  final List<String> media;
   PostModel({
     required this.id,
     required this.creator,
@@ -24,6 +25,7 @@ class PostModel {
     required this.isLiked,
     required this.connectionStatus,
     required this.image,
+    required this.media,
   });
 
   factory PostModel.fromJson(Map<String, dynamic> json) => PostModel(
@@ -40,6 +42,9 @@ class PostModel {
     connectionStatus: json['connectionStatus'] ?? "",
     image: json['image'] != null
         ? (json['image'] as List).map((e) => e.toString()).toList()
+        : [],
+    media: json['media'] != null
+        ? (json['media'] as List).map((e) => e.toString()).toList()
         : [],
   );
 }

@@ -22,6 +22,7 @@ class _StoryViewScreenState extends State<StoryViewScreen>
   final TextEditingController _messageController = TextEditingController();
   final List<String> _messages = [];
   final controller = Get.put(ShowStoryController());
+  final focusNode = FocusNode();
   // Static stories data
   // final List<StoryData> stories = [
   //   StoryData(
@@ -72,7 +73,13 @@ class _StoryViewScreenState extends State<StoryViewScreen>
         _nextStory();
       }
     });
-
+    focusNode.addListener(() {
+      if (focusNode.hasFocus) {
+        _pauseStory(); // stop when typing
+      } else {
+        _resumeStory(); // resume when keyboard closes
+      }
+    });
     _animationController.forward();
   }
 
@@ -113,11 +120,15 @@ class _StoryViewScreenState extends State<StoryViewScreen>
   }
 
   void _pauseStory() {
-    _animationController.stop();
+    if (_animationController.isAnimating) {
+      _animationController.stop();
+    }
   }
 
   void _resumeStory() {
-    _animationController.forward();
+    if (!_animationController.isAnimating) {
+      _animationController.forward();
+    }
   }
 
   void _sendMessage() {
@@ -126,17 +137,7 @@ class _StoryViewScreenState extends State<StoryViewScreen>
         _messages.add(_messageController.text.trim());
         _messageController.clear();
       });
-
-      // Show success snackbar
-      // Get.snackbar(
-      //   'Message Sent',
-      //   'Your message has been sent to ${stories[_currentIndex].userName}',
-      //   backgroundColor: const Color(0xFF00ff87),
-      //   colorText: Colors.black,
-      //   duration: const Duration(seconds: 2),
-      //   snackPosition: SnackPosition.TOP,
-      //   margin: EdgeInsets.all(16.r),
-      // );
+      // I will work on here
     }
   }
 
@@ -420,6 +421,7 @@ class _StoryViewScreenState extends State<StoryViewScreen>
                                     borderRadius: BorderRadius.circular(25.r),
                                   ),
                                   child: TextField(
+                                    focusNode: focusNode,
                                     controller: _messageController,
                                     style: TextStyle(
                                       color: Colors.white,
