@@ -2,13 +2,11 @@ import 'package:get/get.dart';
 
 import '../../../../config/api/api_end_point.dart';
 import '../../../../services/api/api_service.dart';
-import '../../data/model/plan_details_model.dart';
+import '../../data/model/business_plan_detail_model.dart';
 
-class PlanDetailController extends GetxController {
-
+class BusinessPlanDetailController extends GetxController {
   final isLoading = true.obs;
-  final Rx<PlanDetailModel?> planDetail = Rx<PlanDetailModel?>(null);
-
+  final Rx<BusinessPlanDetailModel?> planDetail = Rx<BusinessPlanDetailModel?>(null);
 
   @override
   void onInit() {
@@ -16,7 +14,7 @@ class PlanDetailController extends GetxController {
     loadPlanDetail();
   }
 
-  void loadPlanDetail() async {
+  Future<void> loadPlanDetail() async {
     isLoading.value = true;
 
     try {
@@ -26,7 +24,7 @@ class PlanDetailController extends GetxController {
         return;
       }
 
-      final url = '${ApiEndPoint.gymAndFitnessPlan}/$planId';
+      final url = '${ApiEndPoint.businessAndMindsetPlan}/$planId';
       final response = await ApiService2.get(url);
       if (response == null || response.statusCode != 200) {
         planDetail.value = null;
@@ -40,7 +38,7 @@ class PlanDetailController extends GetxController {
         return;
       }
 
-      planDetail.value = PlanDetailModel.fromJson(payload.cast<String, dynamic>());
+      planDetail.value = BusinessPlanDetailModel.fromJson(payload.cast<String, dynamic>());
     } catch (_) {
       planDetail.value = null;
     } finally {

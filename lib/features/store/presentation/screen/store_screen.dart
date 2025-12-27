@@ -7,11 +7,15 @@ import 'package:road_project_flutter/config/route/app_routes.dart';
 import 'package:road_project_flutter/utils/constants/app_colors.dart';
 
 import '../controller/store_controller.dart';
+import '../controller/product_detail_api_controller.dart';
+import '../controller/cart_controller.dart';
 
 class StoreScreen extends StatelessWidget {
-  StoreScreen({super.key});
+  StoreScreen({Key? key}) : super(key: key);
 
   final StoreController controller = Get.put(StoreController());
+  final CartController cartController =
+      Get.isRegistered<CartController>() ? Get.find<CartController>() : Get.put(CartController());
 
   @override
   Widget build(BuildContext context) {
@@ -33,114 +37,154 @@ class StoreScreen extends StatelessWidget {
           Stack(
             children: [
               IconButton(
-                icon: Icon(
-                  Icons.shopping_cart_outlined,
-                  color: Colors.white,
-                  size: 30.h,
-                ),
+                icon: Icon(Icons.shopping_cart_outlined, color: Colors.white, size: 30.h),
                 onPressed: () {
                   Get.toNamed(AppRoutes.cartScreen);
                 },
               ),
-              Obx(
-                () => controller.cartItems.isNotEmpty
-                    ? Positioned(
-                        right: 8.w,
-                        top: 4.h,
-                        child: Container(
-                          padding: EdgeInsets.all(4.w),
-                          decoration: BoxDecoration(
-                            color: AppColors.primaryColor,
-                            shape: BoxShape.circle,
-                          ),
-                          constraints: BoxConstraints(
-                            minWidth: 18.w,
-                            minHeight: 18.h,
-                          ),
-                          child: Text(
-                            '${controller.cartItems.length}',
-                            style: TextStyle(
-                              color: Colors.black,
-                              fontSize: 10.sp,
-                              fontWeight: FontWeight.bold,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                        ),
-                      )
-                    : SizedBox(),
-              ),
+              Obx(() => cartController.cartCount.value > 0
+                  ? Positioned(
+                right: 8.w,
+                top: 4.h,
+                child: Container(
+                  padding: EdgeInsets.all(4.w),
+                  decoration: BoxDecoration(
+                    color: AppColors.primaryColor,
+                    shape: BoxShape.circle,
+                  ),
+                  constraints: BoxConstraints(
+                    minWidth: 18.w,
+                    minHeight: 18.h,
+                  ),
+                  child: Text(
+                    '${cartController.cartCount.value}',
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontSize: 10.sp,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              )
+                  : SizedBox()),
             ],
           ),
           SizedBox(width: 8.w),
         ],
       ),
-      body: Column(
+      body: Stack(
         children: [
-          // Category Tabs
-          Container(
-            height: 50.h,
-            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
-            child: ListView.builder(
-              scrollDirection: Axis.horizontal,
-              itemCount: controller.categories.length,
-              itemBuilder: (context, index) {
-                final category = controller.categories[index];
-                return Obx(() {
-                  final isSelected =
-                      controller.selectedCategory.value == category;
-                  return GestureDetector(
-                    onTap: () => controller.selectCategory(category),
-                    child: Container(
-                      margin: EdgeInsets.only(right: 12.w),
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 20.w,
-                        vertical: 8.h,
+          Column(
+            children: [
+              // Category Tabs
+              Container(
+                height: 50.h,
+                padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+                child: Obx(() {
+                  if (controller.isLoading) {
+                    return const SizedBox.shrink();
+                  }
+                  if (controller.categories.isEmpty) {
+                    return const Center(
+                      child: Text(
+                        'No categories found',
+                        style: TextStyle(color: Colors.white),
                       ),
-                      decoration: BoxDecoration(
-                        color: isSelected ? Colors.white : Colors.transparent,
-                        borderRadius: BorderRadius.circular(20.r),
-                        border: Border.all(
-                          color: isSelected ? Colors.white : Colors.grey[700]!,
-                          width: 1,
-                        ),
-                      ),
-                      child: Center(
-                        child: Text(
-                          category,
-                          style: TextStyle(
-                            color: isSelected ? Colors.black : Colors.white,
-                            fontSize: 14.sp,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ),
-                    ),
-                  );
-                });
-              },
-            ),
-          ),
+                    );
+                  }
 
-          // Product Grid
-          Expanded(
-            child: Obx(
-              () => GridView.builder(
-                padding: EdgeInsets.all(16.w),
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  childAspectRatio: 0.65,
-                  crossAxisSpacing: 12.w,
-                  mainAxisSpacing: 16.h,
-                ),
-                itemCount: controller.products.length,
-                itemBuilder: (context, index) {
-                  final product = controller.products[index];
-                  return _buildProductCard(product);
-                },
+                  return ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: controller.categories.length,
+                    itemBuilder: (context, index) {
+                      final category = controller.categories[index];
+                      return Obx(() {
+                        final isSelected =
+                            controller.selectedCategory.value == category;
+                        return GestureDetector(
+                          onTap: () => controller.selectCategory(category),
+                          child: Container(
+                            margin: EdgeInsets.only(right: 12.w),
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 20.w, vertical: 8.h),
+                            decoration: BoxDecoration(
+                              color: isSelected
+                                  ? Colors.white
+                                  : Colors.transparent,
+                              borderRadius: BorderRadius.circular(20.r),
+                              border: Border.all(
+                                color: isSelected
+                                    ? Colors.white
+                                    : Colors.grey[700]!,
+                                width: 1,
+                              ),
+                            ),
+                            child: Center(
+                              child: Text(
+                                category,
+                                style: TextStyle(
+                                  color:
+                                      isSelected ? Colors.black : Colors.white,
+                                  fontSize: 14.sp,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ),
+                          ),
+                        );
+                      });
+                    },
+                  );
+                }),
               ),
-            ),
+
+              // Product Grid
+              Expanded(
+                child: Obx(() {
+                  if (controller.isLoading) {
+                    return const SizedBox.shrink();
+                  }
+                  if (controller.products.isEmpty) {
+                    return const Center(
+                      child: Text(
+                        'No products found',
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    );
+                  }
+
+                  return GridView.builder(
+                    padding: EdgeInsets.all(16.w),
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      childAspectRatio: 0.65,
+                      crossAxisSpacing: 12.w,
+                      mainAxisSpacing: 16.h,
+                    ),
+                    itemCount: controller.products.length,
+                    itemBuilder: (context, index) {
+                      final product = controller.products[index];
+                      return _buildProductCard(product);
+                    },
+                  );
+                }),
+              ),
+            ],
           ),
+          Obx(() {
+            if (!controller.isLoading) {
+              return const SizedBox.shrink();
+            }
+            return Container(
+              color: Colors.black.withOpacity(0.35),
+              child: const Center(
+                child: CircularProgressIndicator(
+                  color: Color(0xFFb4ff39),
+                ),
+              ),
+            );
+          }),
         ],
       ),
     );
@@ -148,11 +192,14 @@ class StoreScreen extends StatelessWidget {
 
   Widget _buildProductCard(Map<String, dynamic> product) {
     return Obx(() {
-      final isFavorite = controller.isFavorite(product['id']);
+      final isFavorite = controller.isFavorite(product['extendId']);
 
       return GestureDetector(
         onTap: () {
-          Get.toNamed(AppRoutes.productDetails, arguments: product);
+          if (Get.isRegistered<ProductDetailApiController>()) {
+            Get.delete<ProductDetailApiController>(force: true);
+          }
+          Get.toNamed(AppRoutes.productDetails, arguments: product['handle']);
         },
         child: Container(
           decoration: BoxDecoration(
@@ -169,24 +216,22 @@ class StoreScreen extends StatelessWidget {
                     height: 180.h,
                     decoration: BoxDecoration(
                       color: Colors.grey[800],
-                      borderRadius: BorderRadius.vertical(
-                        top: Radius.circular(12.r),
-                      ),
+                      borderRadius: BorderRadius.vertical(top: Radius.circular(12.r)),
                       image: product['image'] != null
                           ? DecorationImage(
-                              image: NetworkImage(product['image']),
-                              fit: BoxFit.cover,
-                            )
+                        image: NetworkImage(product['image']),
+                        fit: BoxFit.cover,
+                      )
                           : null,
                     ),
                     child: product['image'] == null
                         ? Center(
-                            child: Icon(
-                              Icons.image,
-                              color: Colors.grey[600],
-                              size: 50.sp,
-                            ),
-                          )
+                      child: Icon(
+                        Icons.image,
+                        color: Colors.grey[600],
+                        size: 50.sp,
+                      ),
+                    )
                         : null,
                   ),
                   // Favorite Button
@@ -194,7 +239,7 @@ class StoreScreen extends StatelessWidget {
                     top: 8.h,
                     right: 8.w,
                     child: GestureDetector(
-                      onTap: () => controller.toggleFavorite(product['id']),
+                      onTap: () => controller.toggleFavorite(product['extendId']),
                       child: Container(
                         padding: EdgeInsets.all(6.w),
                         decoration: BoxDecoration(

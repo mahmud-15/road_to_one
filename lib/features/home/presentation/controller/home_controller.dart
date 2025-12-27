@@ -6,7 +6,6 @@ import 'package:road_project_flutter/config/route/app_routes.dart';
 import 'package:road_project_flutter/features/home/presentation/controller/notification_controller.dart';
 import 'package:road_project_flutter/services/api/api_service.dart';
 import 'package:road_project_flutter/utils/constants/app_string.dart';
-import 'package:road_project_flutter/utils/log/app_log.dart';
 import 'package:road_project_flutter/utils/log/error_log.dart';
 import 'dart:async';
 
@@ -140,6 +139,7 @@ class HomeController extends GetxController {
             ..clearSnackBars()
             ..showSnackBar(SnackBar(content: Text(data['message'])));
         } else {
+<<<<<<< HEAD
           final temp = data['data'] as List;
           if (temp.isNotEmpty) {
             final userData = temp.map((e) => PostModel.fromJson(e)).toList();
@@ -150,6 +150,14 @@ class HomeController extends GetxController {
             posts.value = userData;
             update();
           }
+=======
+          final userData = (data['data'] as List)
+              .map((e) => PostModel.fromJson(e))
+              .toList();
+          //appLog("userData: ${userData.length}");
+          posts.value = userData;
+          update();
+>>>>>>> origin/chironjit
           // for (var c in posts) {
           //   loadComments(context, c.id);
           // }
@@ -157,7 +165,9 @@ class HomeController extends GetxController {
       }
     } catch (e) {
       errorLog("Load posts failed: $e");
-      Get.offAllNamed(AppRoutes.signIn);
+      ScaffoldMessenger.of(context)
+        ..clearSnackBars()
+        ..showSnackBar(SnackBar(content: Text(AppString.someThingWrong)));
     } finally {
       postLoading.value = false;
       update();
@@ -192,7 +202,9 @@ class HomeController extends GetxController {
       }
     } catch (e) {
       errorLog("Load comments failed: $e");
-      Get.offAllNamed(AppRoutes.signIn);
+      ScaffoldMessenger.of(context)
+        ..clearSnackBars()
+        ..showSnackBar(SnackBar(content: Text(AppString.someThingWrong)));
     } finally {
       commentLoading.value = false;
       update();

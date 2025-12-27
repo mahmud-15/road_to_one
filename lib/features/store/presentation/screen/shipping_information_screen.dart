@@ -5,23 +5,22 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:road_project_flutter/component/button/common_button.dart';
 import 'package:road_project_flutter/component/image/app_bar.dart';
-import 'package:road_project_flutter/features/store/presentation/screen/pay_screen.dart';
 import 'package:road_project_flutter/utils/constants/app_colors.dart';
 
 import '../controller/shipping_information_controller.dart';
 
 class ShippingInformationScreen extends StatelessWidget {
-  ShippingInformationScreen({super.key});
+  ShippingInformationScreen({Key? key}) : super(key: key);
 
-  final ShippingInformationController controller = Get.put(
-    ShippingInformationController(),
-  );
+  final ShippingInformationController controller = Get.put(ShippingInformationController());
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.backgroudColor,
-      appBar: AppBarNew(title: "Shipping Information"),
+      appBar: AppBarNew(
+          title: "Shipping Information"
+      ),
       body: SafeArea(
         child: Column(
           children: [
@@ -41,7 +40,7 @@ class ShippingInformationScreen extends StatelessWidget {
                       ),
                     ),
                     SizedBox(height: 16.h),
-
+        
                     // Address Input
                     Text(
                       'Address',
@@ -56,26 +55,20 @@ class ShippingInformationScreen extends StatelessWidget {
                       style: TextStyle(color: Colors.white, fontSize: 14.sp),
                       decoration: InputDecoration(
                         hintText: 'Enter your address',
-                        hintStyle: TextStyle(
-                          color: Colors.grey[600],
-                          fontSize: 14.sp,
-                        ),
+                        hintStyle: TextStyle(color: Colors.grey[600], fontSize: 14.sp),
                         filled: true,
                         fillColor: Color(0xFF2A2A2A),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12.r),
                           borderSide: BorderSide.none,
                         ),
-                        contentPadding: EdgeInsets.symmetric(
-                          horizontal: 16.w,
-                          vertical: 14.h,
-                        ),
+                        contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
                       ),
                       maxLines: 2,
                     ),
-
+        
                     SizedBox(height: 24.h),
-
+        
                     // Contact Input
                     Text(
                       'Contact',
@@ -91,29 +84,23 @@ class ShippingInformationScreen extends StatelessWidget {
                       keyboardType: TextInputType.phone,
                       decoration: InputDecoration(
                         hintText: 'Enter your phone number',
-                        hintStyle: TextStyle(
-                          color: Colors.grey[600],
-                          fontSize: 14.sp,
-                        ),
+                        hintStyle: TextStyle(color: Colors.grey[600], fontSize: 14.sp),
                         filled: true,
                         fillColor: Color(0xFF2A2A2A),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12.r),
                           borderSide: BorderSide.none,
                         ),
-                        contentPadding: EdgeInsets.symmetric(
-                          horizontal: 16.w,
-                          vertical: 14.h,
-                        ),
+                        contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
                       ),
                     ),
-
+        
                     SizedBox(height: 24.h),
                   ],
                 ),
               ),
             ),
-
+        
             // Payment Amount Section
             Container(
               padding: EdgeInsets.all(16.w),
@@ -132,7 +119,10 @@ class ShippingInformationScreen extends StatelessWidget {
                 children: [
                   Text(
                     'Payment Amount',
-                    style: TextStyle(color: Colors.grey[400], fontSize: 14.sp),
+                    style: TextStyle(
+                      color: Colors.grey[400],
+                      fontSize: 14.sp,
+                    ),
                   ),
                   SizedBox(height: 12.h),
                   Row(
@@ -146,31 +136,29 @@ class ShippingInformationScreen extends StatelessWidget {
                           fontWeight: FontWeight.w600,
                         ),
                       ),
-                      Obx(
-                        () => Text(
-                          '\$${controller.totalAmount.value.toStringAsFixed(2)}',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 18.sp,
-                            fontWeight: FontWeight.w600,
-                          ),
+                      Obx(() => Text(
+                        '\$${controller.totalAmount.value.toStringAsFixed(2)}',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 18.sp,
+                          fontWeight: FontWeight.w600,
                         ),
-                      ),
+                      )),
                     ],
                   ),
                   SizedBox(height: 20.h),
-                  CommonButton(
-                    titleText: "Process to Pay",
-                    onTap: () {
-                      Get.to(
-                        PaymentScreen(
-                          address: controller.addressController.text,
-                          contact: controller.contactController.text,
-                          totalAmount: controller.totalAmount.value,
-                        ),
-                      );
-                    },
-                  ),
+                  Obx(() {
+                    final saving = controller.isSaving.value;
+                    return AbsorbPointer(
+                      absorbing: saving,
+                      child: CommonButton(
+                        titleText: saving ? "Saving..." : "Process to Pay",
+                        onTap: () {
+                          controller.proceedToPay();
+                        },
+                      ),
+                    );
+                  })
                 ],
               ),
             ),

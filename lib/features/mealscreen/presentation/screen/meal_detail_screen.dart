@@ -1,110 +1,91 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_html/flutter_html.dart';
+import 'package:get/get.dart';
 import 'package:road_project_flutter/component/image/app_bar.dart';
+import 'package:road_project_flutter/utils/constants/app_colors.dart';
+
+import '../controller/meal_detail_controller.dart';
 
 class MealDetailScreen extends StatelessWidget {
-  const MealDetailScreen({super.key});
+  const MealDetailScreen({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    final MealDetailController controller = Get.put(MealDetailController());
     return Scaffold(
-      backgroundColor: Colors.black,
-      appBar: AppBarNew(title: "Oats"),
-      body: SingleChildScrollView(
-        padding: EdgeInsets.all(24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Ingredients Section
-            Text(
-              'Ingredients:',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
+      backgroundColor: AppColors.backgroudColor,
+      appBar: AppBarNew(title: "Meal Details"),
+      body: Obx(() {
+        if (controller.isLoading.value) {
+          return Center(
+            child: CircularProgressIndicator(
+              color: const Color(0xFFb4ff39),
+            ),
+          );
+        }
+
+        final meal = controller.mealDetail.value;
+        if (meal == null) {
+          return const Center(
+            child: Text(
+              'No meal details available',
+              style: TextStyle(color: Colors.white),
+            ),
+          );
+        }
+
+        return SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // if (meal.imageUrl.isNotEmpty)
+              //   Container(
+              //     width: double.infinity,
+              //     height: 250.h,
+              //     margin: EdgeInsets.all(16.w),
+              //     decoration: BoxDecoration(
+              //       borderRadius: BorderRadius.circular(16.r),
+              //       image: DecorationImage(
+              //         image: NetworkImage(meal.imageUrl),
+              //         fit: BoxFit.cover,
+              //       ),
+              //     ),
+              //   ),
+
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 16.w),
+                child: Text(
+                  meal.name,
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 22.sp,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
               ),
-            ),
-            SizedBox(height: 12),
-            Text(
-              '½ cup rolled oats, 1 cup water or milk, a pinch of salt, ½ tbsp maple syrup, and 1-2 tbsp brown sugar.',
-              style: TextStyle(
-                color: Colors.grey[400],
-                fontSize: 14,
-                height: 1.6,
+              SizedBox(height: 12.h),
+
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 16.w),
+                child: Html(
+                  data: meal.description,
+                  style: {
+                    'body': Style(
+                      margin: Margins.zero,
+                      padding: HtmlPaddings.zero,
+                      color: Colors.grey[400],
+                      fontSize: FontSize(14.sp),
+                      lineHeight: const LineHeight(1.5),
+                    ),
+                  },
+                ),
               ),
-            ),
-            SizedBox(height: 32),
-
-            // Method Section
-            Text(
-              'Method (Stovetop):',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            SizedBox(height: 16),
-
-            // Step 1
-            _buildStep(
-              number: '1',
-              text:
-                  'Add oats, water or milk, and salt to a pot over medium-high heat. You can also add cinnamon for extra flavor.',
-            ),
-            SizedBox(height: 16),
-
-            // Step 2
-            _buildStep(
-              number: '2',
-              text:
-                  'Bring the mixture to a low boil, then reduce the heat to a simmer.',
-            ),
-            SizedBox(height: 16),
-
-            // Step 3
-            _buildStep(
-              number: '3',
-              text:
-                  'Cook for 5–7 minutes, stirring occasionally, until the liquid is mostly absorbed and the oats are creamy.',
-            ),
-            SizedBox(height: 16),
-
-            // Step 4
-            _buildStep(
-              number: '4',
-              text:
-                  'Remove from heat, stir in the maple syrup and brown sugar, and serve with your favorite toppings.',
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildStep({required String number, required String text}) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          '$number.',
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 14,
-            fontWeight: FontWeight.w500,
+              SizedBox(height: 32.h),
+            ],
           ),
-        ),
-        SizedBox(width: 8),
-        Expanded(
-          child: Text(
-            text,
-            style: TextStyle(
-              color: Colors.grey[400],
-              fontSize: 14,
-              height: 1.6,
-            ),
-          ),
-        ),
-      ],
+        );
+      }),
     );
   }
 }

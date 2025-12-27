@@ -97,6 +97,14 @@ class MyProgressScreen extends GetView<MyProgressController> {
   Widget _buildPicturesGrid() {
     return Expanded(
       child: Obx(() {
+        if (controller.isProgressLoading.value) {
+          return const Center(
+            child: CircularProgressIndicator(
+              strokeWidth: 2,
+              color: Color(0xFFb4ff39),
+            ),
+          );
+        }
         final pictureCount = controller.pictures.length;
         return GridView.builder(
           padding: EdgeInsets.symmetric(horizontal: 16.w),
@@ -154,11 +162,25 @@ class MyProgressScreen extends GetView<MyProgressController> {
           color: const Color(0xFF2d2d2d),
           borderRadius: BorderRadius.circular(12.r),
         ),
-        child: Icon(
-          Icons.add_photo_alternate_outlined,
-          color: Colors.grey[600],
-          size: 32.sp,
-        ),
+        child: Obx(() {
+          if (controller.isUploading.value) {
+            return const Center(
+              child: SizedBox(
+                height: 22,
+                width: 22,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: Color(0xFFb4ff39),
+                ),
+              ),
+            );
+          }
+          return Icon(
+            Icons.add_photo_alternate_outlined,
+            color: Colors.grey[600],
+            size: 32.sp,
+          );
+        }),
       ),
     );
   }
