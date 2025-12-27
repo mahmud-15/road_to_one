@@ -3,9 +3,9 @@ import 'package:get/get.dart';
 import 'package:paginated_listview_builder/paginated_listview_builder.dart';
 import 'package:road_project_flutter/config/api/api_end_point.dart';
 import 'package:road_project_flutter/config/route/app_routes.dart';
+import 'package:road_project_flutter/features/home/presentation/controller/notification_controller.dart';
 import 'package:road_project_flutter/services/api/api_service.dart';
 import 'package:road_project_flutter/utils/constants/app_string.dart';
-import 'package:road_project_flutter/utils/log/app_log.dart';
 import 'package:road_project_flutter/utils/log/error_log.dart';
 import 'dart:async';
 
@@ -37,8 +37,6 @@ class HomeController extends GetxController {
   final Map<String, RxInt> currentPages = {};
   final Map<String, Timer?> autoScrollTimers = {};
 
-  void onRefresh() {}
-
   @override
   void onInit() {
     // TODO: implement onInit
@@ -50,6 +48,27 @@ class HomeController extends GetxController {
     loadStories(context, 1);
     loadPosts(context, 1);
     initializePostControllers();
+    loadNotification(context);
+  }
+
+  Future onRefresh(BuildContext context) async {
+    stories.clear();
+    posts.clear();
+    comments.clear();
+    postPaginatedController.reset();
+    storyPaginationController.reset();
+    initial(context);
+  }
+
+  void loadNotification(BuildContext context) {
+    final controller = NotificationController();
+    controller.loadNotifications(context);
+    final data = controller.groupedNotifications;
+    if (data.isNotEmpty) {
+      notificationCount.value =
+          data['Recent']!.where((element) => element.seen == false).length +
+          data['Yesterday']!.where((element) => element.seen == false).length;
+    }
   }
 
   @override
@@ -77,6 +96,7 @@ class HomeController extends GetxController {
         ScaffoldMessenger.of(context)
           ..clearSnackBars()
           ..showSnackBar(SnackBar(content: Text(AppString.someThingWrong)));
+        Get.offAllNamed(AppRoutes.signIn);
       } else {
         final data = response.data;
         if (response.statusCode != 200) {
@@ -119,6 +139,7 @@ class HomeController extends GetxController {
             ..clearSnackBars()
             ..showSnackBar(SnackBar(content: Text(data['message'])));
         } else {
+<<<<<<< HEAD
           final temp = data['data'] as List;
           if (temp.isNotEmpty) {
             final userData = temp.map((e) => PostModel.fromJson(e)).toList();
@@ -129,6 +150,14 @@ class HomeController extends GetxController {
             posts.value = userData;
             update();
           }
+=======
+          final userData = (data['data'] as List)
+              .map((e) => PostModel.fromJson(e))
+              .toList();
+          //appLog("userData: ${userData.length}");
+          posts.value = userData;
+          update();
+>>>>>>> origin/chironjit
           // for (var c in posts) {
           //   loadComments(context, c.id);
           // }
@@ -136,7 +165,9 @@ class HomeController extends GetxController {
       }
     } catch (e) {
       errorLog("Load posts failed: $e");
-      Get.offAllNamed(AppRoutes.signIn);
+      ScaffoldMessenger.of(context)
+        ..clearSnackBars()
+        ..showSnackBar(SnackBar(content: Text(AppString.someThingWrong)));
     } finally {
       postLoading.value = false;
       update();
@@ -171,7 +202,9 @@ class HomeController extends GetxController {
       }
     } catch (e) {
       errorLog("Load comments failed: $e");
-      Get.offAllNamed(AppRoutes.signIn);
+      ScaffoldMessenger.of(context)
+        ..clearSnackBars()
+        ..showSnackBar(SnackBar(content: Text(AppString.someThingWrong)));
     } finally {
       commentLoading.value = false;
       update();

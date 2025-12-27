@@ -39,7 +39,9 @@ class NetworkController extends GetxController {
           final userData = (data['data'] as List)
               .map((e) => NetworkUser.fromJson(e))
               .toList();
-          users.value = userData;
+          users.value = userData
+              .where((element) => element.status != "rejected")
+              .toList();
           update();
         }
       }
@@ -99,8 +101,7 @@ class NetworkController extends GetxController {
 
   void unfollowUser(BuildContext context, int index) async {
     try {
-      final url =
-          "${ApiEndPoint.networkedUser}/disconnect/${users[index].user.id}";
+      final url = "${ApiEndPoint.networkedUser}/disconnect/${users[index].id}";
       final response = await ApiService2.patch(url);
       if (response != null && response.statusCode == 200) {
         users.removeAt(index);

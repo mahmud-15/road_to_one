@@ -21,7 +21,8 @@ class _StoryViewScreenState extends State<StoryViewScreen>
   int _currentIndex = 0;
   final TextEditingController _messageController = TextEditingController();
   final List<String> _messages = [];
-
+  final controller = Get.put(ShowStoryController());
+  final focusNode = FocusNode();
   // Static stories data
   // final List<StoryData> stories = [
   //   StoryData(
@@ -69,10 +70,16 @@ class _StoryViewScreenState extends State<StoryViewScreen>
 
     _animationController.addStatusListener((status) {
       if (status == AnimationStatus.completed) {
-        _nextStory([]);
+        _nextStory();
       }
     });
-
+    focusNode.addListener(() {
+      if (focusNode.hasFocus) {
+        _pauseStory(); // stop when typing
+      } else {
+        _resumeStory(); // resume when keyboard closes
+      }
+    });
     _animationController.forward();
   }
 
@@ -84,8 +91,8 @@ class _StoryViewScreenState extends State<StoryViewScreen>
     super.dispose();
   }
 
-  void _nextStory(List<Story> stories) {
-    if (_currentIndex < stories.length - 1) {
+  void _nextStory() {
+    if (_currentIndex < controller.userStory.value!.stories.length - 1) {
       _currentIndex++;
       _pageController.animateToPage(
         _currentIndex,
@@ -113,11 +120,15 @@ class _StoryViewScreenState extends State<StoryViewScreen>
   }
 
   void _pauseStory() {
-    _animationController.stop();
+    if (_animationController.isAnimating) {
+      _animationController.stop();
+    }
   }
 
   void _resumeStory() {
-    _animationController.forward();
+    if (!_animationController.isAnimating) {
+      _animationController.forward();
+    }
   }
 
   void _sendMessage() {
@@ -126,17 +137,7 @@ class _StoryViewScreenState extends State<StoryViewScreen>
         _messages.add(_messageController.text.trim());
         _messageController.clear();
       });
-
-      // Show success snackbar
-      // Get.snackbar(
-      //   'Message Sent',
-      //   'Your message has been sent to ${stories[_currentIndex].userName}',
-      //   backgroundColor: const Color(0xFF00ff87),
-      //   colorText: Colors.black,
-      //   duration: const Duration(seconds: 2),
-      //   snackPosition: SnackPosition.TOP,
-      //   margin: EdgeInsets.all(16.r),
-      // );
+      // I will work on here
     }
   }
 
@@ -144,347 +145,343 @@ class _StoryViewScreenState extends State<StoryViewScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black,
-      body: GetBuilder(
-        init: ShowStoryController(),
-        builder: (controller) => controller.isLoading.value
-            ? Center(child: CircularProgressIndicator())
-            : GestureDetector(
-                onTapDown: (details) {
-                  final screenWidth = MediaQuery.of(context).size.width;
-                  final dx = details.globalPosition.dx;
+      body: controller.isLoading.value
+          ? Center(child: CircularProgressIndicator())
+          : GestureDetector(
+              onTapDown: (details) {
+                final screenWidth = MediaQuery.of(context).size.width;
+                final dx = details.globalPosition.dx;
 
-                  if (dx < screenWidth / 3) {
-                    _previousStory();
-                  } else if (dx > 2 * screenWidth / 3) {
-                    _nextStory(controller.userStory.value!.stories);
-                  }
-                },
-                onLongPressStart: (_) => _pauseStory(),
-                onLongPressEnd: (_) => _resumeStory(),
-                child: Stack(
-                  children: [
-                    // Story Images
-                    PageView.builder(
-                      controller: _pageController,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemCount: controller.userStory.value?.stories.length,
-                      onPageChanged: (index) {
-                        setState(() {
-                          _currentIndex = index;
-                        });
-                      },
-                      itemBuilder: (context, index) {
-                        return Image.network(
-                          ApiEndPoint.imageUrl +
-                              controller.userStory.value!.stories[index].image,
-                          fit: BoxFit.cover,
-                          width: double.infinity,
-                          height: double.infinity,
-                          errorBuilder: (context, error, stackTrace) =>
-                              Image.network(
-                                AppString.defaultProfilePic,
-                                fit: BoxFit.cover,
-                                width: double.infinity,
-                                height: double.infinity,
-                              ),
-                        );
-                      },
-                    ),
-
-                    // Gradient overlay
-                    Container(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.center,
-                          colors: [
-                            Colors.black.withOpacity(0.7),
-                            Colors.transparent,
-                          ],
-                        ),
-                      ),
-                    ),
-
-                    // Story Progress Bars
-                    SafeArea(
-                      child: Column(
-                        children: [
-                          Padding(
-                            padding: EdgeInsets.symmetric(
-                              horizontal: 8.w,
-                              vertical: 8.h,
-                            ),
-                            child: Row(
-                              children: List.generate(
-                                controller.userStory.value!.stories.length,
-                                (index) => Expanded(
-                                  child: Container(
-                                    height: 3.h,
-                                    margin: EdgeInsets.symmetric(
-                                      horizontal: 2.w,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: Colors.white.withOpacity(0.3),
-                                      borderRadius: BorderRadius.circular(2.r),
-                                    ),
-                                    child: FractionallySizedBox(
-                                      alignment: Alignment.centerLeft,
-                                      widthFactor: index == _currentIndex
-                                          ? _animationController.value
-                                          : index < _currentIndex
-                                          ? 1.0
-                                          : 0.0,
-                                      child: Container(
-                                        decoration: BoxDecoration(
-                                          color: Colors.white,
-                                          borderRadius: BorderRadius.circular(
-                                            2.r,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-
-                          // User Info Header
-                          Padding(
-                            padding: EdgeInsets.symmetric(
-                              horizontal: 16.w,
-                              vertical: 12.h,
-                            ),
-                            child: Row(
-                              children: [
-                                CircleAvatar(
-                                  radius: 20.r,
-                                  backgroundImage: NetworkImage(
-                                    ApiEndPoint.imageUrl +
-                                        controller.userStory.value!.user.image,
-                                  ),
-                                ),
-                                SizedBox(width: 12.w),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        controller.userStory.value!.user.name,
-                                        style: TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 16.sp,
-                                          fontWeight: FontWeight.w600,
-                                        ),
-                                      ),
-                                      Text(
-                                        Utils.timeAgo(
-                                          controller
-                                              .userStory
-                                              .value!
-                                              .stories[_currentIndex]
-                                              .createAt,
-                                        ),
-                                        style: TextStyle(
-                                          color: Colors.white.withOpacity(0.7),
-                                          fontSize: 12.sp,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                IconButton(
-                                  onPressed: () => Get.back(),
-                                  icon: Icon(
-                                    Icons.close,
-                                    color: Colors.white,
-                                    size: 28.sp,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-
-                          const Spacer(),
-
-                          // Messages Display
-                          if (_messages.isNotEmpty)
-                            Container(
-                              margin: EdgeInsets.symmetric(horizontal: 16.w),
-                              padding: EdgeInsets.all(12.r),
-                              constraints: BoxConstraints(maxHeight: 200.h),
-                              decoration: BoxDecoration(
-                                color: Colors.black.withOpacity(0.6),
-                                borderRadius: BorderRadius.circular(12.r),
-                              ),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    'Your Messages:',
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 12.sp,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                  SizedBox(height: 8.h),
-                                  Expanded(
-                                    child: ListView.builder(
-                                      shrinkWrap: true,
-                                      itemCount: _messages.length,
-                                      itemBuilder: (context, index) {
-                                        return Container(
-                                          margin: EdgeInsets.only(bottom: 6.h),
-                                          padding: EdgeInsets.symmetric(
-                                            horizontal: 12.w,
-                                            vertical: 8.h,
-                                          ),
-                                          decoration: BoxDecoration(
-                                            color: const Color(
-                                              0xFF00ff87,
-                                            ).withOpacity(0.2),
-                                            borderRadius: BorderRadius.circular(
-                                              8.r,
-                                            ),
-                                            border: Border.all(
-                                              color: const Color(
-                                                0xFF00ff87,
-                                              ).withOpacity(0.5),
-                                            ),
-                                          ),
-                                          child: Text(
-                                            _messages[index],
-                                            style: TextStyle(
-                                              color: Colors.white,
-                                              fontSize: 13.sp,
-                                            ),
-                                          ),
-                                        );
-                                      },
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-
-                          SizedBox(height: 8.h),
-
-                          // Caption at bottom
-                          if (controller
-                              .userStory
-                              .value!
-                              .stories[_currentIndex]
-                              .caption
-                              .isNotEmpty)
-                            Container(
+                if (dx < screenWidth / 3) {
+                  _previousStory();
+                } else if (dx > 2 * screenWidth / 3) {
+                  _nextStory();
+                }
+              },
+              onLongPressStart: (_) => _pauseStory(),
+              onLongPressEnd: (_) => _resumeStory(),
+              child: Stack(
+                children: [
+                  // Story Images
+                  PageView.builder(
+                    controller: _pageController,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: controller.userStory.value?.stories.length,
+                    onPageChanged: (index) {
+                      setState(() {
+                        _currentIndex = index;
+                      });
+                    },
+                    itemBuilder: (context, index) {
+                      return Image.network(
+                        ApiEndPoint.imageUrl +
+                            controller.userStory.value!.stories[index].image,
+                        fit: BoxFit.cover,
+                        width: double.infinity,
+                        height: double.infinity,
+                        errorBuilder: (context, error, stackTrace) =>
+                            Image.network(
+                              AppString.defaultProfilePic,
+                              fit: BoxFit.cover,
                               width: double.infinity,
-                              padding: EdgeInsets.all(16.r),
-                              margin: EdgeInsets.symmetric(
-                                horizontal: 16.w,
-                                vertical: 8.h,
-                              ),
-                              decoration: BoxDecoration(
-                                color: Colors.black.withOpacity(0.5),
-                                borderRadius: BorderRadius.circular(12.r),
-                              ),
-                              child: Text(
-                                controller
-                                    .userStory
-                                    .value!
-                                    .stories[_currentIndex]
-                                    .caption,
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 14.sp,
-                                  height: 1.4,
-                                ),
-                              ),
+                              height: double.infinity,
                             ),
+                      );
+                    },
+                  ),
 
-                          // Message Input
-                          Container(
-                            padding: EdgeInsets.symmetric(
-                              horizontal: 16.w,
-                              vertical: 12.h,
-                            ),
-                            child: Row(
-                              children: [
-                                Expanded(
-                                  child: Container(
-                                    padding: EdgeInsets.symmetric(
-                                      horizontal: 16.w,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: Colors.transparent,
-                                      border: Border.all(
-                                        color: Colors.white.withOpacity(0.5),
-                                        width: 1,
-                                      ),
-                                      borderRadius: BorderRadius.circular(25.r),
-                                    ),
-                                    child: TextField(
-                                      controller: _messageController,
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 14.sp,
-                                      ),
-                                      onSubmitted: (_) => _sendMessage(),
-                                      decoration: InputDecoration(
-                                        hintText: 'Type a message',
-                                        hintStyle: TextStyle(
-                                          color: Colors.white.withOpacity(0.5),
-                                          fontSize: 14.sp,
-                                        ),
-                                        border: InputBorder.none,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                SizedBox(width: 12.w),
-                                GestureDetector(
-                                  onTap: _sendMessage,
-                                  child: Container(
-                                    padding: EdgeInsets.all(12.r),
-                                    decoration: BoxDecoration(
-                                      color: const Color(0xFF00ff87),
-                                      shape: BoxShape.circle,
-                                    ),
-                                    child: Icon(
-                                      Icons.send,
-                                      color: Colors.black,
-                                      size: 20.sp,
-                                    ),
-                                  ),
-                                ),
-                                SizedBox(width: 12.w),
-                                GestureDetector(
-                                  onTap: () {
-                                    controller.toggleStoryLike(_currentIndex);
-                                  },
-                                  child: Icon(
-                                    controller
-                                            .userStory
-                                            .value!
-                                            .stories[_currentIndex]
-                                            .isLiked
-                                        ? Icons.favorite
-                                        : Icons.favorite_border,
-                                    color: Colors.white,
-                                    size: 28.sp,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
+                  // Gradient overlay
+                  Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.center,
+                        colors: [
+                          Colors.black.withOpacity(0.7),
+                          Colors.transparent,
                         ],
                       ),
                     ),
-                  ],
-                ),
+                  ),
+
+                  // Story Progress Bars
+                  SafeArea(
+                    child: Column(
+                      children: [
+                        Padding(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 8.w,
+                            vertical: 8.h,
+                          ),
+                          child: Row(
+                            children: List.generate(
+                              controller.userStory.value!.stories.length,
+                              (index) => Expanded(
+                                child: Container(
+                                  height: 3.h,
+                                  margin: EdgeInsets.symmetric(horizontal: 2.w),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withOpacity(0.3),
+                                    borderRadius: BorderRadius.circular(2.r),
+                                  ),
+                                  child: FractionallySizedBox(
+                                    alignment: Alignment.centerLeft,
+                                    widthFactor: index == _currentIndex
+                                        ? _animationController.value
+                                        : index < _currentIndex
+                                        ? 1.0
+                                        : 0.0,
+                                    child: Container(
+                                      decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.circular(
+                                          2.r,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+
+                        // User Info Header
+                        Padding(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 16.w,
+                            vertical: 12.h,
+                          ),
+                          child: Row(
+                            children: [
+                              CircleAvatar(
+                                radius: 20.r,
+                                backgroundImage: NetworkImage(
+                                  ApiEndPoint.imageUrl +
+                                      controller.userStory.value!.user.image,
+                                ),
+                              ),
+                              SizedBox(width: 12.w),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      controller.userStory.value!.user.name,
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 16.sp,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                    Text(
+                                      Utils.timeAgo(
+                                        controller
+                                            .userStory
+                                            .value!
+                                            .stories[_currentIndex]
+                                            .createAt,
+                                      ),
+                                      style: TextStyle(
+                                        color: Colors.white.withOpacity(0.7),
+                                        fontSize: 12.sp,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              IconButton(
+                                onPressed: () => Get.back(),
+                                icon: Icon(
+                                  Icons.close,
+                                  color: Colors.white,
+                                  size: 28.sp,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+
+                        const Spacer(),
+
+                        // Messages Display
+                        if (_messages.isNotEmpty)
+                          Container(
+                            margin: EdgeInsets.symmetric(horizontal: 16.w),
+                            padding: EdgeInsets.all(12.r),
+                            constraints: BoxConstraints(maxHeight: 200.h),
+                            decoration: BoxDecoration(
+                              color: Colors.black.withOpacity(0.6),
+                              borderRadius: BorderRadius.circular(12.r),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Your Messages:',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 12.sp,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                SizedBox(height: 8.h),
+                                Expanded(
+                                  child: ListView.builder(
+                                    shrinkWrap: true,
+                                    itemCount: _messages.length,
+                                    itemBuilder: (context, index) {
+                                      return Container(
+                                        margin: EdgeInsets.only(bottom: 6.h),
+                                        padding: EdgeInsets.symmetric(
+                                          horizontal: 12.w,
+                                          vertical: 8.h,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: const Color(
+                                            0xFF00ff87,
+                                          ).withOpacity(0.2),
+                                          borderRadius: BorderRadius.circular(
+                                            8.r,
+                                          ),
+                                          border: Border.all(
+                                            color: const Color(
+                                              0xFF00ff87,
+                                            ).withOpacity(0.5),
+                                          ),
+                                        ),
+                                        child: Text(
+                                          _messages[index],
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 13.sp,
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+
+                        SizedBox(height: 8.h),
+
+                        // Caption at bottom
+                        if (controller
+                            .userStory
+                            .value!
+                            .stories[_currentIndex]
+                            .caption
+                            .isNotEmpty)
+                          Container(
+                            width: double.infinity,
+                            padding: EdgeInsets.all(16.r),
+                            margin: EdgeInsets.symmetric(
+                              horizontal: 16.w,
+                              vertical: 8.h,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.black.withOpacity(0.5),
+                              borderRadius: BorderRadius.circular(12.r),
+                            ),
+                            child: Text(
+                              controller
+                                  .userStory
+                                  .value!
+                                  .stories[_currentIndex]
+                                  .caption,
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 14.sp,
+                                height: 1.4,
+                              ),
+                            ),
+                          ),
+
+                        // Message Input
+                        Container(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 16.w,
+                            vertical: 12.h,
+                          ),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: Container(
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal: 16.w,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: Colors.transparent,
+                                    border: Border.all(
+                                      color: Colors.white.withOpacity(0.5),
+                                      width: 1,
+                                    ),
+                                    borderRadius: BorderRadius.circular(25.r),
+                                  ),
+                                  child: TextField(
+                                    focusNode: focusNode,
+                                    controller: _messageController,
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 14.sp,
+                                    ),
+                                    onSubmitted: (_) => _sendMessage(),
+                                    decoration: InputDecoration(
+                                      hintText: 'Type a message',
+                                      hintStyle: TextStyle(
+                                        color: Colors.white.withOpacity(0.5),
+                                        fontSize: 14.sp,
+                                      ),
+                                      border: InputBorder.none,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              SizedBox(width: 12.w),
+                              GestureDetector(
+                                onTap: _sendMessage,
+                                child: Container(
+                                  padding: EdgeInsets.all(12.r),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFF00ff87),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: Icon(
+                                    Icons.send,
+                                    color: Colors.black,
+                                    size: 20.sp,
+                                  ),
+                                ),
+                              ),
+                              SizedBox(width: 12.w),
+                              GestureDetector(
+                                onTap: () {
+                                  controller.toggleStoryLike(_currentIndex);
+                                  setState(() {});
+                                },
+                                child: Icon(
+                                  controller
+                                          .userStory
+                                          .value!
+                                          .stories[_currentIndex]
+                                          .isLiked
+                                      ? Icons.favorite
+                                      : Icons.favorite_border,
+                                  color: Colors.white,
+                                  size: 28.sp,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
-      ),
+            ),
     );
   }
 }

@@ -3,12 +3,14 @@ class UserActivitySave {
   final String id;
   final Post post;
   final String user;
+  final String type;
   final DateTime createAt;
   UserActivitySave({
     required this.id,
     required this.post,
     required this.user,
     required this.createAt,
+    required this.type,
   });
 
   factory UserActivitySave.fromJson(Map<String, dynamic> json) =>
@@ -16,6 +18,7 @@ class UserActivitySave {
         id: json['_id'] ?? "",
         post: Post.fromJson(json['post']),
         user: json['user'] ?? "",
+        type: json['type'] ?? "",
         createAt: DateTime.parse(json['createdAt'].toString()),
       );
 }

@@ -11,7 +11,7 @@ import '../controller/cart_controller.dart';
 import '../../data/models/cart_item.dart';
 
 class CartScreen extends StatelessWidget {
-  CartScreen({super.key});
+  CartScreen({Key? key}) : super(key: key);
 
   final CartController controller = Get.put(CartController());
 
@@ -30,8 +30,16 @@ class CartScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // Cart Items List
-                    Obx(
-                      () => ListView.builder(
+                    Obx(() {
+                      if (controller.cartItems.isEmpty) {
+                        return const Center(
+                          child: Text(
+                            'Cart is empty',
+                            style: TextStyle(color: Colors.white),
+                          ),
+                        );
+                      }
+                      return ListView.builder(
                         shrinkWrap: true,
                         physics: const NeverScrollableScrollPhysics(),
                         itemCount: controller.cartItems.length,
@@ -42,8 +50,8 @@ class CartScreen extends StatelessWidget {
                             child: CartItemCard(item: item),
                           );
                         },
-                      ),
-                    ),
+                      );
+                    }),
                     SizedBox(height: 24.h),
                     // Cost Summary
                     CommonText(
@@ -53,30 +61,21 @@ class CartScreen extends StatelessWidget {
                       color: AppColors.white50,
                     ),
                     SizedBox(height: 16.h),
-                    Obx(
-                      () => Column(
-                        children: [
-                          _buildSummaryRow('Subtotal', controller.subtotal),
-                          SizedBox(height: 12.h),
-                          _buildSummaryRow('Taxes', controller.taxes),
-                          SizedBox(height: 12.h),
-                          _buildSummaryRow('Other Fees', controller.otherFees),
-                          SizedBox(height: 12.h),
-                          _buildSummaryRow(
-                            'Delivery Fees',
-                            controller.deliveryFees,
-                          ),
-                          SizedBox(height: 16.h),
-                          Divider(color: Colors.grey, height: 1),
-                          SizedBox(height: 16.h),
-                          _buildSummaryRow(
-                            'Total',
-                            controller.total,
-                            isTotal: true,
-                          ),
-                        ],
-                      ),
-                    ),
+                    Obx(() => Column(
+                      children: [
+                        _buildSummaryRow('Subtotal', controller.subtotal),
+                        SizedBox(height: 12.h),
+                        _buildSummaryRow('Taxes', controller.taxes),
+                        SizedBox(height: 12.h),
+                        _buildSummaryRow('Other Fees', controller.otherFees),
+                        SizedBox(height: 12.h),
+                        _buildSummaryRow('Delivery Fees', controller.deliveryFees),
+                        SizedBox(height: 16.h),
+                        Divider(color: Colors.grey, height: 1),
+                        SizedBox(height: 16.h),
+                        _buildSummaryRow('Total', controller.total, isTotal: true),
+                      ],
+                    )),
                   ],
                 ),
               ),
@@ -88,20 +87,27 @@ class CartScreen extends StatelessWidget {
             child: Column(
               children: [
                 CommonButton(
-                  titleText: "Contunue Shopping",
+                    titleText: "Contunue Shopping",
                   buttonColor: Colors.transparent,
                   borderColor: Colors.white,
                   titleColor: Colors.white,
-                  onTap: () {},
-                ),
-                SizedBox(height: 20.h),
-                CommonButton(
-                  titleText: "Checkout",
-                  onTap: () {
-                    Get.toNamed(AppRoutes.shippingInformationScreen);
+                  onTap: (){
+
                   },
                 ),
-                SizedBox(height: 20.h),
+                SizedBox(height: 20.h,),
+                CommonButton(
+                  titleText: "Checkout",
+                  onTap: (){
+                    Get.toNamed(
+                      AppRoutes.shippingInformationScreen,
+                      arguments: {
+                        'total': controller.total,
+                      },
+                    );
+                  },
+                ),
+                SizedBox(height: 20.h,),
               ],
             ),
           ),
@@ -118,13 +124,13 @@ class CartScreen extends StatelessWidget {
           text: label,
           fontSize: 14,
           fontWeight: FontWeight.w400,
-          color: isTotal ? AppColors.white50 : AppColors.white700,
+          color: isTotal?AppColors.white50:AppColors.white700,
         ),
         CommonText(
           text: "\$${amount.toStringAsFixed(2)}",
           fontSize: 16,
           fontWeight: FontWeight.w500,
-          color: isTotal ? AppColors.white50 : AppColors.white700,
+          color: isTotal?AppColors.white50:AppColors.white700,
         ),
       ],
     );
@@ -134,7 +140,7 @@ class CartScreen extends StatelessWidget {
 class CartItemCard extends StatelessWidget {
   final CartItem item;
 
-  const CartItemCard({super.key, required this.item});
+  const CartItemCard({Key? key, required this.item}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -183,12 +189,15 @@ class CartItemCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  item.description,
-                  style: TextStyle(color: Colors.grey.shade500, fontSize: 12),
+                  '${item.color} / ${item.size}',
+                  style: TextStyle(
+                    color: Colors.grey.shade500,
+                    fontSize: 12,
+                  ),
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  '\$${item.price.toStringAsFixed(0)}',
+                  '${item.price.toStringAsFixed(2)} ${item.currencyCode}',
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 16,
@@ -203,7 +212,7 @@ class CartItemCard extends StatelessWidget {
           Column(
             children: [
               GestureDetector(
-                onTap: () => controller.removeItem(item.id),
+                onTap: () => controller.removeItem(item.keyId),
                 child: Icon(
                   Icons.delete_outline,
                   color: Colors.grey.shade500,
@@ -219,7 +228,7 @@ class CartItemCard extends StatelessWidget {
                 child: Row(
                   children: [
                     GestureDetector(
-                      onTap: () => controller.decrementQuantity(item.id),
+                      onTap: () => controller.decrementQuantity(item.keyId),
                       child: Container(
                         padding: const EdgeInsets.all(4),
                         child: const Icon(
@@ -229,21 +238,19 @@ class CartItemCard extends StatelessWidget {
                         ),
                       ),
                     ),
-                    Obx(
-                      () => Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12),
-                        child: Text(
-                          '${item.quantity.value}',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                          ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      child: Text(
+                        '${item.quantity}',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
                     ),
                     GestureDetector(
-                      onTap: () => controller.incrementQuantity(item.id),
+                      onTap: () => controller.incrementQuantity(item.keyId),
                       child: Container(
                         padding: const EdgeInsets.all(4),
                         child: const Icon(

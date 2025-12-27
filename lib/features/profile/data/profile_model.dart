@@ -41,11 +41,11 @@ class ProfileModel {
         .toList(),
     totalPost: json['totalPost'] ?? 0,
     totalNetwork: json['totalNetwork'] ?? 0,
-    dreamJob: json['dreamJob'] ?? "",
+    dreamJob: json['dreamJob'] ?? "N/A",
     education: json['education'] ?? "",
     location: json['location'] ?? "",
     mobile: json['mobile'] ?? "",
-    occupation: json['occupation'] ?? "",
+    occupation: json['occupation'] ?? "N/A",
   );
 }
 

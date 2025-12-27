@@ -1,14 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:road_project_flutter/component/app_storage/storage_key.dart';
 import 'package:road_project_flutter/config/api/api_end_point.dart';
-import 'package:road_project_flutter/features/home/presentation/models/post_model.dart';
 import 'package:road_project_flutter/features/profile/data/profile_model.dart';
 import 'package:road_project_flutter/features/profile/data/user_activity_like.dart';
 import 'package:road_project_flutter/features/profile/data/user_activity_model.dart';
 import 'package:road_project_flutter/features/profile/data/user_activity_photo.dart';
 import 'package:road_project_flutter/features/profile/data/user_activity_save.dart';
-import 'package:road_project_flutter/features/profile/data/user_activity_story.dart';
 import 'package:road_project_flutter/services/api/api_service.dart';
 import 'package:road_project_flutter/services/storage/storage_services.dart';
 import 'package:road_project_flutter/utils/constants/app_string.dart';
@@ -20,13 +17,26 @@ class ProfileController extends GetxController {
   final isLoading = false.obs;
   final imageLoading = false.obs;
   final likeLoading = false.obs;
-  final storyLoading = false.obs;
+  final videoLoading = false.obs;
   final saveLoading = false.obs;
   final user = Rxn<ProfileModel>();
   final userImage = RxList<UserActivityModel>();
   final userVideo = RxList<UserActivityModel>();
   final userLike = RxList<UserActivityModel>();
   final userSave = RxList<UserActivityModel>();
+
+  final postPage = 1.obs;
+  final postHasMore = true.obs;
+
+  final videoPage = 1.obs;
+  final videoHasmore = true.obs;
+
+  final likePage = 1.obs;
+  final likeHasmore = true.obs;
+
+  final savePage = 1.obs;
+  final saveHasmore = true.obs;
+
   // final String username = "Alex Peterson";
   final String bio =
       "Job: UI/UX Designer\nDream Job: UI/UX Designer\nInterested in Socializing, Adventure, Travelling";
@@ -212,7 +222,7 @@ class ProfileController extends GetxController {
   void initial(BuildContext context) {
     fetchProfile(context);
     fetchAllImage(context);
-    fetchPost(context);
+    fetchLike(context);
     fetchVideo(context);
     fetchSave(context);
   }
@@ -252,7 +262,7 @@ class ProfileController extends GetxController {
     update();
     try {
       final url =
-          "${ApiEndPoint.userActivity}/${LocalStorage.userId}?type=post";
+          "${ApiEndPoint.userActivity}/${LocalStorage.userId}?type=post&page=${postPage.value}&limit=10";
       final response = await ApiService2.get(url);
       if (response == null) {
         ScaffoldMessenger.of(context)
@@ -270,19 +280,26 @@ class ProfileController extends GetxController {
             final userData = temp
                 .map((e) => UserActivityPhoto.fromJson(e))
                 .toList();
-            userImage.value = userData
-                .where(
-                  (e) => e.type == 'image'
-                      ? e.image.isNotEmpty
-                      : e.media.isNotEmpty,
-                )
-                .map(
-                  (e) => UserActivityModel(
-                    file: e.type == 'image' ? e.image.first : e.media.first,
-                    type: e.type,
-                  ),
-                )
-                .toList();
+            userImage.addAll(
+              userData
+                  .where(
+                    (e) => e.type.toLowerCase() == 'image'
+                        ? e.image.isNotEmpty
+                        : e.media.isNotEmpty,
+                  )
+                  .map(
+                    (e) => UserActivityModel(
+                      file: e.type.toLowerCase() == 'image'
+                          ? e.image.first
+                          : e.media.first,
+                      type: e.type.toLowerCase(),
+                      viewer: e.videoViewCount,
+                    ),
+                  )
+                  .toList(),
+            );
+            postPage.value++;
+            postHasMore.value = temp.length == 10;
 
             update();
           }
@@ -297,11 +314,11 @@ class ProfileController extends GetxController {
   }
 
   void fetchVideo(BuildContext context) async {
-    storyLoading.value = true;
+    videoLoading.value = true;
     update();
     try {
       final url =
-          "${ApiEndPoint.userActivity}/${LocalStorage.userId}?type=video";
+          "${ApiEndPoint.userActivity}/${LocalStorage.userId}?type=video&page=${videoPage.value}&limit=10";
       final response = await ApiService2.get(url);
       if (response == null) {
         ScaffoldMessenger.of(context)
@@ -316,32 +333,38 @@ class ProfileController extends GetxController {
         } else {
           final temp = data['data'] as List;
           if (temp.isNotEmpty) {
-            userVideo.value = temp
-                .map(
-                  (e) => UserActivityModel(
-                    file: (e['media'] as List).first,
-                    type: 'video',
-                  ),
-                )
-                .toList();
+            userVideo.addAll(
+              temp
+                  .where((e) => (e['media'] as List).isNotEmpty)
+                  .map(
+                    (e) => UserActivityModel(
+                      file: (e['media'] as List).first,
+                      type: 'video',
+                      viewer: e['videoViewCount'],
+                    ),
+                  )
+                  .toList(),
+            );
+            videoPage.value++;
+            videoHasmore.value = temp.length == 10;
             update();
           }
         }
       }
     } catch (e) {
-      errorLog("error in story: $e");
+      errorLog("error in video: $e");
     } finally {
-      storyLoading.value = false;
+      videoLoading.value = false;
       update();
     }
   }
 
-  void fetchPost(BuildContext context) async {
+  void fetchLike(BuildContext context) async {
     likeLoading.value = true;
     update();
     try {
       final url =
-          "${ApiEndPoint.userActivity}/${LocalStorage.userId}?type=like";
+          "${ApiEndPoint.userActivity}/${LocalStorage.userId}?type=like&page=${likePage.value}&limit=10";
       final response = await ApiService2.get(url);
       if (response == null) {
         ScaffoldMessenger.of(context)
@@ -359,26 +382,34 @@ class ProfileController extends GetxController {
             final userData = (data['data'] as List)
                 .map((e) => UserActivityLike.fromJson(e))
                 .toList();
-            userLike.value = userData
-                .where(
-                  (element) =>
-                      (element.post != null) &&
-                      (element.post!.image.isNotEmpty),
-                )
-                .map(
-                  (e) => UserActivityModel(
-                    file: e.post!.image.first,
-                    type: "image",
-                  ),
-                )
-                .toList();
+            userLike.addAll(
+              userData
+                  .where(
+                    (element) =>
+                        (element.post != null) &&
+                        (element.post!.type == "image"
+                            ? element.post!.image.isNotEmpty
+                            : element.post!.media.isNotEmpty),
+                  )
+                  .map(
+                    (e) => UserActivityModel(
+                      file: e.post!.type == "image"
+                          ? e.post!.image.first
+                          : e.post!.media.first,
+                      type: e.post!.type,
+                    ),
+                  )
+                  .toList(),
+            );
+            likePage.value++;
+            likeHasmore.value = temp.length == 10;
 
             update();
           }
         }
       }
     } catch (e) {
-      errorLog("error in post: $e");
+      errorLog("error in like: $e");
     } finally {
       likeLoading.value = false;
       update();
@@ -388,7 +419,8 @@ class ProfileController extends GetxController {
   void fetchSave(BuildContext context) async {
     saveLoading.value = true;
     update();
-    final url = "${ApiEndPoint.userActivity}/${LocalStorage.userId}?type=save";
+    final url =
+        "${ApiEndPoint.userActivity}/${LocalStorage.userId}?type=save&page=${savePage.value}&limit=10";
     try {
       final response = await ApiService2.get(url);
       if (response == null) {
@@ -402,20 +434,34 @@ class ProfileController extends GetxController {
             ..clearSnackBars()
             ..showSnackBar(SnackBar(content: Text(data['message'])));
         } else {
-          final userdata = (data['data'] as List)
-              .map((e) => UserActivitySave.fromJson(e))
-              .toList();
-          if (userdata.isNotEmpty) {
-            userSave.value = userdata
-                .map(
-                  (e) => UserActivityModel(
-                    file: e.post.image.first,
-                    type: 'image',
-                  ),
-                )
+          final temp = data['data'] as List;
+          if (temp.isNotEmpty) {
+            final userdata = temp
+                .map((e) => UserActivitySave.fromJson(e))
                 .toList();
+
+            userSave.addAll(
+              userdata
+                  .where(
+                    (element) => element.type == "image"
+                        ? element.post.image.isNotEmpty
+                        : element.post.media.isNotEmpty,
+                  )
+                  .map(
+                    (e) => UserActivityModel(
+                      file: e.type == "image"
+                          ? e.post.image.first
+                          : e.post.media.first,
+                      type: e.type,
+                    ),
+                  )
+                  .toList(),
+            );
+            savePage.value++;
+            saveHasmore.value = temp.length == 10;
+
+            update();
           }
-          update();
         }
       }
     } catch (e) {

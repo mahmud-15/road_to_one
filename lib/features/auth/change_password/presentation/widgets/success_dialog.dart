@@ -60,7 +60,7 @@ class SuccessDialog {
               CommonButton(
                 titleText: "Go to Login",
                 onTap: () {
-                  Get.toNamed(AppRoutes.signIn);
+                  Get.offAllNamed(AppRoutes.signIn);
                 },
               ),
             ],

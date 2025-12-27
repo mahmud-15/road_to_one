@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:road_project_flutter/config/api/api_end_point.dart';
+import 'package:road_project_flutter/config/route/app_routes.dart';
 import 'package:road_project_flutter/services/api/api_service.dart';
 import 'package:road_project_flutter/services/storage/storage_keys.dart';
 import 'package:road_project_flutter/services/storage/storage_services.dart';
@@ -71,7 +72,9 @@ class VerifyUserController extends GetxController {
             ..showSnackBar(SnackBar(content: Text(data['message'])));
           LocalStorage.token = data['data'];
           LocalStorage.setString(LocalStorageKeys.token, LocalStorage.token);
-          // navigate to home screen
+          LocalStorage.isLogIn = true;
+          LocalStorage.setBool(LocalStorageKeys.isLogIn, LocalStorage.isLogIn);
+          Get.offAllNamed(AppRoutes.homeNav);
         }
       }
     } else {

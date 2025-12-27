@@ -2,7 +2,7 @@
 class NotificationItem {
   final String id;
   final String receiver;
-  final String sender;
+  final Sender? sender;
   final String title;
   final String message;
   final String refId;
@@ -25,7 +25,7 @@ class NotificationItem {
       NotificationItem(
         id: json['_id'] ?? "",
         receiver: json['receiver'] ?? "",
-        sender: json['sender'] ?? "",
+        sender: Sender.fromJson(json['sender'] ?? {}),
         title: json['title'] ?? "",
         message: json['message'] ?? "",
         refId: json['refId'] ?? "",
@@ -33,4 +33,16 @@ class NotificationItem {
         seen: json['seen'] ?? false,
         createdAt: DateTime.parse(json['createdAt'].toString()),
       );
+}
+
+class Sender {
+  final String id;
+  final String name;
+  final String image;
+  Sender({required this.id, required this.name, required this.image});
+  factory Sender.fromJson(Map<String, dynamic> json) => Sender(
+    id: json['_id'] ?? "",
+    name: json['name'] ?? "",
+    image: json['image'] ?? "",
+  );
 }

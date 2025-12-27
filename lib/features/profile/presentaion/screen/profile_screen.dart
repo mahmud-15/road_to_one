@@ -5,12 +5,11 @@ import 'package:road_project_flutter/component/text/common_text.dart';
 import 'package:road_project_flutter/config/api/api_end_point.dart';
 import 'package:road_project_flutter/config/route/app_routes.dart';
 import 'package:road_project_flutter/features/profile/data/user_activity_model.dart';
-import 'package:road_project_flutter/features/profile/data/user_activity_photo.dart';
 import 'package:road_project_flutter/utils/constants/app_colors.dart';
 import 'package:road_project_flutter/utils/constants/app_string.dart';
+import 'package:road_project_flutter/utils/log/app_log.dart';
 import 'package:video_player/video_player.dart';
 
-import '../../data/media_item.dart';
 import '../controller/profile_controller.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -212,18 +211,33 @@ class _ProfileScreenState extends State<ProfileScreen>
                                 fontWeight: FontWeight.w400,
                                 color: AppColors.white50,
                               ),
-                              ...List.generate(
-                                controller.user.value!.preferences.length,
-                                (index) => CommonText(
-                                  text:
-                                      "${controller.user.value!.preferences[index].name}${index == controller.user.value!.preferences.length - 1 ? "" : ", "}",
-                                  fontSize: 16.sp,
-                                  maxLines: 6,
-                                  textAlign: TextAlign.left,
-                                  fontWeight: FontWeight.w400,
-                                  color: AppColors.white50,
-                                ),
-                              ),
+                              controller.user.value!.preferences.isEmpty
+                                  ? CommonText(
+                                      text: "N/A",
+                                      fontSize: 16.sp,
+                                      maxLines: 6,
+                                      textAlign: TextAlign.left,
+                                      fontWeight: FontWeight.w400,
+                                      color: AppColors.white50,
+                                    )
+                                  : Wrap(
+                                      children: List.generate(
+                                        controller
+                                            .user
+                                            .value!
+                                            .preferences
+                                            .length,
+                                        (index) => CommonText(
+                                          text:
+                                              "${controller.user.value!.preferences[index].name}${index == controller.user.value!.preferences.length - 1 ? "" : ", "}",
+                                          fontSize: 16.sp,
+                                          maxLines: 6,
+                                          textAlign: TextAlign.left,
+                                          fontWeight: FontWeight.w400,
+                                          color: AppColors.white50,
+                                        ),
+                                      ),
+                                    ),
                             ],
                           ),
                         ),
@@ -256,21 +270,29 @@ class _ProfileScreenState extends State<ProfileScreen>
               child: TabBarView(
                 controller: _tabController,
                 children: [
-                  _buildGridView(
-                    controller.userImage,
-                    controller.imageLoading.value,
+                  BuildGridView(
+                    items: controller.userImage,
+                    isLoading: controller.imageLoading.value,
+                    hasMore: controller.postHasMore.value,
+                    onFetch: (e) => controller.fetchAllImage(e),
                   ),
-                  _buildGridView(
-                    controller.userVideo,
-                    controller.imageLoading.value,
+                  BuildGridView(
+                    items: controller.userVideo,
+                    isLoading: controller.videoLoading.value,
+                    hasMore: controller.videoHasmore.value,
+                    onFetch: (e) => controller.fetchVideo(e),
                   ),
-                  _buildGridView(
-                    controller.userLike,
-                    controller.imageLoading.value,
+                  BuildGridView(
+                    items: controller.userLike,
+                    isLoading: controller.likeLoading.value,
+                    hasMore: controller.likeHasmore.value,
+                    onFetch: (e) => controller.fetchLike(e),
                   ),
-                  _buildGridView(
-                    controller.userSave,
-                    controller.imageLoading.value,
+                  BuildGridView(
+                    items: controller.userSave,
+                    isLoading: controller.saveLoading.value,
+                    hasMore: controller.saveHasmore.value,
+                    onFetch: (e) => controller.fetchSave(e),
                   ),
                 ],
               ),
@@ -301,123 +323,124 @@ class _ProfileScreenState extends State<ProfileScreen>
     );
   }
 
-  Widget _buildGridView(List<UserActivityModel> items, bool isLoading) {
-    if (isLoading) {
-      return Center(child: CircularProgressIndicator());
-    } else if (items.isEmpty) {
-      return Center(
-        child: Text("No item found", style: TextStyle(color: AppColors.white)),
-      );
-    } else {
-      return GridView.builder(
-        padding: const EdgeInsets.all(1),
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 3,
-          crossAxisSpacing: 2,
-          mainAxisSpacing: 2,
-          childAspectRatio: 1,
-        ),
-        itemCount: items.length,
-        itemBuilder: (context, index) {
-          final item = items[index];
-          return GestureDetector(
-            onTap: () {
-              _showMediaViewer(context, items, index);
-            },
-            child: Stack(
-              fit: StackFit.expand,
-              children: [
-                // Thumbnail
-                Image.network(
-                  ApiEndPoint.imageUrl + item.file,
-                  fit: BoxFit.cover,
-                  loadingBuilder: (context, child, loadingProgress) {
-                    if (loadingProgress == null) return child;
-                    return Container(
-                      color: Colors.grey[900],
-                      child: Center(
-                        child: CircularProgressIndicator(
-                          value: loadingProgress.expectedTotalBytes != null
-                              ? loadingProgress.cumulativeBytesLoaded /
-                                    loadingProgress.expectedTotalBytes!
-                              : null,
-                        ),
-                      ),
-                    );
-                  },
-                  errorBuilder: (context, error, stackTrace) {
-                    return Container(
-                      color: Colors.grey[900],
-                      child: Icon(
-                        item.type == "video" ? Icons.videocam : Icons.image,
-                        size: 50,
-                        color: Colors.grey[700],
-                      ),
-                    );
-                  },
-                ),
-                // Video indicator
-                if (item.type == "video")
-                  Positioned(
-                    top: 8,
-                    right: 8,
-                    child: Icon(
-                      Icons.videocam,
-                      color: Colors.white,
-                      size: 20,
-                      shadows: [
-                        Shadow(
-                          color: Colors.black.withOpacity(0.8),
-                          blurRadius: 8,
-                        ),
-                      ],
-                    ),
-                  ),
-                // Video duration
-                if (item.type == "video")
-                  Positioned(
-                    bottom: 8,
-                    right: 8,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 6,
-                        vertical: 2,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.black.withOpacity(0.7),
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                      child: Text(
-                        item.viewer.toString(),
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 11,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ),
-                  ),
-              ],
-            ),
-          );
-        },
-      );
-    }
-  }
+  //   Widget _buildGridView(List<UserActivityModel> items, bool isLoading) {
+  //     if (isLoading) {
+  //       return Center(child: CircularProgressIndicator());
+  //     } else if (items.isEmpty) {
+  //       return Center(
+  //         child: Text("No item found", style: TextStyle(color: AppColors.white)),
+  //       );
+  //     } else {
+  //       return GridView.builder(
+  //         padding: const EdgeInsets.all(1),
+  //         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+  //           crossAxisCount: 3,
+  //           crossAxisSpacing: 2,
+  //           mainAxisSpacing: 2,
+  //           childAspectRatio: 1,
+  //         ),
+  //         itemCount: items.length,
+  //         itemBuilder: (context, index) {
+  //           final item = items[index];
+  //           return GestureDetector(
+  //             onTap: () {
+  //               _showMediaViewer(context, items, index);
+  //             },
+  //             child: Stack(
+  //               fit: StackFit.expand,
+  //               children: [
+  //                 // Thumbnail
+  //                 Image.network(
+  //                   ApiEndPoint.imageUrl + item.file,
+  //                   fit: BoxFit.cover,
+  //                   loadingBuilder: (context, child, loadingProgress) {
+  //                     if (loadingProgress == null) return child;
+  //                     return Container(
+  //                       color: Colors.grey[900],
+  //                       child: Center(
+  //                         child: CircularProgressIndicator(
+  //                           value: loadingProgress.expectedTotalBytes != null
+  //                               ? loadingProgress.cumulativeBytesLoaded /
+  //                                     loadingProgress.expectedTotalBytes!
+  //                               : null,
+  //                         ),
+  //                       ),
+  //                     );
+  //                   },
+  //                   errorBuilder: (context, error, stackTrace) {
+  //                     return Container(
+  //                       color: Colors.grey[900],
+  //                       child: Icon(
+  //                         item.type == "video" ? Icons.videocam : Icons.image,
+  //                         size: 50,
+  //                         color: Colors.grey[700],
+  //                       ),
+  //                     );
+  //                   },
+  //                 ),
+  //                 // Video indicator
+  //                 if (item.type == "video")
+  //                   Positioned(
+  //                     top: 8,
+  //                     right: 8,
+  //                     child: Icon(
+  //                       Icons.videocam,
+  //                       color: Colors.white,
+  //                       size: 20,
+  //                       shadows: [
+  //                         Shadow(
+  //                           color: Colors.black.withOpacity(0.8),
+  //                           blurRadius: 8,
+  //                         ),
+  //                       ],
+  //                     ),
+  //                   ),
+  //                 // Video duration
+  //                 if (item.type == "video")
+  //                   Positioned(
+  //                     bottom: 8,
+  //                     right: 8,
+  //                     child: Container(
+  //                       padding: const EdgeInsets.symmetric(
+  //                         horizontal: 6,
+  //                         vertical: 2,
+  //                       ),
+  //                       decoration: BoxDecoration(
+  //                         color: Colors.black.withOpacity(0.7),
+  //                         borderRadius: BorderRadius.circular(4),
+  //                       ),
+  //                       child: Text(
+  //                         item.viewer.toString(),
+  //                         style: const TextStyle(
+  //                           color: Colors.white,
+  //                           fontSize: 11,
+  //                           fontWeight: FontWeight.w500,
+  //                         ),
+  //                       ),
+  //                     ),
+  //                   ),
+  //               ],
+  //             ),
+  //           );
+  //         },
+  //       );
+  //     }
+  //   }
 
-  void _showMediaViewer(
-    BuildContext context,
-    List<UserActivityModel> items,
-    int initialIndex,
-  ) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) =>
-            MediaViewerScreen(items: items, initialIndex: initialIndex),
-      ),
-    );
-  }
+  //   void _showMediaViewer(
+  //     BuildContext context,
+  //     List<UserActivityModel> items,
+  //     int initialIndex,
+  //   ) {
+  //     Navigator.push(
+  //       context,
+  //       MaterialPageRoute(
+  //         builder: (context) =>
+  //             MediaViewerScreen(items: items, initialIndex: initialIndex),
+  //       ),
+  //     );
+  //   }
+  // }
 }
 
 // Full screen media viewer
@@ -542,10 +565,19 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
   }
 
   Future<void> _initializeVideo() async {
+    appLog("video url: ${widget.videoUrl}");
     try {
       _controller = VideoPlayerController.networkUrl(
         Uri.parse(widget.videoUrl),
       );
+      _controller.addListener(() {
+        if (_controller.value.hasError) {
+          appLog('Video error: ${_controller.value.errorDescription}');
+          setState(() {
+            _hasError = true;
+          });
+        }
+      });
 
       await _controller.initialize();
       setState(() {
@@ -891,5 +923,170 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
         ),
       ),
     );
+  }
+}
+
+class BuildGridView extends StatefulWidget {
+  const BuildGridView({
+    super.key,
+    required this.items,
+    required this.isLoading,
+    required this.hasMore,
+    required this.onFetch,
+  });
+  final List<UserActivityModel> items;
+  final bool isLoading;
+  final bool hasMore;
+  final Function(BuildContext) onFetch;
+
+  @override
+  State<BuildGridView> createState() => _BuildGridViewState();
+}
+
+class _BuildGridViewState extends State<BuildGridView> {
+  final ScrollController _scrollController = ScrollController();
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    _scrollController.addListener(() {
+      if (_scrollController.position.pixels >=
+              _scrollController.position.maxScrollExtent - 200 &&
+          !widget.isLoading &&
+          widget.hasMore) {
+        widget.onFetch(context);
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+    _scrollController.dispose();
+  }
+
+  void _showMediaViewer(
+    BuildContext context,
+    List<UserActivityModel> items,
+    int initialIndex,
+  ) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) =>
+            MediaViewerScreen(items: items, initialIndex: initialIndex),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (widget.isLoading) {
+      return Center(child: CircularProgressIndicator());
+    } else if (widget.items.isEmpty) {
+      return Center(
+        child: Text("No item found", style: TextStyle(color: AppColors.white)),
+      );
+    } else {
+      return GridView.builder(
+        controller: _scrollController,
+        padding: const EdgeInsets.all(1),
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 3,
+          crossAxisSpacing: 2,
+          mainAxisSpacing: 2,
+          childAspectRatio: 1,
+        ),
+        itemCount: widget.items.length + (widget.isLoading ? 1 : 0),
+        itemBuilder: (context, index) {
+          if (index == widget.items.length) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          final item = widget.items[index];
+          return GestureDetector(
+            onTap: () {
+              _showMediaViewer(context, widget.items, index);
+            },
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                // Thumbnail
+                Image.network(
+                  ApiEndPoint.imageUrl + item.file,
+                  fit: BoxFit.cover,
+                  loadingBuilder: (context, child, loadingProgress) {
+                    if (loadingProgress == null) return child;
+                    return Container(
+                      color: Colors.grey[900],
+                      child: Center(
+                        child: CircularProgressIndicator(
+                          value: loadingProgress.expectedTotalBytes != null
+                              ? loadingProgress.cumulativeBytesLoaded /
+                                    loadingProgress.expectedTotalBytes!
+                              : null,
+                        ),
+                      ),
+                    );
+                  },
+                  errorBuilder: (context, error, stackTrace) {
+                    return Container(
+                      color: Colors.grey[900],
+                      child: Icon(
+                        item.type == "video" ? Icons.videocam : Icons.image,
+                        size: 50,
+                        color: Colors.grey[700],
+                      ),
+                    );
+                  },
+                ),
+                // Video indicator
+                if (item.type == "video")
+                  Positioned(
+                    top: 8,
+                    right: 8,
+                    child: Icon(
+                      Icons.videocam,
+                      color: Colors.white,
+                      size: 20,
+                      shadows: [
+                        Shadow(
+                          color: Colors.black.withOpacity(0.8),
+                          blurRadius: 8,
+                        ),
+                      ],
+                    ),
+                  ),
+                // Video duration
+                if (item.type == "video")
+                  Positioned(
+                    bottom: 8,
+                    right: 8,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 2,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.black.withOpacity(0.7),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Text(
+                        item.viewer.toString(),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          );
+        },
+      );
+    }
   }
 }

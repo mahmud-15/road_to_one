@@ -2,12 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:road_project_flutter/component/image/app_bar.dart';
+import 'package:road_project_flutter/component/button/common_button.dart';
 
 import '../../data/model/calender_model.dart';
 import '../controller/calender_controller.dart';
 
 class CalendarScreen extends StatelessWidget {
-  const CalendarScreen({super.key});
+  const CalendarScreen({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -16,7 +17,7 @@ class CalendarScreen extends StatelessWidget {
       builder: (controller) {
         return Scaffold(
           backgroundColor: const Color(0xFF1a1a1a),
-          appBar: AppBarNew(title: "Calender"),
+          appBar: AppBarNew(title: "Calender",),
           body: SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -51,6 +52,19 @@ class CalendarScreen extends StatelessWidget {
                 ),
                 SizedBox(height: 12.h),
                 _buildTaskSchedule(controller),
+                SizedBox(height: 100.h),
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 16.w),
+                  child: CommonButton(
+                    titleText: 'Save',
+                    buttonColor: const Color(0xFFb4ff39),
+                    titleColor: Colors.black,
+                    isLoading: controller.isTaskSaving,
+                    onTap: controller.activeTaskDay?.active == true
+                        ? controller.saveTaskCalendar
+                        : null,
+                  ),
+                ),
                 SizedBox(height: 24.h),
               ],
             ),
@@ -101,7 +115,11 @@ class CalendarScreen extends StatelessWidget {
               ),
             ),
             SizedBox(width: 4.w),
-            Icon(Icons.keyboard_arrow_down, color: Colors.white, size: 16.sp),
+            Icon(
+              Icons.keyboard_arrow_down,
+              color: Colors.white,
+              size: 16.sp,
+            ),
           ],
         ),
       ),
@@ -156,55 +174,124 @@ class CalendarScreen extends StatelessWidget {
             }).toList(),
           ),
           SizedBox(height: 12.h),
-          // Calendar grid
-          ...controller.calendarWeeks.map((week) {
-            return Padding(
-              padding: EdgeInsets.only(bottom: 8.h),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: week.map((day) {
-                  return _buildCalendarDay(day, controller);
-                }).toList(),
-              ),
-            );
-          }),
+          // Calendar grid (drag to select)
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final days = controller.calendarWeeks.expand((w) => w).toList();
+
+              final cellSize = 32.w;
+              final columns = 7;
+
+              final crossSpacing =
+                  ((constraints.maxWidth - (columns * cellSize)) / (columns - 1))
+                      .clamp(0.0, double.infinity);
+              final mainSpacing = 8.h;
+
+              int? indexFromOffset(Offset localPosition) {
+                final strideX = cellSize + crossSpacing;
+                final strideY = cellSize + mainSpacing;
+
+                final col = (localPosition.dx / strideX).floor();
+                final row = (localPosition.dy / strideY).floor();
+
+                if (col < 0 || col >= columns || row < 0) return null;
+                final index = row * columns + col;
+                if (index < 0 || index >= days.length) return null;
+                return index;
+              }
+
+              return GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onPanStart: (details) {
+                  final index = indexFromOffset(details.localPosition);
+                  if (index == null) return;
+                  controller.startDragSelection(days[index].date);
+                },
+                onPanUpdate: (details) {
+                  final index = indexFromOffset(details.localPosition);
+                  if (index == null) return;
+                  controller.updateDragSelection(days[index].date);
+                },
+                onPanEnd: (_) => controller.endDragSelection(),
+                onPanCancel: controller.endDragSelection,
+                child: GridView.builder(
+                  physics: const NeverScrollableScrollPhysics(),
+                  shrinkWrap: true,
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: columns,
+                    mainAxisExtent: cellSize,
+                    crossAxisSpacing: crossSpacing,
+                    mainAxisSpacing: mainSpacing,
+                  ),
+                  itemCount: days.length,
+                  itemBuilder: (context, index) {
+                    return _buildCalendarDay(
+                      days[index],
+                      controller,
+                    );
+                  },
+                ),
+              );
+            },
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildCalendarDay(CalendarDay day, CalendarController controller) {
+  Widget _buildCalendarDay(
+    CalendarDay day,
+    CalendarController controller,
+  ) {
     final isSelected = controller.isDateSelected(day.date);
-    final isInRange = controller.isDateInRange(day.date);
+    final activeDate = controller.activeDate;
+    final normalized = DateTime(day.date.year, day.date.month, day.date.day);
+    final isActive = activeDate != null &&
+        activeDate.year == normalized.year &&
+        activeDate.month == normalized.month &&
+        activeDate.day == normalized.day;
     final isToday = controller.isToday(day.date);
 
-    Color bgColor = Colors.transparent;
     Color textColor = Colors.white;
-
-    if (isSelected) {
-      bgColor = const Color(0xFFb4ff39);
-      textColor = Colors.black;
-    } else if (isInRange) {
-      bgColor = const Color(0xFF4a5a3a);
-    } else if (!day.isCurrentMonth) {
+    if (!day.isCurrentMonth) {
       textColor = Colors.grey[700]!;
+    }
+
+    final selectedColor = const Color(0xFF4a5a3a);
+    final activeColor = const Color(0xFFb4ff39);
+
+    final shouldShowSelectedCircle = isSelected || isActive;
+    final circleColor = isActive ? activeColor : selectedColor;
+    if (isActive) {
+      textColor = Colors.black;
     }
 
     return GestureDetector(
       onTap: () => controller.selectDate(day.date),
-      child: Container(
+      child: SizedBox(
         width: 32.w,
         height: 32.w,
-        decoration: BoxDecoration(color: bgColor, shape: BoxShape.circle),
-        child: Center(
-          child: Text(
-            day.day.toString(),
-            style: TextStyle(
-              color: textColor,
-              fontSize: 14.sp,
-              fontWeight: isToday ? FontWeight.bold : FontWeight.w500,
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            if (shouldShowSelectedCircle)
+              Container(
+                width: 32.w,
+                height: 32.w,
+                decoration: BoxDecoration(
+                  color: circleColor,
+                  shape: BoxShape.circle,
+                ),
+              ),
+            Text(
+              day.day.toString(),
+              style: TextStyle(
+                color: textColor,
+                fontSize: 14.sp,
+                fontWeight: isToday ? FontWeight.bold : FontWeight.w500,
+              ),
             ),
-          ),
+          ],
         ),
       ),
     );
@@ -213,35 +300,53 @@ class CalendarScreen extends StatelessWidget {
   Widget _buildTaskSchedule(CalendarController controller) {
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 16.w),
-      child: Row(
-        children: controller.weekDays.map((dayData) {
-          return Expanded(
-            child: _buildDayTask(
-              dayData['day']!,
-              dayData['date']!,
-              dayData['task']!,
-              dayData['isChecked'] as bool,
-              () => controller.toggleTask(dayData['day']!),
+      child: controller.isTaskLoading
+          ? SizedBox(
+              height: 80.h,
+              child: Center(
+                child: SizedBox(
+                  height: 22.w,
+                  width: 22.w,
+                  child: const CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: Color(0xFFb4ff39),
+                  ),
+                ),
+              ),
+            )
+          : Row(
+              children: controller.taskDays.map((dayData) {
+                final isActive = dayData.active;
+                final onTap = isActive
+                    ? controller.toggleActiveTaskSelection
+                    : null;
+                return Expanded(
+                  child: _buildDayTask(
+                    isActive ? 'Today' : dayData.day,
+                    dayData.work,
+                    dayData.selected,
+                    isActive,
+                    onTap,
+                  ),
+                );
+              }).toList(),
             ),
-          );
-        }).toList(),
-      ),
     );
   }
 
   Widget _buildDayTask(
     String day,
-    String date,
     String task,
     bool isChecked,
-    VoidCallback onTap,
+    bool isActive,
+    VoidCallback? onTap,
   ) {
     return Column(
       children: [
         Text(
           day,
           style: TextStyle(
-            color: Colors.white,
+            color: isActive ? const Color(0xFFb4ff39) : Colors.white,
             fontSize: 12.sp,
             fontWeight: FontWeight.w500,
           ),
@@ -254,13 +359,19 @@ class CalendarScreen extends StatelessWidget {
             height: 32.w,
             decoration: BoxDecoration(
               border: Border.all(
-                color: isChecked ? const Color(0xFFb4ff39) : Colors.grey[700]!,
+                color: (isChecked || isActive)
+                    ? const Color(0xFFb4ff39)
+                    : Colors.grey[700]!,
                 width: 2,
               ),
               borderRadius: BorderRadius.circular(4.r),
             ),
             child: isChecked
-                ? Icon(Icons.check, color: const Color(0xFFb4ff39), size: 20.sp)
+                ? Icon(
+              Icons.check,
+              color: const Color(0xFFb4ff39),
+              size: 20.sp,
+            )
                 : null,
           ),
         ),
@@ -268,7 +379,7 @@ class CalendarScreen extends StatelessWidget {
         Text(
           task,
           style: TextStyle(
-            color: Colors.grey[400],
+            color:isActive ? const Color(0xFFb4ff39) : Colors.grey[400],
             fontSize: 11.sp,
             fontWeight: FontWeight.w400,
           ),
