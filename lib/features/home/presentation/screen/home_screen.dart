@@ -30,7 +30,7 @@ class HomeScreen extends StatelessWidget {
               // Custom AppBar
               _buildCustomAppBar(
                 cartCount: controller.cartCount.value,
-                messageCount:0,
+                messageCount: 0,
                 notificationCount: controller.notificationCount.value,
               ),
 
@@ -335,7 +335,7 @@ class PostCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => controller.onCommentTap(context, controller.posts[index].id),
+      onTap: () {},
       child: Container(
         margin: EdgeInsets.only(bottom: 20.h),
         color: const Color(0xFF0a0a0a),
@@ -532,7 +532,7 @@ class PostCard extends StatelessWidget {
           ),
           SizedBox(width: 20.w),
           GestureDetector(
-            onTap: () => controller.onCommentTap(context, controller.posts[index].id),
+            onTap: () {},
             child: Icon(
               Icons.chat_bubble_outline,
               color: AppColors.primaryColor,

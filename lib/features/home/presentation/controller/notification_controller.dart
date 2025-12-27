@@ -16,7 +16,7 @@ class NotificationController extends GetxController {
   void onInit() {
     super.onInit();
     _markAllAsRead();
-    _loadNotifications(Get.context!);
+    loadNotifications(Get.context!);
   }
 
   Future<void> _markAllAsRead() async {
@@ -25,13 +25,13 @@ class NotificationController extends GetxController {
     } catch (_) {
       // ignore
     } finally {
-      if (Get.isRegistered<HomeController>()) {
-        Get.find<HomeController>().fetchNotificationCount();
-      }
+      // if (Get.isRegistered<HomeController>()) {
+      //   Get.find<HomeController>().fetchNotificationCount();
+      // }
     }
   }
 
-  void _loadNotifications(BuildContext context) async {
+  void loadNotifications(BuildContext context) async {
     isLoading.value = true;
     update();
     try {
