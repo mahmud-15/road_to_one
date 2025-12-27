@@ -7,6 +7,7 @@ import 'package:road_project_flutter/config/route/app_routes.dart';
 import 'package:road_project_flutter/features/profile/data/user_activity_model.dart';
 import 'package:road_project_flutter/utils/constants/app_colors.dart';
 import 'package:road_project_flutter/utils/constants/app_string.dart';
+import 'package:road_project_flutter/utils/log/app_log.dart';
 import 'package:video_player/video_player.dart';
 
 import '../controller/profile_controller.dart';
@@ -540,10 +541,19 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
   }
 
   Future<void> _initializeVideo() async {
+    appLog("video url: ${widget.videoUrl}");
     try {
       _controller = VideoPlayerController.networkUrl(
         Uri.parse(widget.videoUrl),
       );
+      _controller.addListener(() {
+        if (_controller.value.hasError) {
+          appLog('Video error: ${_controller.value.errorDescription}');
+          setState(() {
+            _hasError = true;
+          });
+        }
+      });
 
       await _controller.initialize();
       setState(() {

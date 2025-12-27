@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:paginated_listview_builder/paginated_listview_builder.dart';
 import 'package:road_project_flutter/config/api/api_end_point.dart';
 import 'package:road_project_flutter/config/route/app_routes.dart';
+import 'package:road_project_flutter/features/home/presentation/controller/notification_controller.dart';
 import 'package:road_project_flutter/services/api/api_service.dart';
 import 'package:road_project_flutter/utils/constants/app_string.dart';
 import 'package:road_project_flutter/utils/log/app_log.dart';
@@ -37,8 +38,6 @@ class HomeController extends GetxController {
   final Map<String, RxInt> currentPages = {};
   final Map<String, Timer?> autoScrollTimers = {};
 
-  void onRefresh() {}
-
   @override
   void onInit() {
     // TODO: implement onInit
@@ -50,6 +49,27 @@ class HomeController extends GetxController {
     loadStories(context, 1);
     loadPosts(context, 1);
     initializePostControllers();
+    loadNotification(context);
+  }
+
+  Future onRefresh(BuildContext context) async {
+    stories.clear();
+    posts.clear();
+    comments.clear();
+    postPaginatedController.reset();
+    storyPaginationController.reset();
+    initial(context);
+  }
+
+  void loadNotification(BuildContext context) {
+    final controller = NotificationController();
+    controller.loadNotifications(context);
+    final data = controller.groupedNotifications;
+    if (data.isNotEmpty) {
+      notificationCount.value =
+          data['Recent']!.where((element) => element.seen == false).length +
+          data['Yesterday']!.where((element) => element.seen == false).length;
+    }
   }
 
   @override
@@ -77,6 +97,7 @@ class HomeController extends GetxController {
         ScaffoldMessenger.of(context)
           ..clearSnackBars()
           ..showSnackBar(SnackBar(content: Text(AppString.someThingWrong)));
+        Get.offAllNamed(AppRoutes.signIn);
       } else {
         final data = response.data;
         if (response.statusCode != 200) {

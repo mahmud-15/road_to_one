@@ -326,10 +326,11 @@ class ProfileController extends GetxController {
                   (e) => UserActivityModel(
                     file: (e['media'] as List).first,
                     type: 'video',
-                    viewer: e['videoViewCount'] ?? 0,
+                    viewer: e['videoViewCount'],
                   ),
                 )
                 .toList();
+
             update();
           }
         }

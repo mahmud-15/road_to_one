@@ -14,10 +14,10 @@ class NotificationController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    _loadNotifications(Get.context!);
+    loadNotifications(Get.context!);
   }
 
-  void _loadNotifications(BuildContext context) async {
+  void loadNotifications(BuildContext context) async {
     isLoading.value = true;
     update();
     try {
