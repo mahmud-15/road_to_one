@@ -456,8 +456,7 @@ class PostCard extends StatelessWidget {
     // if (pageController == null || currentPage == null) {
     //   return const SizedBox.shrink();
     // }
-    if (controller.posts[index].image.isEmpty &&
-        controller.posts[index].media.isEmpty) {
+    if (controller.posts[index].image.isEmpty) {
       return const SizedBox.shrink();
     }
 
