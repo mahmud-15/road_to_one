@@ -36,6 +36,12 @@ class CalendarController extends GetxController {
     return DateTime(date.year, date.month, date.day);
   }
 
+  bool _isBeforeToday(DateTime date) {
+    final today = _normalizeDate(DateTime.now());
+    final normalized = _normalizeDate(date);
+    return normalized.isBefore(today);
+  }
+
   DateTime? get rangeStart => _rangeStart;
   DateTime? get rangeEnd => _rangeEnd;
 
@@ -220,6 +226,9 @@ class CalendarController extends GetxController {
   }
 
   void selectDate(DateTime date) {
+    if (_isBeforeToday(date)) {
+      return;
+    }
     final normalized = _normalizeDate(date);
 
     if (_rangeStart == null || _rangeEnd == null) {
@@ -266,6 +275,9 @@ class CalendarController extends GetxController {
   }
 
   void startDragSelection(DateTime date) {
+    if (_isBeforeToday(date)) {
+      return;
+    }
     _isDragging = true;
     final normalized = _normalizeDate(date);
     _rangeStart = normalized;
@@ -276,6 +288,7 @@ class CalendarController extends GetxController {
 
   void updateDragSelection(DateTime date) {
     if (!_isDragging) return;
+    if (_isBeforeToday(date)) return;
     final normalized = _normalizeDate(date);
     _rangeEnd = normalized;
     activeDate = normalized;

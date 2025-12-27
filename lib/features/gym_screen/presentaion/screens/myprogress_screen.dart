@@ -12,6 +12,12 @@ class MyProgressScreen extends GetView<MyProgressController> {
   @override
   MyProgressController controller = Get.put(MyProgressController());
 
+  void _closeOverlay<T>({T? result}) {
+    final ctx = Get.overlayContext ?? Get.context;
+    if (ctx == null) return;
+    Navigator.of(ctx, rootNavigator: true).pop(result);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -274,7 +280,7 @@ class MyProgressScreen extends GetView<MyProgressController> {
                 style: TextStyle(color: Colors.white),
               ),
               onTap: () {
-                Get.back();
+                _closeOverlay();
                 controller.editCaption(index);
               },
             ),
@@ -285,7 +291,7 @@ class MyProgressScreen extends GetView<MyProgressController> {
                 style: TextStyle(color: Colors.white),
               ),
               onTap: () {
-                Get.back();
+                _closeOverlay();
                 _showDeleteDialog(index);
               },
             ),
@@ -310,13 +316,13 @@ class MyProgressScreen extends GetView<MyProgressController> {
         ),
         actions: [
           TextButton(
-            onPressed: () => Get.back(),
+            onPressed: () => _closeOverlay(),
             child: Text('Cancel', style: TextStyle(color: Colors.grey[400])),
           ),
           TextButton(
             onPressed: () {
               controller.deletePicture(index);
-              Get.back();
+              _closeOverlay();
             },
             child: const Text('Delete', style: TextStyle(color: Colors.red)),
           ),

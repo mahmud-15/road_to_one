@@ -4,8 +4,6 @@ import 'package:get/get.dart';
 import 'package:road_project_flutter/component/button/common_button.dart';
 import 'package:road_project_flutter/component/image/app_bar.dart';
 import 'package:road_project_flutter/utils/constants/app_colors.dart';
-
-import '../../../../config/route/app_routes.dart';
 import '../controller/delete_controller.dart';
 
 class DeleteScreen extends StatelessWidget {
@@ -113,12 +111,16 @@ class DeleteScreen extends StatelessWidget {
             // Delete Account Button
             Padding(
               padding: const EdgeInsets.all(20),
-              child: CommonButton(
-                titleText: "Delete Account",
-                onTap: () {
-                  Get.toNamed(AppRoutes.settingScreen);
-                },
-              ),
+              child: Obx(() {
+                final deleting = controller.isDeleting.value;
+                return AbsorbPointer(
+                  absorbing: deleting,
+                  child: CommonButton(
+                    titleText: deleting ? "Deleting..." : "Delete Account",
+                    onTap: controller.deleteAccount,
+                  ),
+                );
+              }),
             ),
           ],
         ),

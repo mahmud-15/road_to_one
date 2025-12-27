@@ -18,6 +18,7 @@ import 'package:road_project_flutter/features/profile/presentaion/screen/change_
 import 'package:road_project_flutter/features/profile/presentaion/screen/delete_screen.dart';
 import 'package:road_project_flutter/features/profile/presentaion/screen/order_history_screen.dart';
 import 'package:road_project_flutter/features/profile/presentaion/screen/setting_screen.dart';
+import 'package:road_project_flutter/features/profile/presentaion/screen/my_token_screen.dart';
 import 'package:road_project_flutter/features/messages/presentation/screen/chat_screen.dart';
 import 'package:road_project_flutter/features/profile/presentaion/screen/shipping_information_update.dart';
 import 'package:road_project_flutter/features/store/presentation/screen/cart_screen.dart';
@@ -68,6 +69,7 @@ class AppRoutes {
   static const String chatScreenImage = "/chatScreenImage";
   static const String settingScreen = "/settingScreen";
   static const String orderHistoryScreen = "/orderHistoryScreen";
+  static const String myTokenScreen = "/myTokenScreen";
   static const String shippingInformationUpdateScreen =
       "/shippingInformationUpdateScreen";
   static const String changePassword = "/changePassword";
@@ -114,6 +116,7 @@ class AppRoutes {
     GetPage(name: chatScreenImage, page: () => ChatScreen()),
     GetPage(name: settingScreen, page: () => SettingsScreen()),
     GetPage(name: orderHistoryScreen, page: () => OrderHistoryScreen()),
+    GetPage(name: myTokenScreen, page: () => MyTokenScreen()),
     GetPage(
       name: shippingInformationUpdateScreen,
       page: () => ShippingInformationUpdateScreen(),

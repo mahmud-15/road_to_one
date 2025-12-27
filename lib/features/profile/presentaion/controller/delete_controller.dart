@@ -1,10 +1,49 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:road_project_flutter/utils/constants/app_colors.dart';
+import 'package:road_project_flutter/config/api/api_end_point.dart';
+import 'package:road_project_flutter/config/route/app_routes.dart';
+import 'package:road_project_flutter/services/api/api_service.dart';
+import 'package:road_project_flutter/services/storage/storage_services.dart';
 
 class DeleteController extends GetxController {
   final passwordController = TextEditingController();
   final isPasswordVisible = false.obs;
+  final isDeleting = false.obs;
+
+  void _closeOverlay<T>({T? result}) {
+    final ctx = Get.overlayContext ?? Get.context;
+    if (ctx == null) return;
+    Navigator.of(ctx, rootNavigator: true).pop(result);
+  }
+
+  void _safeSnackbar(
+    String title,
+    String message, {
+    required Color backgroundColor,
+  }) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final context = Get.key.currentContext ?? Get.context;
+      if (context == null) {
+        return;
+      }
+
+      final messenger = ScaffoldMessenger.maybeOf(context);
+      if (messenger == null) {
+        return;
+      }
+
+      messenger
+        ..clearSnackBars()
+        ..showSnackBar(
+          SnackBar(
+            content: Text('$title: $message'),
+            backgroundColor: backgroundColor,
+            duration: const Duration(seconds: 2),
+          ),
+        );
+    });
+  }
 
   void togglePasswordVisibility() {
     isPasswordVisible.value = !isPasswordVisible.value;
@@ -12,12 +51,10 @@ class DeleteController extends GetxController {
 
   void deleteAccount() {
     if (passwordController.text.isEmpty) {
-      Get.snackbar(
+      _safeSnackbar(
         'Error',
         'Please enter your password',
-        snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.red,
-        colorText: Colors.white,
       );
       return;
     }
@@ -57,7 +94,7 @@ class DeleteController extends GetxController {
                 children: [
                   Expanded(
                     child: TextButton(
-                      onPressed: () => Get.back(),
+                      onPressed: () => _closeOverlay(),
                       style: TextButton.styleFrom(
                         padding: EdgeInsets.symmetric(vertical: 12),
                         backgroundColor: Colors.transparent,
@@ -79,7 +116,7 @@ class DeleteController extends GetxController {
                   Expanded(
                     child: TextButton(
                       onPressed: () {
-                        Get.back();
+                        _closeOverlay();
                         _confirmDelete();
                       },
                       style: TextButton.styleFrom(
@@ -109,23 +146,53 @@ class DeleteController extends GetxController {
     );
   }
 
-  void _confirmDelete() {
-    // Implement actual delete account API call here
-    print('Deleting account with password: ${passwordController.text}');
+  Future<void> _confirmDelete() async {
+    if (isDeleting.value) return;
+    isDeleting.value = true;
+    try {
+      final password = passwordController.text.trim();
+      final response = await ApiService.delete(
+        ApiEndPoint.deleteAccount,
+        body: {
+          'password': password,
+        },
+      );
 
-    Get.snackbar(
-      'Success',
-      'Your account has been deleted',
-      snackPosition: SnackPosition.BOTTOM,
-      backgroundColor: Colors.green,
-      colorText: Colors.white,
-    );
+      debugPrint(
+        'DELETE_ACCOUNT statusCode=${response.statusCode} data=${response.data}',
+      );
 
-    // Navigate to login screen after delay
-    Future.delayed(Duration(seconds: 1), () {
-      // Get.offAll(() => LoginScreen());
-      print('Navigate to login screen');
-    });
+      final ok = response.statusCode == 200 || response.statusCode == 201;
+      if (!ok) {
+        final data = response.data;
+        final message = data['message'] != null
+            ? data['message'].toString()
+            : response.message;
+        _safeSnackbar(
+          'Failed',
+          message,
+          backgroundColor: Colors.red,
+        );
+        return;
+      }
+
+      _safeSnackbar(
+        'Success',
+        'Your account has been deleted',
+        backgroundColor: Colors.green,
+      );
+
+      await LocalStorage.removeAllPrefData();
+      Get.offAllNamed(AppRoutes.signIn);
+    } catch (_) {
+      _safeSnackbar(
+        'Failed',
+        'Delete failed',
+        backgroundColor: Colors.red,
+      );
+    } finally {
+      isDeleting.value = false;
+    }
   }
 
   @override

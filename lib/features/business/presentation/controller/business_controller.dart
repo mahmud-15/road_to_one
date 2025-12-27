@@ -149,12 +149,10 @@ class BusinessController extends GetxController {
     }
 
     if (numberOfToken.value <= 0) {
-      Get.snackbar(
+      _safeSnackbar(
         'No Tokens',
         "You don't have enough tokens to open this plan.",
-        backgroundColor: Colors.grey[800],
-        colorText: Colors.white,
-        duration: const Duration(seconds: 2),
+        backgroundColor: Colors.grey[800]!,
       );
       return;
     }
@@ -172,14 +170,22 @@ class BusinessController extends GetxController {
         ),
         actions: [
           TextButton(
-            onPressed: () => Get.back(result: false),
+            onPressed: () {
+              final ctx = Get.overlayContext ?? Get.context;
+              if (ctx == null) return;
+              Navigator.of(ctx, rootNavigator: true).pop(false);
+            },
             child: const Text(
               'Cancel',
               style: TextStyle(color: Colors.white70),
             ),
           ),
           TextButton(
-            onPressed: () => Get.back(result: true),
+            onPressed: () {
+              final ctx = Get.overlayContext ?? Get.context;
+              if (ctx == null) return;
+              Navigator.of(ctx, rootNavigator: true).pop(true);
+            },
             child: const Text(
               'Agree',
               style: TextStyle(color: Color(0xFFb4ff39)),
@@ -213,13 +219,10 @@ class BusinessController extends GetxController {
   }
 
   void showLockedMessage() {
-    Get.snackbar(
+    _safeSnackbar(
       'Locked',
       'This plan is currently locked. Complete previous plans to unlock.',
-      snackPosition: SnackPosition.BOTTOM,
       backgroundColor: Colors.orange,
-      colorText: Colors.white,
-      duration: Duration(seconds: 2),
     );
   }
 
@@ -244,5 +247,33 @@ class BusinessController extends GetxController {
   // Check if a plan is locked
   bool isPlanLocked(Map<String, dynamic> plan) {
     return plan['isLocked'] ?? false;
+  }
+
+  void _safeSnackbar(
+    String title,
+    String message, {
+    required Color backgroundColor,
+  }) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final context = Get.key.currentContext ?? Get.context;
+      if (context == null) {
+        return;
+      }
+
+      final messenger = ScaffoldMessenger.maybeOf(context);
+      if (messenger == null) {
+        return;
+      }
+
+      messenger
+        ..clearSnackBars()
+        ..showSnackBar(
+          SnackBar(
+            content: Text('$title: $message'),
+            backgroundColor: backgroundColor,
+            duration: const Duration(seconds: 2),
+          ),
+        );
+    });
   }
 }

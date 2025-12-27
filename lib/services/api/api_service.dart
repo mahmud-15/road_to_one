@@ -111,6 +111,7 @@ class ApiService2 {
     String url, {
     Map<String, dynamic>? body,
     String? image,
+    List<String>? images,
     Map<String, dynamic>? header,
     required bool isPost,
   }) async {
@@ -122,6 +123,14 @@ class ApiService2 {
       formData.files.add(
         MapEntry('image', await MultipartFile.fromFile(image)),
       );
+    }
+    if (images != null && images.isNotEmpty) {
+      for (final path in images) {
+        if (path.trim().isEmpty) continue;
+        formData.files.add(
+          MapEntry('image', await MultipartFile.fromFile(path)),
+        );
+      }
     }
 
     final dio = Dio();

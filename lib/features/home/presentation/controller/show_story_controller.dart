@@ -14,7 +14,17 @@ class ShowStoryController extends GetxController {
   void onInit() {
     // TODO: implement onInit
     super.onInit();
-    final storyId = Get.arguments;
+    final args = Get.arguments;
+    final storyId = args?.toString() ?? '';
+    if (storyId.trim().isEmpty) {
+      if (Get.context != null) {
+        ScaffoldMessenger.of(Get.context!)
+          ..clearSnackBars()
+          ..showSnackBar(SnackBar(content: Text(AppString.someThingWrong)));
+      }
+      Get.back();
+      return;
+    }
     fetchStory(Get.context!, storyId);
   }
 

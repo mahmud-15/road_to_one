@@ -25,73 +25,61 @@ class HomeScreen extends StatelessWidget {
       body: SafeArea(
         child: GetBuilder(
           init: HomeController(),
-          builder: (controller) => RefreshIndicator.adaptive(
-            onRefresh: () {
-              return controller.onRefresh(context);
-            },
-            child: Column(
-              children: [
-                // Custom AppBar
-                _buildCustomAppBar(
-                  cartCount: controller.cartCount.value,
-                  messageCount: controller.messageCount.value,
-                  notificationCount: controller.notificationCount.value,
-                ),
+          builder: (controller) => Column(
+            children: [
+              // Custom AppBar
+              _buildCustomAppBar(
+                cartCount: controller.cartCount.value,
+                messageCount:0,
+                notificationCount: controller.notificationCount.value,
+              ),
 
-                // Stories Section
-                _buildStoriesSection(controller),
+              // Stories Section
+              _buildStoriesSection(controller),
 
-                // Posts Section
-                // controller.postLoading.value
-                //     ? Center(child: CircularProgressIndicator())
-                //     : controller.posts.isEmpty
-                //     ? Center(
-                //         child: Text(
-                //           "No Post Found",
-                //           style: TextStyle(color: AppColors.white),
-                //         ),
-                //       )
-                //     : Expanded(
-                //         child: ListView.builder(
-                //           controller: controller.scrollController,
-                //           itemCount: controller.posts.length,
-                //           itemBuilder: (context, index) {
-                //             return PostCard(index: index, controller: controller);
-                //           },
-                //         ),
-                //       ),
-                Expanded(
-                  child: PaginatedListViewBuilder<PostModel>(
-                    controller: controller.postPaginatedController,
-                    isLoading: controller.postLoading.value,
-                    initLoadingWidget: Center(
-                      child: CircularProgressIndicator.adaptive(),
-                    ),
-                    onHitThreshold: (context, current) {
-                      if (!controller.postLoading.value) {
-                        appLog("load post current: $current");
-                        controller.loadPosts(context, current);
-                      }
-                    },
-                    endListLoadingWidget: Padding(
-                      padding: EdgeInsets.all(16),
-                      child: Center(
-                        child: CircularProgressIndicator.adaptive(),
-                      ),
-                    ),
-                    itemBuilder: (context, index, currentData) {
-                      return PostCard(index: index, controller: controller);
-                    },
-                    emptyStateWidget: Center(
-                      child: Text(
-                        "No Post Found",
-                        style: TextStyle(color: Colors.white),
-                      ),
-                    ),
+              // Posts Section
+              // controller.postLoading.value
+              //     ? Center(child: CircularProgressIndicator())
+              //     : controller.posts.isEmpty
+              //     ? Center(
+              //         child: Text(
+              //           "No Post Found",
+              //           style: TextStyle(color: AppColors.white),
+              //         ),
+              //       )
+              //     : Expanded(
+              //         child: ListView.builder(
+              //           controller: controller.scrollController,
+              //           itemCount: controller.posts.length,
+              //           itemBuilder: (context, index) {
+              //             return PostCard(index: index, controller: controller);
+              //           },
+              //         ),
+              //       ),
+              Expanded(
+                child: PaginatedListViewBuilder<PostModel>(
+                  controller: controller.postPaginatedController,
+                  isLoading: controller.postLoading.value,
+                  initLoadingWidget: Center(
+                    child: CircularProgressIndicator.adaptive(),
                   ),
+                  onHitThreshold: (context, current) {
+                    if (!controller.postLoading.value) {
+                      appLog("load post current: $current");
+                      controller.loadPosts(context, current);
+                    }
+                  },
+                  endListLoadingWidget: Padding(
+                    padding: EdgeInsets.all(16),
+                    child: Center(child: CircularProgressIndicator.adaptive()),
+                  ),
+                  itemBuilder: (context, index, currentData) {
+                    return PostCard(index: index, controller: controller);
+                  },
+                  emptyStateWidget: Center(child: Text("No Post Found")),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
@@ -346,28 +334,31 @@ class PostCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: EdgeInsets.only(bottom: 20.h),
-      color: const Color(0xFF0a0a0a),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Post Header
-          _buildPostHeader(context),
+    return GestureDetector(
+      onTap: () => controller.onCommentTap(context, controller.posts[index].id),
+      child: Container(
+        margin: EdgeInsets.only(bottom: 20.h),
+        color: const Color(0xFF0a0a0a),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Post Header
+            _buildPostHeader(context),
 
-          // Post Images
-          _buildPostImages(),
+            // Post Images
+            _buildPostImages(),
 
-          // Post Actions
-          _buildPostActions(context),
+            // Post Actions
+            _buildPostActions(context),
 
-          // Post Caption
-          SizedBox(height: 8.h),
-          _buildPostCaption(),
+            // Post Caption
+            SizedBox(height: 8.h),
+            _buildPostCaption(),
 
-          // Comments Section
-          // if (post.commentOfPost != 0) _buildCommentsSection(),
-        ],
+            // Comments Section
+            // if (post.commentOfPost != 0) _buildCommentsSection(),
+          ],
+        ),
       ),
     );
   }
@@ -541,7 +532,7 @@ class PostCard extends StatelessWidget {
           ),
           SizedBox(width: 20.w),
           GestureDetector(
-            onTap: () => controller.onCommentTap(controller.posts[index].id),
+            onTap: () => controller.onCommentTap(context, controller.posts[index].id),
             child: Icon(
               Icons.chat_bubble_outline,
               color: AppColors.primaryColor,

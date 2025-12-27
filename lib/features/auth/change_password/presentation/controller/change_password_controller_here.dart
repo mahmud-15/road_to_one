@@ -7,6 +7,7 @@ import 'package:road_project_flutter/utils/constants/app_string.dart';
 
 class SetPasswordController extends GetxController {
   final otp = "".obs;
+  final isLoading = false.obs;
 
   @override
   void onInit() {
@@ -46,6 +47,51 @@ class SetPasswordController extends GetxController {
         //   ..showSnackBar(SnackBar(content: Text(data['message'])));
         SuccessDialog.show(context);
       }
+    }
+  }
+
+  Future<void> changePassword(
+    BuildContext context, {
+    required String currentPassword,
+    required String newPassword,
+    required String confirmPassword,
+  }) async {
+    isLoading.value = true;
+    update();
+    try {
+      final body = {
+        "currentPassword": currentPassword,
+        "newPassword": newPassword,
+        "confirmPassword": confirmPassword,
+      };
+
+      final response = await ApiService2.post(
+        ApiEndPoint.changePassword,
+        body: body,
+      );
+
+      if (response == null) {
+        ScaffoldMessenger.of(context)
+          ..clearSnackBars()
+          ..showSnackBar(SnackBar(content: Text(AppString.someThingWrong)));
+        return;
+      }
+
+      final data = response.data;
+      if (response.statusCode != 200) {
+        ScaffoldMessenger.of(context)
+          ..clearSnackBars()
+          ..showSnackBar(SnackBar(content: Text(data['message'].toString())));
+        return;
+      }
+
+      ScaffoldMessenger.of(context)
+        ..clearSnackBars()
+        ..showSnackBar(SnackBar(content: Text(data['message'].toString())));
+      Get.offAllNamed(AppRoutes.signIn);
+    } finally {
+      isLoading.value = false;
+      update();
     }
   }
 }

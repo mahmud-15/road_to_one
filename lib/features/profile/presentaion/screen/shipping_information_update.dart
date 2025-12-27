@@ -116,7 +116,12 @@ class ShippingInformationUpdateScreen extends StatelessWidget {
                     SizedBox(height: 8.h),
                     Obx(
                       () => DropdownButtonFormField<String>(
-                        value: controller.selectedCountry.value,
+                        value: (() {
+                          final uniqueItems = controller.countries.toSet();
+                          final v = controller.selectedCountry.value.trim();
+                          if (v.isEmpty) return null;
+                          return uniqueItems.contains(v) ? v : null;
+                        })(),
                         dropdownColor: const Color(0xFF1C1C1C),
                         icon: Icon(Icons.keyboard_arrow_down,
                             color: Colors.white.withOpacity(0.8)),
@@ -126,6 +131,7 @@ class ShippingInformationUpdateScreen extends StatelessWidget {
                           fontSize: 14.sp,
                         ),
                         items: controller.countries
+                            .toSet()
                             .map(
                               (c) => DropdownMenuItem<String>(
                                 value: c,
@@ -287,15 +293,30 @@ class ShippingInformationUpdateScreen extends StatelessWidget {
                 ),
                 Padding(
                   padding: EdgeInsets.all(16.w),
-                  child: CommonButton(
-                    titleText: "Update Information",
-                    onTap: () {
-                      _safeSnackbar(
-                        'Successfully Update',
-                        'Change Your Information',
-                        backgroundColor: const Color(0xFFb4ff39),
-                      );
-                    },
+                  child: Obx(
+                    () => CommonButton(
+                      titleText: controller.isSaving.value
+                          ? "Updating..."
+                          : "Update Information",
+                      onTap: controller.isSaving.value
+                          ? () {}
+                          : () async {
+                              final ok = await controller.updateShippingInfo();
+                              if (ok) {
+                                _safeSnackbar(
+                                  'Successfully Update',
+                                  'Change Your Information',
+                                  backgroundColor: const Color(0xff000000),
+                                );
+                              } else {
+                                _safeSnackbar(
+                                  'Failed',
+                                  'Could not update shipping information.',
+                                  backgroundColor: Colors.red,
+                                );
+                              }
+                            },
+                    ),
                   ),
                 ),
               ],

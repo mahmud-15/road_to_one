@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:road_project_flutter/component/button/common_button.dart';
 import 'package:road_project_flutter/component/image/common_image.dart';
+import 'package:road_project_flutter/features/profile/presentaion/controller/feature_access_controller.dart';
 
 import '../../../../component/text/common_text.dart';
 import '../../../../config/route/app_routes.dart';
@@ -43,7 +44,12 @@ class SuccessPaymentScreen extends StatelessWidget {
               SizedBox(height: 24.h),
               CommonButton(
                 titleText: "Go to Home",
-                onTap: () {
+                onTap: () async {
+                  final accessController = Get.isRegistered<FeatureAccessController>()
+                      ? Get.find<FeatureAccessController>()
+                      : Get.put(FeatureAccessController(), permanent: true);
+                  accessController.setAccess(true);
+                  accessController.fetchAccess();
                   Get.offAllNamed(AppRoutes.homeNav);
                 },
               ),

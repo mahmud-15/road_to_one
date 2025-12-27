@@ -1,6 +1,6 @@
 class ApiUrl{
-  static const String baseUrl = "http://13.48.16.21:8080/api/v1/";
-  static const String imageUrl = "http://13.48.16.21:8080/";
+  static const String baseUrl = "http://92.205.234.176:5500/api/v1/";
+  static const String imageUrl = "http://92.205.234.176:5500/";
   static const String verify = "auth/verify-email";
   static const String login = "auth/login";
   static const String resetPassword = "auth/reset-password";

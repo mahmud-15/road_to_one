@@ -6,6 +6,7 @@ import 'package:road_project_flutter/utils/constants/app_string.dart';
 import 'package:road_project_flutter/utils/log/error_log.dart';
 
 import '../models/notification_model.dart';
+import 'home_controller.dart';
 
 class NotificationController extends GetxController {
   var notifications = <NotificationItem>[].obs;
@@ -14,10 +15,23 @@ class NotificationController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    loadNotifications(Get.context!);
+    _markAllAsRead();
+    _loadNotifications(Get.context!);
   }
 
-  void loadNotifications(BuildContext context) async {
+  Future<void> _markAllAsRead() async {
+    try {
+      await ApiService2.get(ApiEndPoint.notificationUpdate);
+    } catch (_) {
+      // ignore
+    } finally {
+      if (Get.isRegistered<HomeController>()) {
+        Get.find<HomeController>().fetchNotificationCount();
+      }
+    }
+  }
+
+  void _loadNotifications(BuildContext context) async {
     isLoading.value = true;
     update();
     try {

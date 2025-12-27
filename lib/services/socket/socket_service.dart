@@ -34,6 +34,12 @@ class SocketServices {
     _socket.on(event, handler);
   }
 
+  static off(String event) {
+    try {
+      _socket.off(event);
+    } catch (_) {}
+  }
+
   static emit(String event, Function(dynamic data) handler) {
     if (!_socket.connected) {
       connectToSocket();

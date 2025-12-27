@@ -44,6 +44,14 @@ class SettingsScreen extends StatelessWidget {
             ),
 
             _buildDivider(),
+            _buildSettingItem(
+              icon: Icons.token,
+              title: 'My Token',
+              onTap: () => Get.toNamed(AppRoutes.myTokenScreen),
+            ),
+
+
+            _buildDivider(),
 
             // Change Password
             _buildSettingItem(

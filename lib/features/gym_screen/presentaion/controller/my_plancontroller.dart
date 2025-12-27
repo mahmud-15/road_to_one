@@ -112,14 +112,22 @@ class MyPlanController extends GetxController {
         ),
         actions: [
           TextButton(
-            onPressed: () => Get.back(result: false),
+            onPressed: () {
+              final ctx = Get.overlayContext ?? Get.context;
+              if (ctx == null) return;
+              Navigator.of(ctx, rootNavigator: true).pop(false);
+            },
             child: const Text(
               'Cancel',
               style: TextStyle(color: Colors.white70),
             ),
           ),
           TextButton(
-            onPressed: () => Get.back(result: true),
+            onPressed: () {
+              final ctx = Get.overlayContext ?? Get.context;
+              if (ctx == null) return;
+              Navigator.of(ctx, rootNavigator: true).pop(true);
+            },
             child: const Text(
               'Agree',
               style: TextStyle(color: Color(0xFFb4ff39)),
