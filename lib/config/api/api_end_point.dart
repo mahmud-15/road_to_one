@@ -1,7 +1,7 @@
 class ApiEndPoint {
-  static const baseUrl = "http://10.10.7.11:5500/api/v1";
-  static const imageUrl = "http://10.10.7.11:5500";
-  static const socketUrl = "http://10.10.7.11:5500";
+  static const baseUrl = "http://92.205.234.176:5500/api/v1";
+  static const imageUrl = "http://92.205.234.176:5500";
+  static const socketUrl = "http://92.205.234.176:5500";
 
   static const signUp = "$baseUrl/user";
   static const verifyEmail = "$baseUrl/auth/verify-email";
@@ -19,20 +19,28 @@ class ApiEndPoint {
   static const provider = "provider";
   static const getProvider = "provider/my-provider";
   static const resetPassword = "$baseUrl/auth/reset-password";
+  static const changePassword = "$baseUrl/auth/change-password";
   static const myProvider = "provider/my-provider";
-  static const changePassword = "auth/change-password";
   static const user = "$baseUrl/user/profile";
   static const completeOrder = "booking/complete-booking/";
   static const reset_otp = "auth/resend-otp";
   static const notifications = "$baseUrl/notification";
+  static const notificationCount = "$baseUrl/notification/count";
+  static const notificationUpdate = "$baseUrl/notification/update";
   static const chats = "chats/my-chats";
   static const review = "review/my-ratings";
   static const messages = "messages";
   static const sendMessage = "messages/create";
+  static const message = "$baseUrl/message";
   static const userActivity = "$baseUrl/user/profile/activity";
+  static const conversation = "$baseUrl/conversation";
   static const allPost = "$baseUrl/post";
   static const allComment = "$baseUrl/post/comment";
+  static const commentReply = "$baseUrl/post/comment/reply";
+  static const commentLikeToggle = "$baseUrl/post/comment/like/toggle";
   static const story = "$baseUrl/story";
+
+  static const deleteAccount = "$baseUrl/user/delete";
 
   static const taskCalender = "$baseUrl/task-calendar";
   static const gymAndFitnessPlan = "$baseUrl/gym-and-fitness-plan";

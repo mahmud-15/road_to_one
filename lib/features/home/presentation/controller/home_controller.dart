@@ -9,9 +9,12 @@ import 'package:road_project_flutter/utils/log/app_log.dart';
 import 'package:road_project_flutter/utils/log/error_log.dart';
 import 'dart:async';
 
+import '../../../store/presentation/controller/cart_controller.dart';
+
 import '../models/comment_model.dart';
 import '../models/post_model.dart';
 import '../models/story_model.dart';
+import '../screen/comments_bottom_sheet.dart';
 
 // Home Controller - Single controller for entire screen
 class HomeController extends GetxController {
@@ -28,9 +31,12 @@ class HomeController extends GetxController {
   final commentLoading = false.obs;
 
   // Notification counts
-  var cartCount = 3.obs;
-  var notificationCount = 1.obs;
+  var cartCount = 0.obs;
+  var notificationCount = 0.obs;
   var messageCount = 5.obs;
+
+  late final CartController _cartController;
+  Worker? _cartCountWorker;
 
   // Post image carousel controllers
   final Map<String, PageController> pageControllers = {};
@@ -43,7 +49,43 @@ class HomeController extends GetxController {
   void onInit() {
     // TODO: implement onInit
     super.onInit();
+
+    _cartController = Get.isRegistered<CartController>()
+        ? Get.find<CartController>()
+        : Get.put(CartController(), permanent: true);
+
+    cartCount.value = _cartController.cartCount.value;
+    _cartCountWorker = ever<int>(_cartController.cartCount, (value) {
+      cartCount.value = value;
+      update();
+    });
+
+    fetchNotificationCount();
+
     initial(Get.context!);
+  }
+
+  Future<void> fetchNotificationCount() async {
+    try {
+      final response = await ApiService2.get(ApiEndPoint.notificationCount);
+      if (response == null || response.statusCode != 200) {
+        return;
+      }
+
+      final data = response.data;
+      final payload = (data is Map) ? (data['data'] as Map?) : null;
+      final raw = payload?['count'];
+      if (raw is num) {
+        notificationCount.value = raw.toInt();
+      } else if (raw is String) {
+        notificationCount.value = int.tryParse(raw) ?? 0;
+      } else {
+        notificationCount.value = 0;
+      }
+      update();
+    } catch (_) {
+      // ignore
+    }
   }
 
   void initial(BuildContext context) {
@@ -55,6 +97,7 @@ class HomeController extends GetxController {
   @override
   void onClose() {
     scrollController.dispose();
+    _cartCountWorker?.dispose();
     // Dispose all page controllers and timers
     for (var controller in pageControllers.values) {
       controller.dispose();
@@ -252,7 +295,15 @@ class HomeController extends GetxController {
     }
   }
 
-  void onCommentTap(String postId) {}
+  void onCommentTap(BuildContext context, String postId) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => CommentsBottomSheet(postId: postId),
+    );
+  }
 
   void onSaveTap(BuildContext context, String postId) async {
     final url = "${ApiEndPoint.toggleSave}/$postId";

@@ -42,6 +42,12 @@ class PictureItem {
 class MyProgressController extends GetxController {
   final ImagePicker _imagePicker = ImagePicker();
 
+  void _closeOverlay<T>({T? result}) {
+    final ctx = Get.overlayContext ?? Get.context;
+    if (ctx == null) return;
+    Navigator.of(ctx, rootNavigator: true).pop(result);
+  }
+
   // Reactive variables
   final _selectedTab = 0.obs;
   final _workoutCount = 0.obs;
@@ -284,7 +290,7 @@ class MyProgressController extends GetxController {
         ),
         actions: [
           TextButton(
-            onPressed: () => Get.back(),
+            onPressed: () => _closeOverlay(),
             child: Text(
               'Cancel',
               style: TextStyle(color: Colors.grey[400]),
@@ -293,7 +299,7 @@ class MyProgressController extends GetxController {
           TextButton(
             onPressed: () {
               final caption = captionController.text.trim();
-              Get.back();
+              _closeOverlay();
               uploadWorkoutPicture(imagePath: imagePath, caption: caption);
             },
             child: const Text(
@@ -342,7 +348,7 @@ class MyProgressController extends GetxController {
           ),
           actions: [
             TextButton(
-              onPressed: () => Get.back(),
+              onPressed: () => _closeOverlay(),
               child: Text(
                 'Cancel',
                 style: TextStyle(color: Colors.grey[400]),
@@ -352,7 +358,7 @@ class MyProgressController extends GetxController {
               onPressed: () {
                 _pictures[index].caption = captionController.text.trim();
                 _pictures.refresh();
-                Get.back();
+                _closeOverlay();
                 Get.snackbar(
                   'Success',
                   'Caption updated successfully',

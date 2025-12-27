@@ -1,5 +1,7 @@
 // Path: lib/screens/store/controller/shipping_information_controller.dart
 
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -22,6 +24,7 @@ class ShippingInformationUpdateController extends GetxController {
   ];
 
   final RxBool isLoadingProfile = false.obs;
+  final RxBool isSaving = false.obs;
 
   var totalAmount = 0.0.obs;
 
@@ -59,14 +62,56 @@ class ShippingInformationUpdateController extends GetxController {
 
       final country = (shipping?['country'] ?? '').toString().trim();
       if (country.isNotEmpty) {
-        selectedCountry.value = countries.contains(country)
-            ? country
-            : country;
+        final normalized = countries.firstWhere(
+          (c) => c.toLowerCase() == country.toLowerCase(),
+          orElse: () => '',
+        );
+        selectedCountry.value = normalized;
       }
     } catch (_) {
       loadSavedData();
     } finally {
       isLoadingProfile.value = false;
+    }
+  }
+
+  Future<bool> updateShippingInfo() async {
+    if (addressController.text.trim().isEmpty) {
+      Get.snackbar('Error', 'Please enter your address');
+      return false;
+    }
+    if (contactController.text.trim().isEmpty) {
+      Get.snackbar('Error', 'Please enter your contact number');
+      return false;
+    }
+
+    isSaving.value = true;
+    try {
+      final shippingAddress = {
+        'address': addressController.text.trim(),
+        'contact_number': contactController.text.trim(),
+        'country': selectedCountry.value.trim(),
+        'city': cityController.text.trim(),
+        'zip': postCodeController.text.trim(),
+      };
+
+      final response = await ApiService2.multipart(
+        ApiEndPoint.user,
+        body: {
+          'shipping_address': jsonEncode(shippingAddress),
+        },
+        isPost: false,
+      );
+
+      if (response == null || response.statusCode != 200) {
+        return false;
+      }
+
+      return true;
+    } catch (_) {
+      return false;
+    } finally {
+      isSaving.value = false;
     }
   }
 

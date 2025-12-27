@@ -27,7 +27,7 @@ class ChatScreen extends StatelessWidget {
             padding: EdgeInsets.all(16.w),
             child: TextField(
               controller: controller.searchController,
-              onChanged: controller.searchChats,
+              onChanged: controller.onSearchChanged,
               style: TextStyle(color: Colors.white, fontSize: 14.sp),
               decoration: InputDecoration(
                 hintText: 'Search',
@@ -56,14 +56,51 @@ class ChatScreen extends StatelessWidget {
             height: 100.h,
             padding: EdgeInsets.only(left: 16.w),
             child: Obx(
-              () => ListView.builder(
-                scrollDirection: Axis.horizontal,
-                itemCount: controller.stories.length,
-                itemBuilder: (context, index) {
-                  final story = controller.stories[index];
-                  return _buildStoryItem(story);
-                },
-              ),
+              () {
+                final showStoryShimmer =
+                    controller.storyLoading.value && controller.stories.length <= 1;
+
+                if (showStoryShimmer) {
+                  final items = controller.stories;
+                  return Row(
+                    children: [
+                      if (items.isNotEmpty) _buildStoryItem(items.first),
+                      Expanded(
+                        child: ListView.builder(
+                          scrollDirection: Axis.horizontal,
+                          itemCount: 6,
+                          itemBuilder: (context, index) {
+                            return _buildStoryShimmerItem();
+                          },
+                        ),
+                      ),
+                    ],
+                  );
+                }
+
+                return NotificationListener<ScrollNotification>(
+                  onNotification: (notification) {
+                    if (notification.metrics.axis != Axis.horizontal) {
+                      return false;
+                    }
+
+                    final remaining = notification.metrics.maxScrollExtent -
+                        notification.metrics.pixels;
+                    if (remaining < 120 && controller.storyLoading.value == false) {
+                      controller.fetchStories(refresh: false);
+                    }
+                    return false;
+                  },
+                  child: ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: controller.stories.length,
+                    itemBuilder: (context, index) {
+                      final story = controller.stories[index];
+                      return _buildStoryItem(story);
+                    },
+                  ),
+                );
+              },
             ),
           ),
 
@@ -72,14 +109,95 @@ class ChatScreen extends StatelessWidget {
           // Chat List
           Expanded(
             child: Obx(
-              () => ListView.builder(
-                itemCount: controller.filteredChats.length,
-                itemBuilder: (context, index) {
-                  final chat = controller.filteredChats[index];
-                  return _buildChatItem(chat);
-                },
-              ),
+              () {
+                final showChatShimmer =
+                    controller.isLoading.value && controller.conversations.isEmpty;
+                if (showChatShimmer) {
+                  return ListView.builder(
+                    padding: EdgeInsets.symmetric(vertical: 8.h),
+                    itemCount: 10,
+                    itemBuilder: (context, index) {
+                      return _buildChatShimmerItem();
+                    },
+                  );
+                }
+
+                return RefreshIndicator(
+                  color: AppColors.primaryColor,
+                  onRefresh: controller.refreshConversations,
+                  child: ListView.builder(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    itemCount: controller.conversations.length,
+                    itemBuilder: (context, index) {
+                      controller.loadMoreIfNeeded(index);
+                      final chat = controller.conversations[index];
+                      return _buildChatItem(chat);
+                    },
+                  ),
+                );
+              },
             ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStoryShimmerItem() {
+    return Container(
+      margin: EdgeInsets.only(right: 12.w),
+      child: Column(
+        children: [
+          _ShimmerBox(
+            width: 64.w,
+            height: 64.h,
+            borderRadius: 999,
+          ),
+          SizedBox(height: 6.h),
+          _ShimmerBox(
+            width: 52.w,
+            height: 10.h,
+            borderRadius: 8,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildChatShimmerItem() {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+      child: Row(
+        children: [
+          _ShimmerBox(
+            width: 56.r,
+            height: 56.r,
+            borderRadius: 999,
+          ),
+          SizedBox(width: 12.w),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _ShimmerBox(
+                  width: 160.w,
+                  height: 12.h,
+                  borderRadius: 8,
+                ),
+                SizedBox(height: 8.h),
+                _ShimmerBox(
+                  width: 220.w,
+                  height: 10.h,
+                  borderRadius: 8,
+                ),
+              ],
+            ),
+          ),
+          SizedBox(width: 12.w),
+          _ShimmerBox(
+            width: 32.w,
+            height: 10.h,
+            borderRadius: 8,
           ),
         ],
       ),
@@ -92,7 +210,7 @@ class ChatScreen extends StatelessWidget {
         if (story.isYourStory) {
           Get.to(() => CreateStoryScreen());
         } else {
-          Get.to(() => const StoryViewScreen());
+          Get.to(() => const StoryViewScreen(), arguments: story.id);
         }
       },
       child: Container(
@@ -245,6 +363,73 @@ class ChatScreen extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+class _ShimmerBox extends StatefulWidget {
+  final double width;
+  final double height;
+  final double borderRadius;
+
+  const _ShimmerBox({
+    required this.width,
+    required this.height,
+    required this.borderRadius,
+  });
+
+  @override
+  State<_ShimmerBox> createState() => _ShimmerBoxState();
+}
+
+class _ShimmerBoxState extends State<_ShimmerBox>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1100),
+    )..repeat();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final base = const Color(0xFF2A2A2A);
+    final highlight = Colors.white.withOpacity(0.10);
+
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, child) {
+        final t = _controller.value;
+        return ClipRRect(
+          borderRadius: BorderRadius.circular(widget.borderRadius),
+          child: ShaderMask(
+            shaderCallback: (rect) {
+              return LinearGradient(
+                begin: Alignment(-1.0 - 2.0 * (1.0 - t), 0),
+                end: Alignment(1.0 + 2.0 * t, 0),
+                colors: [base, highlight, base],
+                stops: const [0.35, 0.5, 0.65],
+              ).createShader(rect);
+            },
+            blendMode: BlendMode.srcATop,
+            child: Container(
+              width: widget.width,
+              height: widget.height,
+              color: base,
+            ),
+          ),
+        );
+      },
     );
   }
 }

@@ -30,7 +30,7 @@ class HomeScreen extends StatelessWidget {
               // Custom AppBar
               _buildCustomAppBar(
                 cartCount: controller.cartCount.value,
-                messageCount: controller.messageCount.value,
+                messageCount:0,
                 notificationCount: controller.notificationCount.value,
               ),
 
@@ -334,28 +334,31 @@ class PostCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: EdgeInsets.only(bottom: 20.h),
-      color: const Color(0xFF0a0a0a),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Post Header
-          _buildPostHeader(context),
+    return GestureDetector(
+      onTap: () => controller.onCommentTap(context, controller.posts[index].id),
+      child: Container(
+        margin: EdgeInsets.only(bottom: 20.h),
+        color: const Color(0xFF0a0a0a),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Post Header
+            _buildPostHeader(context),
 
-          // Post Images
-          _buildPostImages(),
+            // Post Images
+            _buildPostImages(),
 
-          // Post Actions
-          _buildPostActions(context),
+            // Post Actions
+            _buildPostActions(context),
 
-          // Post Caption
-          SizedBox(height: 8.h),
-          _buildPostCaption(),
+            // Post Caption
+            SizedBox(height: 8.h),
+            _buildPostCaption(),
 
-          // Comments Section
-          // if (post.commentOfPost != 0) _buildCommentsSection(),
-        ],
+            // Comments Section
+            // if (post.commentOfPost != 0) _buildCommentsSection(),
+          ],
+        ),
       ),
     );
   }
@@ -529,7 +532,7 @@ class PostCard extends StatelessWidget {
           ),
           SizedBox(width: 20.w),
           GestureDetector(
-            onTap: () => controller.onCommentTap(controller.posts[index].id),
+            onTap: () => controller.onCommentTap(context, controller.posts[index].id),
             child: Icon(
               Icons.chat_bubble_outline,
               color: AppColors.primaryColor,

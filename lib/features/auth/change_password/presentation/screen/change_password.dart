@@ -18,16 +18,19 @@ class SetPasswordScreen extends StatefulWidget {
 }
 
 class _SetPasswordScreenState extends State<SetPasswordScreen> {
+  final _currentPasswordController = TextEditingController();
   final _newPasswordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
   final _isPasswordVisible = ValueNotifier(false);
   final _isConfirmPasswordVisible = ValueNotifier(false);
+  final _isCurrentPasswordVisible = ValueNotifier(false);
   final _formKey = GlobalKey<FormState>();
 
   @override
   void dispose() {
     // TODO: implement dispose
     super.dispose();
+    _currentPasswordController.dispose();
     _newPasswordController.dispose();
     _confirmPasswordController.dispose();
   }
@@ -64,6 +67,40 @@ class _SetPasswordScreenState extends State<SetPasswordScreen> {
                 ),
 
                 SizedBox(height: 30.h),
+
+                /// Current Password Field
+                CommonText(
+                  text: "Current Password",
+                  fontSize: 14.sp,
+                  color: AppColors.white50,
+                  fontWeight: FontWeight.w400,
+                ),
+                SizedBox(height: 8.h),
+
+                ValueListenableBuilder(
+                  valueListenable: _isCurrentPasswordVisible,
+                  builder: (context, value, child) => _buildTextField(
+                    controller: _currentPasswordController,
+                    hintText: "Enter Current Password",
+                    obscureText: !value,
+                    validator: (value) {
+                      return Utils.passwordValidator(value);
+                    },
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        value
+                            ? Icons.visibility_outlined
+                            : Icons.visibility_off_outlined,
+                        color: const Color(0xFF757575),
+                        size: 20.sp,
+                      ),
+                      onPressed: () => _isCurrentPasswordVisible.value =
+                          !_isCurrentPasswordVisible.value,
+                    ),
+                  ),
+                ),
+
+                SizedBox(height: 20.h),
 
                 /// Password Field
                 CommonText(
@@ -141,9 +178,15 @@ class _SetPasswordScreenState extends State<SetPasswordScreen> {
                   init: SetPasswordController(),
                   builder: (controller) => CommonButton(
                     titleText: "Change Password",
+                    isLoading: controller.isLoading.value,
                     onTap: () {
-                      controller.verifyPassword(
+                      if (!(_formKey.currentState?.validate() ?? false)) {
+                        return;
+                      }
+
+                      controller.changePassword(
                         context,
+                        currentPassword: _currentPasswordController.text.trim(),
                         newPassword: _newPasswordController.text.trim(),
                         confirmPassword: _confirmPasswordController.text.trim(),
                       );

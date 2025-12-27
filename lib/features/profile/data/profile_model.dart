@@ -57,6 +57,6 @@ class Preferences {
   factory Preferences.fromJson(Map<String, dynamic> json) => Preferences(
     id: json['_id'] ?? "",
     name: json['name'] ?? "",
-    active: json['active'] ?? "",
+    active: json['active'] == true,
   );
 }

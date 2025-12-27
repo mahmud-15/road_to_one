@@ -571,7 +571,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
   // Interested In Dialog
   void _showInterestedInDialog(EditProfileController controller) {
-    controller.fetchAllPref();
+    controller.fetchAllPref(page: 1, limit: 100);
+    newInterestController.clear();
     showDialog(
       context: context,
       builder: (context) => StatefulBuilder(
@@ -606,31 +607,33 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   ],
                 ),
                 const SizedBox(height: 16),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: controller.user.value!.preferences.map((interest) {
-                    return Chip(
-                      label: Text(interest.name),
-                      deleteIcon: const Icon(
-                        Icons.close,
-                        size: 16,
-                        color: Colors.white,
-                      ),
-                      onDeleted: () {
-                        setDialogState(() {
-                          controller.user.value!.preferences.remove(interest);
-                        });
-                      },
-                      backgroundColor: const Color(0xFF3d3d3d),
-                      labelStyle: const TextStyle(color: Colors.white),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20),
-                      ),
+                GetBuilder<EditProfileController>(
+                  builder: (_) {
+                    return Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: controller.selectedPref.map((interest) {
+                        return Chip(
+                          label: Text(interest.name),
+                          deleteIcon: const Icon(
+                            Icons.close,
+                            size: 16,
+                            color: Colors.white,
+                          ),
+                          onDeleted: () {
+                            controller.removePreference(interest);
+                            setDialogState(() {});
+                          },
+                          backgroundColor: const Color(0xFF3d3d3d),
+                          labelStyle: const TextStyle(color: Colors.white),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                        );
+                      }).toList(),
                     );
-                  }).toList(),
+                  },
                 ),
-                const SizedBox(height: 16),
 
                 const SizedBox(height: 16),
                 Container(
@@ -640,54 +643,111 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     borderRadius: BorderRadius.circular(25),
                     border: Border.all(color: Colors.white30, width: 1),
                   ),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: TextField(
-                          controller: newInterestController,
-                          style: const TextStyle(
-                            color: Colors.white70,
-                            fontSize: 14,
-                          ),
-                          decoration: const InputDecoration(
-                            hintText: 'Socializing',
-                            hintStyle: TextStyle(
-                              color: Colors.white38,
-                              fontSize: 14,
-                            ),
-                            border: InputBorder.none,
-                          ),
-                        ),
+                  child: TextField(
+                    controller: newInterestController,
+                    style: const TextStyle(
+                      color: Colors.white70,
+                      fontSize: 14,
+                    ),
+                    onChanged: (_) => setDialogState(() {}),
+                    decoration: const InputDecoration(
+                      hintText: 'Type to search (e.g. Socializing)',
+                      hintStyle: TextStyle(
+                        color: Colors.white38,
+                        fontSize: 14,
                       ),
-                      TextButton(
-                        onPressed: () {
-                          if (newInterestController.text.isNotEmpty) {
-                            setDialogState(() {
-                              // controller.user.value!.preferences.add(
-                              //   newInterestController.text,
-                              // );
-                              controller.updatePreference(context);
-                              newInterestController.clear();
-                            });
-                          }
-                        },
-                        child: const Text(
-                          'Add',
-                          style: TextStyle(color: Colors.white),
-                        ),
-                      ),
-                    ],
+                      border: InputBorder.none,
+                    ),
                   ),
                 ),
+
+                const SizedBox(height: 12),
+                Obx(() {
+                  if (controller.isLoadingPref.value) {
+                    return const Padding(
+                      padding: EdgeInsets.only(top: 8),
+                      child: Center(
+                        child: SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        ),
+                      ),
+                    );
+                  }
+
+                  final query = newInterestController.text;
+                  final suggestions = controller
+                      .suggestionsFor(query)
+                      .where(
+                        (p) => !controller.selectedPref
+                            .any((s) => s.id == p.id),
+                      )
+                      .toList();
+
+                  if (query.trim().isEmpty) {
+                    return const SizedBox.shrink();
+                  }
+
+                  if (suggestions.isEmpty) {
+                    return const Padding(
+                      padding: EdgeInsets.only(top: 8),
+                      child: Text(
+                        'No matches found',
+                        style: TextStyle(color: Colors.white54),
+                      ),
+                    );
+                  }
+
+                  return Container(
+                    constraints: const BoxConstraints(maxHeight: 220),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF262626),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Colors.white12),
+                    ),
+                    child: ListView.separated(
+                      shrinkWrap: true,
+                      padding: EdgeInsets.zero,
+                      itemCount: suggestions.length,
+                      separatorBuilder: (_, __) => Divider(
+                        height: 1,
+                        color: Colors.white.withOpacity(0.08),
+                      ),
+                      itemBuilder: (_, index) {
+                        final item = suggestions[index];
+                        return ListTile(
+                          dense: true,
+                          title: Text(
+                            item.name,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 14,
+                            ),
+                          ),
+                          trailing: const Icon(
+                            Icons.add,
+                            size: 18,
+                            color: Colors.white70,
+                          ),
+                          onTap: () {
+                            controller.addPreference(item);
+                            newInterestController.clear();
+                            setDialogState(() {});
+                          },
+                        );
+                      },
+                    ),
+                  );
+                }),
+
                 const SizedBox(height: 20),
                 SizedBox(
                   width: double.infinity,
                   height: 48,
                   child: ElevatedButton(
                     onPressed: () {
-                      setState(() {
-                        // controller.interestedIn = interests.join(', ');
-                      });
+                      controller.updatePreference(context);
                       Navigator.pop(context);
                     },
                     style: ElevatedButton.styleFrom(

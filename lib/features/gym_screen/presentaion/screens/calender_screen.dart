@@ -80,7 +80,10 @@ class CalendarScreen extends StatelessWidget {
       child: Row(
         children: [
           _buildDropdownButton(controller.selectedYear.toString(), () {
-            Get.back();
+            final ctx = Get.overlayContext ?? Get.context;
+            if (ctx != null) {
+              Navigator.of(ctx, rootNavigator: true).pop();
+            }
             controller.showYearPicker();
           }),
           SizedBox(width: 8.w),
@@ -246,6 +249,9 @@ class CalendarScreen extends StatelessWidget {
     final isSelected = controller.isDateSelected(day.date);
     final activeDate = controller.activeDate;
     final normalized = DateTime(day.date.year, day.date.month, day.date.day);
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final isPastDate = normalized.isBefore(today);
     final isActive = activeDate != null &&
         activeDate.year == normalized.year &&
         activeDate.month == normalized.month &&
@@ -253,6 +259,9 @@ class CalendarScreen extends StatelessWidget {
     final isToday = controller.isToday(day.date);
 
     Color textColor = Colors.white;
+    if (isPastDate) {
+      textColor = Colors.grey[700]!;
+    }
     if (!day.isCurrentMonth) {
       textColor = Colors.grey[700]!;
     }
@@ -260,14 +269,17 @@ class CalendarScreen extends StatelessWidget {
     final selectedColor = const Color(0xFF4a5a3a);
     final activeColor = const Color(0xFFb4ff39);
 
-    final shouldShowSelectedCircle = isSelected || isActive;
+    final shouldShowSelectedCircle = (isSelected || isActive) && !isPastDate;
     final circleColor = isActive ? activeColor : selectedColor;
     if (isActive) {
       textColor = Colors.black;
     }
 
     return GestureDetector(
-      onTap: () => controller.selectDate(day.date),
+      onTap: () {
+        if (isPastDate) return;
+        controller.selectDate(day.date);
+      },
       child: SizedBox(
         width: 32.w,
         height: 32.w,

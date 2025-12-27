@@ -30,6 +30,7 @@ class EditProfileController extends GetxController {
 
   final allPreferences = <Preferences>[].obs;
   final selectedPref = <Preferences>[].obs;
+  final isLoadingPref = false.obs;
 
   void updateProfileImage(BuildContext context, File image) async {
     selectedProfileImage = image;
@@ -132,6 +133,10 @@ class EditProfileController extends GetxController {
     dreamJobController.text = user.value!.dreamJob;
     educationController.text = user.value!.education;
 
+    selectedPref
+      ..clear()
+      ..addAll(user.value!.preferences);
+
     // write all the field of user to controller
   }
 
@@ -169,9 +174,11 @@ class EditProfileController extends GetxController {
     }
   }
 
-  void fetchAllPref() async {
+  Future<void> fetchAllPref({int page = 1, int limit = 100}) async {
+    if (isLoadingPref.value) return;
+    isLoadingPref.value = true;
     try {
-      final url = ApiEndPoint.preferences;
+      final url = '${ApiEndPoint.preferences}?page=$page&limit=$limit';
       final response = await ApiService2.get(url);
 
       if (response != null && response.statusCode == 200) {
@@ -182,12 +189,46 @@ class EditProfileController extends GetxController {
       }
     } catch (e) {
       errorLog("error in fetch all pref: $e");
+    } finally {
+      isLoadingPref.value = false;
     }
+  }
+
+  List<Preferences> suggestionsFor(String query) {
+    final q = query.trim().toLowerCase();
+    if (q.isEmpty) return allPreferences;
+    return allPreferences
+        .where((p) => p.name.toLowerCase().contains(q))
+        .toList();
+  }
+
+  void addPreference(Preferences pref) {
+    final exists = selectedPref.any((p) => p.id == pref.id);
+    if (exists) return;
+    selectedPref.add(pref);
+    final u = user.value;
+    if (u == null) return;
+    u.preferences
+      ..clear()
+      ..addAll(selectedPref);
+    update();
+  }
+
+  void removePreference(Preferences pref) {
+    selectedPref.removeWhere((p) => p.id == pref.id);
+    final u = user.value;
+    if (u == null) return;
+    u.preferences
+      ..clear()
+      ..addAll(selectedPref);
+    update();
   }
 
   void updatePreference(BuildContext context) async {
     try {
-      final body = {'preferences': user.value!.preferences};
+      final body = {
+        'preferences': selectedPref.map((e) => e.id).toList(),
+      };
       final response = await ApiService.patch(ApiEndPoint.user, body: body);
       ScaffoldMessenger.of(context)
         ..clearSnackBars()

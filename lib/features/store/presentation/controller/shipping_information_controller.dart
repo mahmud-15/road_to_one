@@ -17,10 +17,22 @@ import '../screen/payment_webview_screen.dart';
 class ShippingInformationController extends GetxController {
   final TextEditingController addressController = TextEditingController();
   final TextEditingController contactController = TextEditingController();
+  final TextEditingController cityController = TextEditingController();
+  final TextEditingController postCodeController = TextEditingController();
+
+  final RxString selectedCountry = 'United States'.obs;
+  final List<String> countries = const [
+    'United States',
+    'Bangladesh',
+    'United Kingdom',
+    'Canada',
+    'Australia',
+  ];
 
   var totalAmount = 0.0.obs;
   final isSaving = false.obs;
   final isLoadingProfile = false.obs;
+  final isProcessing = false.obs;
 
   @override
   void onInit() {
@@ -62,12 +74,24 @@ class ShippingInformationController extends GetxController {
       if (shipping is Map) {
         final address = (shipping['address'] ?? '').toString();
         final contact = (shipping['contact_number'] ?? '').toString();
+        final city = (shipping['city'] ?? '').toString();
+        final zip = (shipping['zip'] ?? '').toString();
+        final country = (shipping['country'] ?? '').toString().trim();
 
         if (address.trim().isNotEmpty) {
           addressController.text = address;
         }
         if (contact.trim().isNotEmpty) {
           contactController.text = contact;
+        }
+        if (city.trim().isNotEmpty) {
+          cityController.text = city;
+        }
+        if (zip.trim().isNotEmpty) {
+          postCodeController.text = zip;
+        }
+        if (country.isNotEmpty) {
+          selectedCountry.value = countries.contains(country) ? country : country;
         }
       }
     } catch (_) {
@@ -97,28 +121,38 @@ class ShippingInformationController extends GetxController {
       return;
     }
 
-    final ok = await _updateShippingInfo();
-    if (!ok) {
-      return;
-    }
+    if (isProcessing.value) return;
+    isProcessing.value = true;
+    var navigated = false;
+    try {
+      final ok = await _updateShippingInfo();
+      if (!ok) {
+        return;
+      }
 
-    final paymentUrl = await _createCheckout();
-    if (paymentUrl == null || paymentUrl.trim().isEmpty) {
-      return;
-    }
+      final paymentUrl = await _createCheckout();
+      if (paymentUrl == null || paymentUrl.trim().isEmpty) {
+        return;
+      }
 
-    Get.to(
-      () => PaymentWebViewScreen(
-        paymentUrl: paymentUrl,
-        onSuccess: () async {
-          final cartController = Get.isRegistered<CartController>()
-              ? Get.find<CartController>()
-              : Get.put(CartController());
-          await cartController.clearCart();
-          Get.offAllNamed(AppRoutes.successImageScreen);
-        },
-      ),
-    );
+      navigated = true;
+      Get.to(
+        () => PaymentWebViewScreen(
+          paymentUrl: paymentUrl,
+          onSuccess: () async {
+            final cartController = Get.isRegistered<CartController>()
+                ? Get.find<CartController>()
+                : Get.put(CartController());
+            await cartController.clearCart();
+            Get.offAllNamed(AppRoutes.successImageScreen);
+          },
+        ),
+      );
+    } finally {
+      if (!navigated) {
+        isProcessing.value = false;
+      }
+    }
   }
 
   Future<String?> _createCheckout() async {
@@ -226,9 +260,9 @@ class ShippingInformationController extends GetxController {
       final shippingAddress = {
         'address': addressController.text.trim(),
         'contact_number': contactController.text.trim(),
-        'country': '',
-        'city': '',
-        'zip': '',
+        'country': selectedCountry.value.trim(),
+        'city': cityController.text.trim(),
+        'zip': postCodeController.text.trim(),
       };
 
       final dio = Dio();
@@ -256,11 +290,11 @@ class ShippingInformationController extends GetxController {
         return false;
       }
 
-      _safeSnackbar(
-        'Success',
-        'Shipping information updated.',
-        backgroundColor: Colors.green,
-      );
+      // _safeSnackbar(
+      //   'Success',
+      //   'Shipping information updated.',
+      //   backgroundColor: Colors.green,
+      // );
       return true;
     } catch (_) {
       _safeSnackbar(
@@ -306,6 +340,8 @@ class ShippingInformationController extends GetxController {
   void onClose() {
     addressController.dispose();
     contactController.dispose();
+    cityController.dispose();
+    postCodeController.dispose();
     super.onClose();
   }
 }
