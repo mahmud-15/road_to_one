@@ -82,7 +82,12 @@ class HomeScreen extends StatelessWidget {
                     itemBuilder: (context, index, currentData) {
                       return PostCard(index: index, controller: controller);
                     },
-                    emptyStateWidget: Center(child: Text("No Post Found")),
+                    emptyStateWidget: Center(
+                      child: Text(
+                        "No Post Found",
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    ),
                   ),
                 ),
               ],

@@ -211,18 +211,33 @@ class _ProfileScreenState extends State<ProfileScreen>
                                 fontWeight: FontWeight.w400,
                                 color: AppColors.white50,
                               ),
-                              ...List.generate(
-                                controller.user.value!.preferences.length,
-                                (index) => CommonText(
-                                  text:
-                                      "${controller.user.value!.preferences[index].name}${index == controller.user.value!.preferences.length - 1 ? "" : ", "}",
-                                  fontSize: 16.sp,
-                                  maxLines: 6,
-                                  textAlign: TextAlign.left,
-                                  fontWeight: FontWeight.w400,
-                                  color: AppColors.white50,
-                                ),
-                              ),
+                              controller.user.value!.preferences.isEmpty
+                                  ? CommonText(
+                                      text: "N/A",
+                                      fontSize: 16.sp,
+                                      maxLines: 6,
+                                      textAlign: TextAlign.left,
+                                      fontWeight: FontWeight.w400,
+                                      color: AppColors.white50,
+                                    )
+                                  : Wrap(
+                                      children: List.generate(
+                                        controller
+                                            .user
+                                            .value!
+                                            .preferences
+                                            .length,
+                                        (index) => CommonText(
+                                          text:
+                                              "${controller.user.value!.preferences[index].name}${index == controller.user.value!.preferences.length - 1 ? "" : ", "}",
+                                          fontSize: 16.sp,
+                                          maxLines: 6,
+                                          textAlign: TextAlign.left,
+                                          fontWeight: FontWeight.w400,
+                                          color: AppColors.white50,
+                                        ),
+                                      ),
+                                    ),
                             ],
                           ),
                         ),
