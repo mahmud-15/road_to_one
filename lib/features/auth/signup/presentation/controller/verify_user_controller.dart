@@ -72,6 +72,8 @@ class VerifyUserController extends GetxController {
             ..showSnackBar(SnackBar(content: Text(data['message'])));
           LocalStorage.token = data['data'];
           LocalStorage.setString(LocalStorageKeys.token, LocalStorage.token);
+          LocalStorage.isLogIn = true;
+          LocalStorage.setBool(LocalStorageKeys.isLogIn, LocalStorage.isLogIn);
           Get.offAllNamed(AppRoutes.homeNav);
         }
       }
