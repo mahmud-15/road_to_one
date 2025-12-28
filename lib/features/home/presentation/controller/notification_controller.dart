@@ -35,7 +35,8 @@ class NotificationController extends GetxController {
     isLoading.value = true;
     update();
     try {
-      final response = await ApiService2.get(ApiEndPoint.notifications);
+      final url = "${ApiEndPoint.notifications}?page=1&limit=50";
+      final response = await ApiService2.get(url);
       if (response == null) {
         ScaffoldMessenger.of(context)
           ..clearSnackBars()
