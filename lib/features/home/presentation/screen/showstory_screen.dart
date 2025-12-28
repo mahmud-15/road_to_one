@@ -161,7 +161,7 @@ class _StoryViewScreenState extends State<StoryViewScreen>
                   final Rect likeRect = position & size;
 
                   if (likeRect.contains(details.globalPosition)) {
-                    return; // ⛔ Ignore story navigation
+                    return;
                   }
                 }
                 final screenWidth = MediaQuery.of(context).size.width;
