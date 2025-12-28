@@ -335,7 +335,9 @@ class PostCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () {},
+      onTap: () {
+        controller.onCommentTap(context, controller.posts[index].id);
+      },
       child: Container(
         margin: EdgeInsets.only(bottom: 20.h),
         color: const Color(0xFF0a0a0a),
@@ -532,7 +534,9 @@ class PostCard extends StatelessWidget {
           ),
           SizedBox(width: 20.w),
           GestureDetector(
-            onTap: () {},
+            onTap: () {
+              controller.onCommentTap(context, controller.posts[index].id);
+            },
             child: Icon(
               Icons.chat_bubble_outline,
               color: AppColors.primaryColor,

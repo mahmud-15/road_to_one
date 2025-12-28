@@ -3,18 +3,17 @@ import 'package:get/get.dart';
 import 'package:paginated_listview_builder/paginated_listview_builder.dart';
 import 'package:road_project_flutter/config/api/api_end_point.dart';
 import 'package:road_project_flutter/config/route/app_routes.dart';
+import 'package:road_project_flutter/features/home/presentation/controller/notification_controller.dart';
+import 'package:road_project_flutter/features/home/presentation/screen/comments_bottom_sheet.dart';
+import 'package:road_project_flutter/features/store/presentation/controller/cart_controller.dart';
 import 'package:road_project_flutter/services/api/api_service.dart';
 import 'package:road_project_flutter/utils/constants/app_string.dart';
-import 'package:road_project_flutter/utils/log/app_log.dart';
 import 'package:road_project_flutter/utils/log/error_log.dart';
 import 'dart:async';
-
-import '../../../store/presentation/controller/cart_controller.dart';
 
 import '../models/comment_model.dart';
 import '../models/post_model.dart';
 import '../models/story_model.dart';
-import '../screen/comments_bottom_sheet.dart';
 
 // Home Controller - Single controller for entire screen
 class HomeController extends GetxController {
@@ -31,25 +30,22 @@ class HomeController extends GetxController {
   final commentLoading = false.obs;
 
   // Notification counts
-  var cartCount = 0.obs;
-  var notificationCount = 0.obs;
+  var cartCount = 3.obs;
+  var notificationCount = 1.obs;
   var messageCount = 5.obs;
-
-  late final CartController _cartController;
-  Worker? _cartCountWorker;
 
   // Post image carousel controllers
   final Map<String, PageController> pageControllers = {};
   final Map<String, RxInt> currentPages = {};
   final Map<String, Timer?> autoScrollTimers = {};
 
-  void onRefresh() {}
+  late final CartController _cartController;
+  Worker? _cartCountWorker;
 
   @override
   void onInit() {
     // TODO: implement onInit
     super.onInit();
-
     _cartController = Get.isRegistered<CartController>()
         ? Get.find<CartController>()
         : Get.put(CartController(), permanent: true);
@@ -60,44 +56,49 @@ class HomeController extends GetxController {
       update();
     });
 
-    fetchNotificationCount();
-
     initial(Get.context!);
-  }
-
-  Future<void> fetchNotificationCount() async {
-    try {
-      final response = await ApiService2.get(ApiEndPoint.notificationCount);
-      if (response == null || response.statusCode != 200) {
-        return;
-      }
-
-      final data = response.data;
-      final payload = (data is Map) ? (data['data'] as Map?) : null;
-      final raw = payload?['count'];
-      if (raw is num) {
-        notificationCount.value = raw.toInt();
-      } else if (raw is String) {
-        notificationCount.value = int.tryParse(raw) ?? 0;
-      } else {
-        notificationCount.value = 0;
-      }
-      update();
-    } catch (_) {
-      // ignore
-    }
   }
 
   void initial(BuildContext context) {
     loadStories(context, 1);
     loadPosts(context, 1);
     initializePostControllers();
+    loadNotification(context);
+  }
+
+  Future onRefresh(BuildContext context) async {
+    stories.clear();
+    posts.clear();
+    comments.clear();
+    postPaginatedController.reset();
+    storyPaginationController.reset();
+    initial(context);
+  }
+
+  void onCommentTap(BuildContext context, String postId) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => CommentsBottomSheet(postId: postId),
+    );
+  }
+
+  void loadNotification(BuildContext context) {
+    final controller = NotificationController();
+    controller.loadNotifications(context);
+    final data = controller.groupedNotifications;
+    if (data.isNotEmpty) {
+      notificationCount.value =
+          data['Recent']!.where((element) => element.seen == false).length +
+          data['Yesterday']!.where((element) => element.seen == false).length;
+    }
   }
 
   @override
   void onClose() {
     scrollController.dispose();
-    _cartCountWorker?.dispose();
     // Dispose all page controllers and timers
     for (var controller in pageControllers.values) {
       controller.dispose();
@@ -120,6 +121,7 @@ class HomeController extends GetxController {
         ScaffoldMessenger.of(context)
           ..clearSnackBars()
           ..showSnackBar(SnackBar(content: Text(AppString.someThingWrong)));
+        Get.offAllNamed(AppRoutes.signIn);
       } else {
         final data = response.data;
         if (response.statusCode != 200) {
@@ -165,7 +167,6 @@ class HomeController extends GetxController {
           final temp = data['data'] as List;
           if (temp.isNotEmpty) {
             final userData = temp.map((e) => PostModel.fromJson(e)).toList();
-            appLog("userData: ${userData.length}");
 
             postPaginatedController.addData(userData);
 
@@ -179,7 +180,9 @@ class HomeController extends GetxController {
       }
     } catch (e) {
       errorLog("Load posts failed: $e");
-      Get.offAllNamed(AppRoutes.signIn);
+      ScaffoldMessenger.of(context)
+        ..clearSnackBars()
+        ..showSnackBar(SnackBar(content: Text(AppString.someThingWrong)));
     } finally {
       postLoading.value = false;
       update();
@@ -214,7 +217,9 @@ class HomeController extends GetxController {
       }
     } catch (e) {
       errorLog("Load comments failed: $e");
-      Get.offAllNamed(AppRoutes.signIn);
+      ScaffoldMessenger.of(context)
+        ..clearSnackBars()
+        ..showSnackBar(SnackBar(content: Text(AppString.someThingWrong)));
     } finally {
       commentLoading.value = false;
       update();
@@ -293,16 +298,6 @@ class HomeController extends GetxController {
         errorLog("error in toggle like $e");
       }
     }
-  }
-
-  void onCommentTap(BuildContext context, String postId) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      useSafeArea: true,
-      backgroundColor: Colors.transparent,
-      builder: (_) => CommentsBottomSheet(postId: postId),
-    );
   }
 
   void onSaveTap(BuildContext context, String postId) async {
