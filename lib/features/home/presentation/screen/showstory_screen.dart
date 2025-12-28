@@ -3,7 +3,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:road_project_flutter/config/api/api_end_point.dart';
 import 'package:road_project_flutter/features/home/presentation/controller/show_story_controller.dart';
-import 'package:road_project_flutter/features/home/presentation/models/user_story_model.dart';
 import 'package:road_project_flutter/utils/app_utils.dart';
 import 'package:road_project_flutter/utils/constants/app_string.dart';
 
