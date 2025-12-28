@@ -77,4 +77,17 @@ class ShowStoryController extends GetxController {
       errorLog("error in toggle like: $e");
     }
   }
+
+  void sendMessage(BuildContext context, String text) async {
+    final body = {"participant": userStory.value!.user.id, "text": text};
+    final response = await ApiService2.post(
+      ApiEndPoint.conversation,
+      body: body,
+    );
+    if (response == null || response.statusCode != 201) {
+      ScaffoldMessenger.of(context)
+        ..clearSnackBars()
+        ..showSnackBar(SnackBar(content: Text(AppString.someThingWrong)));
+    }
+  }
 }

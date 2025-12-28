@@ -22,6 +22,8 @@ class _StoryViewScreenState extends State<StoryViewScreen>
   final List<String> _messages = [];
   final controller = Get.put(ShowStoryController());
   final focusNode = FocusNode();
+  final GlobalKey _likeKey = GlobalKey();
+
   // Static stories data
   // final List<StoryData> stories = [
   //   StoryData(
@@ -132,6 +134,7 @@ class _StoryViewScreenState extends State<StoryViewScreen>
 
   void _sendMessage() {
     if (_messageController.text.trim().isNotEmpty) {
+      controller.sendMessage(context, _messageController.text.trim());
       setState(() {
         _messages.add(_messageController.text.trim());
         _messageController.clear();
@@ -148,6 +151,19 @@ class _StoryViewScreenState extends State<StoryViewScreen>
           ? Center(child: CircularProgressIndicator())
           : GestureDetector(
               onTapDown: (details) {
+                final RenderBox? box =
+                    _likeKey.currentContext?.findRenderObject() as RenderBox?;
+
+                if (box != null) {
+                  final Offset position = box.localToGlobal(Offset.zero);
+                  final Size size = box.size;
+
+                  final Rect likeRect = position & size;
+
+                  if (likeRect.contains(details.globalPosition)) {
+                    return; // ⛔ Ignore story navigation
+                  }
+                }
                 final screenWidth = MediaQuery.of(context).size.width;
                 final dx = details.globalPosition.dx;
 
@@ -456,6 +472,7 @@ class _StoryViewScreenState extends State<StoryViewScreen>
                               ),
                               SizedBox(width: 12.w),
                               GestureDetector(
+                                key: _likeKey,
                                 onTap: () {
                                   controller.toggleStoryLike(_currentIndex);
                                   setState(() {});
