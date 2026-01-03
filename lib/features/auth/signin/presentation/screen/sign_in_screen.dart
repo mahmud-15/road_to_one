@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -19,8 +20,12 @@ class SignInScreen extends StatefulWidget {
 }
 
 class _SignInScreenState extends State<SignInScreen> {
-  final _emailController = TextEditingController();
-  final _passwordController = TextEditingController();
+  final _emailController = TextEditingController(
+    text: kDebugMode ? "sodabo6181@roratu.com" : "",
+  );
+  final _passwordController = TextEditingController(
+    text: kDebugMode ? "12345678" : "",
+  );
   final _formKey = GlobalKey<FormState>();
   final _isRemeberMe = ValueNotifier(false);
 
