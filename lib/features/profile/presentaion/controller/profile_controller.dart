@@ -9,6 +9,7 @@ import 'package:road_project_flutter/features/profile/data/user_activity_save.da
 import 'package:road_project_flutter/services/api/api_service.dart';
 import 'package:road_project_flutter/services/storage/storage_services.dart';
 import 'package:road_project_flutter/utils/constants/app_string.dart';
+import 'package:road_project_flutter/utils/log/app_log.dart';
 import 'package:road_project_flutter/utils/log/error_log.dart';
 
 import '../../data/media_item.dart';
@@ -423,12 +424,14 @@ class ProfileController extends GetxController {
         "${ApiEndPoint.userActivity}/${LocalStorage.userId}?type=save&page=${savePage.value}&limit=10";
     try {
       final response = await ApiService2.get(url);
+
       if (response == null) {
         ScaffoldMessenger.of(context)
           ..clearSnackBars()
           ..showSnackBar(SnackBar(content: Text(AppString.someThingWrong)));
       } else {
         final data = response.data;
+
         if (response.statusCode != 200) {
           ScaffoldMessenger.of(context)
             ..clearSnackBars()
@@ -443,20 +446,21 @@ class ProfileController extends GetxController {
             userSave.addAll(
               userdata
                   .where(
-                    (element) => element.type == "image"
+                    (element) => element.post.type == "image"
                         ? element.post.image.isNotEmpty
                         : element.post.media.isNotEmpty,
                   )
                   .map(
                     (e) => UserActivityModel(
-                      file: e.type == "image"
+                      file: e.post.type == "image"
                           ? e.post.image.first
                           : e.post.media.first,
-                      type: e.type,
+                      type: e.post.type,
                     ),
                   )
                   .toList(),
             );
+
             savePage.value++;
             saveHasmore.value = temp.length == 10;
 
