@@ -63,7 +63,9 @@ class HomeScreen extends StatelessWidget {
                     controller: controller.postPaginatedController,
                     isLoading: controller.postLoading.value,
                     initLoadingWidget: Center(
-                      child: CircularProgressIndicator.adaptive(),
+                      child: CircularProgressIndicator.adaptive(
+                        backgroundColor: AppColors.primaryColor,
+                      ),
                     ),
                     onHitThreshold: (context, current) {
                       if (!controller.postLoading.value) {

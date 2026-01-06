@@ -75,7 +75,11 @@ class _ProfileScreenState extends State<ProfileScreen>
             Padding(
               padding: const EdgeInsets.all(16.0),
               child: controller.isLoading.value
-                  ? Center(child: CircularProgressIndicator())
+                  ? Center(
+                      child: CircularProgressIndicator.adaptive(
+                        backgroundColor: AppColors.primaryColor,
+                      ),
+                    )
                   : Column(
                       children: [
                         // Profile Picture and Stats
@@ -984,7 +988,11 @@ class _BuildGridViewState extends State<BuildGridView> {
   @override
   Widget build(BuildContext context) {
     if (widget.isLoading) {
-      return Center(child: CircularProgressIndicator());
+      return Center(
+        child: CircularProgressIndicator.adaptive(
+          backgroundColor: AppColors.primaryColor,
+        ),
+      );
     } else if (widget.items.isEmpty) {
       return Center(
         child: Text("No item found", style: TextStyle(color: AppColors.white)),
@@ -1002,7 +1010,11 @@ class _BuildGridViewState extends State<BuildGridView> {
         itemCount: widget.items.length + (widget.isLoading ? 1 : 0),
         itemBuilder: (context, index) {
           if (index == widget.items.length) {
-            return const Center(child: CircularProgressIndicator());
+            return const Center(
+              child: CircularProgressIndicator.adaptive(
+                backgroundColor: AppColors.primaryColor,
+              ),
+            );
           }
           final item = widget.items[index];
           return GestureDetector(

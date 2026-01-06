@@ -33,7 +33,7 @@ class Post {
     id: json['_id'] ?? "",
     creator: json['creator'] ?? "",
     caption: json['caption'] ?? "",
-    type: json['type'] ?? "",
+    type: json['type'] ?? "image",
     image: json['image'] != null
         ? (json['image'] as List).map((e) => e.toString()).toList()
         : [],
