@@ -128,6 +128,7 @@ class HomeController extends GetxController {
           ScaffoldMessenger.of(context)
             ..clearSnackBars()
             ..showSnackBar(SnackBar(content: Text(data['message'])));
+          Get.offAllNamed(AppRoutes.signIn);
         } else {
           final temp = data['data'] as List;
           if (temp.isNotEmpty) {
