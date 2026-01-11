@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:paginated_listview_builder/paginated_listview_builder.dart';
+import 'package:road_project_flutter/component/button/common_button.dart';
+import 'package:road_project_flutter/component/text/common_text.dart';
 import 'package:road_project_flutter/config/api/api_end_point.dart';
 import 'package:road_project_flutter/config/route/app_routes.dart';
 import 'package:road_project_flutter/features/home/presentation/models/post_model.dart';
@@ -10,6 +12,7 @@ import 'package:road_project_flutter/services/storage/storage_services.dart';
 import 'package:road_project_flutter/utils/app_utils.dart';
 import 'package:road_project_flutter/utils/constants/app_colors.dart';
 import 'package:road_project_flutter/utils/constants/app_string.dart';
+import 'package:road_project_flutter/utils/extensions/extension.dart';
 import 'package:road_project_flutter/utils/log/app_log.dart';
 
 import '../controller/home_controller.dart';
@@ -82,7 +85,24 @@ class HomeScreen extends StatelessWidget {
                     itemBuilder: (context, index, currentData) {
                       return PostCard(index: index, controller: controller);
                     },
-                    emptyStateWidget: Center(child: Text("No Post Found")),
+                    emptyStateWidget: Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          CommonText(
+                            text: "No Post Found",
+                            color: AppColors.white,
+                          ),
+                          10.height,
+                          CommonButton(
+                            titleText: "Retry",
+                            buttonWidth: 150.w,
+                            buttonHeight: 40.h,
+                            onTap: () => controller.loadPosts(context, 1),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
                 ),
               ],
