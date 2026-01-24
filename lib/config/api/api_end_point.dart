@@ -1,7 +1,7 @@
 class ApiEndPoint {
-  static const baseUrl = "http://92.205.234.176:5500/api/v1";
-  static const imageUrl = "http://92.205.234.176:5500";
-  static const socketUrl = "http://92.205.234.176:5500";
+  static const baseUrl = "https://api.rt1percent.com/api/v1";
+  static const imageUrl = "https://api.rt1percent.com";
+  static const socketUrl = "https://api.rt1percent.com";
 
   static const signUp = "$baseUrl/user";
   static const verifyEmail = "$baseUrl/auth/verify-email";

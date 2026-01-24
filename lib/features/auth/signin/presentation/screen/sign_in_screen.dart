@@ -21,10 +21,10 @@ class SignInScreen extends StatefulWidget {
 
 class _SignInScreenState extends State<SignInScreen> {
   final _emailController = TextEditingController(
-    text: kDebugMode ? "sodabo6181@roratu.com" : "",
+    text: kDebugMode ? "welot91409@gamening.com" : "",
   );
   final _passwordController = TextEditingController(
-    text: kDebugMode ? "12345678" : "",
+    text: kDebugMode ? "hello123" : "",
   );
   final _formKey = GlobalKey<FormState>();
   final _isRemeberMe = ValueNotifier(false);
@@ -320,18 +320,17 @@ class _SignInScreenState extends State<SignInScreen> {
                       },
                     ),
 
-                    SizedBox(height: 16.h),
+                    // SizedBox(height: 16.h),
 
-                    /// Continue with Phone Button
-                    _SocialButton(
-                      icon: "assets/images/call.png",
-                      text: "Continue with Phone",
-                      iconColor: Color(0xFF4A9EFF),
-                      onTap: () {
-                        Get.toNamed(AppRoutes.phoneSignupScreen);
-                      },
-                    ),
-
+                    // /// Continue with Phone Button
+                    // _SocialButton(
+                    //   icon: "assets/images/call.png",
+                    //   text: "Continue with Phone",
+                    //   iconColor: Color(0xFF4A9EFF),
+                    //   onTap: () {
+                    //     Get.toNamed(AppRoutes.phoneSignupScreen);
+                    //   },
+                    // ),
                     SizedBox(height: 30.h),
 
                     /// Sign Up Text
