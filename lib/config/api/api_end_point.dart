@@ -23,7 +23,7 @@ class ApiEndPoint {
   static const myProvider = "provider/my-provider";
   static const user = "$baseUrl/user/profile";
   static const completeOrder = "booking/complete-booking/";
-  static const reset_otp = "auth/resend-otp";
+  static const resetOtp = "auth/resend-otp";
   static const notifications = "$baseUrl/notification";
   static const notificationCount = "$baseUrl/notification/count";
   static const notificationUpdate = "$baseUrl/notification/update";
